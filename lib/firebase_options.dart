@@ -51,6 +51,8 @@ class DefaultFirebaseOptions {
     authDomain: 'graduation-project-47c85.firebaseapp.com',
     storageBucket: 'graduation-project-47c85.appspot.com',
     measurementId: 'G-Q0ZPPVZM2S',
+    databaseURL:
+        'https://graduation-project-47c85-default-rtdb.firebaseio.com/',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -59,6 +61,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '801296718867',
     projectId: 'graduation-project-47c85',
     storageBucket: 'graduation-project-47c85.appspot.com',
+    databaseURL:
+        'https://graduation-project-47c85-default-rtdb.firebaseio.com/',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -68,6 +72,8 @@ class DefaultFirebaseOptions {
     projectId: 'graduation-project-47c85',
     storageBucket: 'graduation-project-47c85.appspot.com',
     iosBundleId: 'com.example.graduationProject',
+    databaseURL:
+        'https://graduation-project-47c85-default-rtdb.firebaseio.com/',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -77,5 +83,7 @@ class DefaultFirebaseOptions {
     projectId: 'graduation-project-47c85',
     storageBucket: 'graduation-project-47c85.appspot.com',
     iosBundleId: 'com.example.graduationProject.RunnerTests',
+    databaseURL:
+        'https://graduation-project-47c85-default-rtdb.firebaseio.com/',
   );
 }
