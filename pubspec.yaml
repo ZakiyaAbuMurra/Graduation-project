@@ -18,6 +18,7 @@ dependencies:
   persistent_bottom_nav_bar_v2: ^4.2.8
   cloud_firestore: ^4.15.9
   firebase_database: ^10.4.10
+  google_maps_widget: ^1.0.5+1
 
 dev_dependencies:
   flutter_test:

@@ -106,7 +106,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar>
                 ),
               ],
             ),
-      body: const <Widget>[
+      body: <Widget>[
         MapPage(),
         DashBoard(),
         Store(),
