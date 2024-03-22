@@ -1,82 +1,49 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-import 'package:google_maps_widget/google_maps_widget.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:async'; // Add this line
 
-class MapPage extends StatefulWidget {
+class MapSample extends StatefulWidget {
+  const MapSample({super.key});
+
   @override
-  State<MapPage> createState() => _MapPageState();
+  State<MapSample> createState() => MapSampleState();
 }
 
-class _MapPageState extends State<MapPage> {
-  final mapsWidgetController = GlobalKey<GoogleMapsWidgetState>();
+class MapSampleState extends State<MapSample> {
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
+
+  static const CameraPosition _kGooglePlex = CameraPosition(
+    target: LatLng(37.42796133580664, -122.085749655962),
+    zoom: 14.4746,
+  );
+
+  static const CameraPosition _kLake = CameraPosition(
+      bearing: 192.8334901395799,
+      target: LatLng(37.43296265331129, -122.08832357078792),
+      tilt: 59.440717697143555,
+      zoom: 19.151926040649414);
 
   @override
   Widget build(BuildContext context) {
-    // Directly returning Scaffold instead of MaterialApp
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: GoogleMapsWidget(
-                apiKey: "AIzaSyAciMVouN2OmS1BnaDSvfU7n_f-9oe9ppU",
-                key: mapsWidgetController,
-                sourceLatLng: LatLng(
-                  40.484000837597925,
-                  -3.369978368282318,
-                ),
-                destinationLatLng: LatLng(
-                  40.48017307700204,
-                  -3.3618026599287987,
-                ),
-                // Other properties as previously defined...
-                routeWidth: 2,
-                sourceMarkerIconInfo: MarkerIconInfo(
-                  infoWindowTitle: "This is source name",
-                  onTapInfoWindow: (_) {
-                    print("Tapped on source info window");
-                  },
-                  assetPath: "assets/images/house-marker-icon.png",
-                ),
-                // Continued implementation...
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        mapsWidgetController.currentState!.setSourceLatLng(
-                          LatLng(
-                            40.484000837597925 * (Random().nextDouble()),
-                            -3.369978368282318,
-                          ),
-                        );
-                      },
-                      child: Text('Update source'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final googleMapsCon = await mapsWidgetController
-                            .currentState!
-                            .getGoogleMapsController();
-                        googleMapsCon.showMarkerInfoWindow(
-                            MarkerIconInfo.sourceMarkerId);
-                      },
-                      child: Text('Show source info'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      body: GoogleMap(
+        mapType: MapType.hybrid,
+        initialCameraPosition: _kGooglePlex,
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
       ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: _goToTheLake,
+      //   label: const Text('To the lake!'),
+      //   icon: const Icon(Icons.directions_boat),
+      // ),
     );
+  }
+
+  Future<void> _goToTheLake() async {
+    final GoogleMapController controller = await _controller.future;
+    await controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
   }
 }
