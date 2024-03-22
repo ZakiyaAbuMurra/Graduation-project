@@ -57,12 +57,6 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar>
         ],
         title: Column(
           children: [
-            Text(
-              'Current Location',
-              style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                    color: AppColors.grey,
-                  ),
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -72,7 +66,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar>
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Giza, Egypt',
+                  'RecyClear App',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
@@ -91,23 +85,23 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar>
               selectedIndex: currentPageIndex,
               destinations: const <Widget>[
                 NavigationDestination(
-                  selectedIcon: Icon(Icons.home),
-                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.map),
+                  icon: Icon(Icons.map_outlined),
                   label: 'Map',
                 ),
                 NavigationDestination(
-                  selectedIcon: Icon(Icons.favorite),
-                  icon: Icon(Icons.favorite_border),
+                  selectedIcon: Icon(Icons.dashboard),
+                  icon: Icon(Icons.dashboard_outlined),
                   label: 'DashBoard',
                 ),
                 NavigationDestination(
-                  selectedIcon: Icon(Icons.person),
-                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.store),
+                  icon: Icon(Icons.store_outlined),
                   label: 'Store',
                 ),
                 NavigationDestination(
-                  selectedIcon: Icon(Icons.person),
-                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.announcement),
+                  icon: Icon(Icons.announcement_outlined),
                   label: 'Users Request',
                 ),
               ],

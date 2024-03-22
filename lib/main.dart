@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:graduation_project/Admin/pages/custom_button_nav_bar.dart';
 import 'package:graduation_project/firebase_options.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:graduation_project/utils/app_theme.dart';
 
 //void main() => runApp(const CustomBottomNavbar());
 
@@ -10,14 +11,20 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'RecyClear App',
+      theme: AppTheme.lightTheme,
       home: CustomBottomNavbar(),
     );
   }
