@@ -1,36 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/cubits/auth_cubit/auth_cubit.dart';
-import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
 
-class LoginForm extends StatefulWidget {
-  const LoginForm({super.key});
+class RegisterForm extends StatefulWidget {
+  const RegisterForm({super.key});
 
   @override
-  State<LoginForm> createState() => _LoginFormState();
+  State<RegisterForm> createState() => _RegisterFormState();
 }
 
-class _LoginFormState extends State<LoginForm> {
+class _RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _phototUrlController = TextEditingController();
+
   bool _isVisible = false;
   bool isLogin = true;
 
-  Future<void> login() async {
+  Future<void> register() async {
     if (_formKey.currentState!.validate()) {
       debugPrint('Email: ${_emailController.text}');
       debugPrint('Password: ${_passwordController.text}');
-      await BlocProvider.of<AuthCubit>(context).signInWithEmailAndPassword(
+      await BlocProvider.of<AuthCubit>(context).signUpWithEmailAndPassword(
         _emailController.text,
         _passwordController.text,
+        _nameController.text,
+        _phoneController.text,
+        _phototUrlController.text,
       );
     }
   }
-
-
 
   String? validatePassword(String value) {
     String pattern =
@@ -63,6 +68,19 @@ class _LoginFormState extends State<LoginForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
+            'Name',
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              hintText: 'Enter your name',
+            ),
+          ),
+          Text(
             'Email',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontWeight: FontWeight.bold,
@@ -75,12 +93,6 @@ class _LoginFormState extends State<LoginForm> {
               hintText: 'Enter your email',
             ),
             validator: (value) => validateEmail(value!),
-            // validator: (value) {
-            //   if (value!.isEmpty) {
-            //     return 'Please enter your email';
-            //   }
-            //   return null;
-            // },
           ),
           const SizedBox(height: 24),
           Text(
@@ -106,7 +118,6 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
             obscureText: !_isVisible,
-            // validator: (value) => validatePassword(value!),
             validator: (value) {
               if (value!.isEmpty) {
                 return 'Please enter your password';
@@ -116,15 +127,53 @@ class _LoginFormState extends State<LoginForm> {
               return null;
             },
           ),
-          if (isLogin)
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: TextButton(
-                onPressed: () {},
-                child: const Text('Forgot Password?'),
+          Text(
+            'Confirm Password',
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _confirmPasswordController,
+            decoration: InputDecoration(
+              hintText: 'Enter your password another time',
+              suffixIcon: IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isVisible = !_isVisible;
+                  });
+                },
+                icon: Icon(_isVisible
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined),
               ),
             ),
-          const SizedBox(height: 36),
+            obscureText: !_isVisible,
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Please confirm your password';
+              } else if (value != _passwordController.text) {
+                // Check if passwords match
+                return 'Passwords do not match';
+              }
+              return null; // Return null if the text is valid
+            },
+          ),
+          Text(
+            'Phone number',
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _phoneController,
+            decoration: const InputDecoration(
+              hintText: 'Enter your phone number',
+            ),
+          ),
+          const SizedBox(height: 10),
           BlocConsumer<AuthCubit, AuthState>(
             bloc: cubit,
             listenWhen: (previous, current) =>
@@ -163,8 +212,8 @@ class _LoginFormState extends State<LoginForm> {
                 );
               }
               return MainButton(
-                onPressed: login ,
-                title: isLogin ? 'Login' : 'Register',
+                onPressed: register,
+                title: 'Register',
               );
             },
           ),
@@ -172,16 +221,15 @@ class _LoginFormState extends State<LoginForm> {
           Align(
             alignment: Alignment.center,
             child: TextButton(
-              child: Text(isLogin
-                  ? 'Don\'t have an account? Register'
-                  : 'Already have an account? Login'),
+              child:
+                  Text(isLogin ? 'Already have an account? Login' : 'Register'),
               onPressed: () {
                 if (isLogin) {
-                  // Assuming you're using named routes and '/register' is the route to your registration page.
                   Navigator.pushNamed(
                     context,
-                    AppRoutes.register,
+                    AppRoutes.homeLogin,
                   );
+                  // Assuming you're using named routes and '/register' is the route to your registration page.
                 } else {
                   setState(() {
                     isLogin = !isLogin;
@@ -191,15 +239,6 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
           const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.center,
-            child: Text(
-              'or, using other method',
-              style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: AppColors.grey,
-                  ),
-            ),
-          ),
         ],
       ),
     );
