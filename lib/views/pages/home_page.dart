@@ -1,3 +1,9 @@
+/*
+ this code sets up the initial state of the
+ home screen for a Flutter application that
+  monitors bin heights using Firestore and 
+  notification services.
+*/
 import 'package:flutter/material.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:recyclear/services/notification_service.dart';
