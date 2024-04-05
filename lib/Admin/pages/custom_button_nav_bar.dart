@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
+import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/Admin/pages/users_request_page.dart';
@@ -42,9 +43,40 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
-      drawer: const Drawer(
-        child: Center(
-          child: Text('Inside the drawer!'),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            // Custom Drawer Header with Decorated Box
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.green, // Change color as needed
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Recyclear',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            // Add a ListTile for your new page
+            ListTile(
+              leading: const Icon(Icons.person_2_rounded),
+              title: const Text('Profile'), // Title of the drawer item
+              onTap: () {
+                Navigator.of(context).pop(); // Close the drawer
+                // Navigate to the new page
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      const EditProfile(), // Your new page widget
+                ));
+              },
+            ),
+          ],
         ),
       ),
       appBar: AppBar(
