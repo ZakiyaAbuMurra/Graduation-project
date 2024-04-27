@@ -7,6 +7,7 @@ abstract class AuthServices {
   Future<bool> signInWithEmailAndPassword(String email, String password);
   Future<bool> signUpWithEmailAndPassword(String email, String password,
       String name, String phone, String photoUrl);
+  Future<void> sendPasswordResetEmail(String email);
 
   // Add a method signature for getUserType
   Future<String?> getUserType(String uid);
@@ -18,6 +19,11 @@ class AuthServicesImpl implements AuthServices {
   // Singleton Design Pattern
   final firebaseAuth = FirebaseAuth.instance;
   final firestoreServices = FirestoreService.instance;
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    await firebaseAuth.sendPasswordResetEmail(email: email);
+  }
 
   @override
   Future<String?> getUserType(String uid) async {

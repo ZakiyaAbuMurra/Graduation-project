@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/cubits/auth_cubit/auth_cubit.dart';
+import 'package:recyclear/services/auth_service.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
@@ -17,7 +19,7 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isVisible = false;
+  bool _isVisible = true;
   bool isLogin = true;
 
   Future<void> login() async {
@@ -134,7 +136,7 @@ class _LoginFormState extends State<LoginForm> {
                   fillColor: Colors
                       .white, // The background color to show the shadow effectively
                 ),
-                obscureText: !_isVisible,
+                obscureText: _isVisible,
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please enter your password';
@@ -150,7 +152,9 @@ class _LoginFormState extends State<LoginForm> {
             Align(
               alignment: AlignmentDirectional.centerEnd,
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  _showResetPasswordDialog(); // This will open the password reset dialog
+                },
                 child: const Text('Forgot Password?'),
               ),
             ),
@@ -331,5 +335,117 @@ class _LoginFormState extends State<LoginForm> {
         break;
     }
     Navigator.pushReplacementNamed(context, routeName);
+  }
+
+  void _showResetPasswordDialog() {
+    final TextEditingController _resetEmailController = TextEditingController();
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          title: const Text(
+            'Reset Password',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Enter your email address below to receive a password reset link.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.black.withOpacity(0.5),
+                ),
+              ),
+              const SizedBox(height: 18),
+              TextField(
+                controller: _resetEmailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel',
+                      style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors
+                        .primary, // Use the primary color from your AppColors
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      final email = _resetEmailController.text.trim();
+                      if (email.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text("Please enter your email address."),
+                              backgroundColor: Colors.red),
+                        );
+                        return;
+                      }
+                      await _auth.sendPasswordResetEmail(email: email);
+                      Navigator.of(context)
+                          .pop(); // Close the dialog on success
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Password reset email sent!"),
+                            backgroundColor: Colors.green),
+                      );
+                    } catch (e) {
+                      Navigator.of(context).pop(); // Close the dialog on error
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text("Error: $e"),
+                            backgroundColor: Colors.red),
+                      );
+                    }
+                  },
+                  child: Text('Send Reset Link',
+                      style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors
+                        .primary, // Use the primary color from your AppColors
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          actionsPadding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+        );
+      },
+    );
   }
 }
