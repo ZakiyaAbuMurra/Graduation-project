@@ -123,7 +123,7 @@ class _LoginFormState extends State<LoginForm> {
                     icon: Icon(
                       _isVisible
                           ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
+                          : Icons.visibility,
                     ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(

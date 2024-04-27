@@ -7,6 +7,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final isMobile = MediaQuery.of(context).size.width < 600; // Example breakpoint for mobile
 
     return Scaffold(
       // extendBodyBehindAppBar: true,
