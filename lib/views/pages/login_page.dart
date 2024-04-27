@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/views/widgets/login_form.dart';
 
 class LoginPage extends StatelessWidget {
@@ -24,7 +23,7 @@ class LoginPage extends StatelessWidget {
                 Container(
                   width: double.infinity,
                   child: Image.asset(
-                    'assets/images/login.png', // replace with your image path
+                    'assets/images/login.png',
                     fit: BoxFit.fitWidth, // Change this depending on your image
                   ),
                 ),

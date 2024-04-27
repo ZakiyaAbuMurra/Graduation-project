@@ -256,8 +256,10 @@ class _LoginFormState extends State<LoginForm> {
                   child: SizedBox(
                     width: 100,
                     child: ElevatedButton.icon(
-                      icon: const FaIcon(
-                          FontAwesomeIcons.google), // Icon for Google
+                      icon: Image.asset('assets/images/google.png',
+                          height:
+                              24.0), // Use an appropriate height for your logo
+// Icon for Google
                       label: const Text('Google'),
                       onPressed: () {
                         // Google sign-in logic

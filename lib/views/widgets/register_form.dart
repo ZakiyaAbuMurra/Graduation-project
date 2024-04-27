@@ -68,15 +68,19 @@ class _RegisterFormState extends State<RegisterForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Name',
+            'UserName',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           TextFormField(
             controller: _nameController,
             decoration: InputDecoration(
+              prefixIcon: const Icon(
+                Icons.person_2_outlined, // Example icon
+                color: Colors.grey, // Icon color
+              ),
               hintText: 'Enter the name',
               filled: true, // Add a fill color
               fillColor: Colors.grey[200], // Light grey fill color
@@ -92,6 +96,7 @@ class _RegisterFormState extends State<RegisterForm> {
               fontSize: 16.0, // Slightly larger font size
             ),
           ),
+          const SizedBox(height: 8),
           Text(
             'Email',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
@@ -102,6 +107,10 @@ class _RegisterFormState extends State<RegisterForm> {
           TextFormField(
             controller: _emailController,
             decoration: InputDecoration(
+              prefixIcon: const Icon(
+                Icons.email_outlined, // Example icon
+                color: Colors.grey, // Icon color
+              ),
               hintText: 'Enter the Email',
               filled: true, // Add a fill color
               fillColor: Colors.grey[200], // Light grey fill color
@@ -125,11 +134,15 @@ class _RegisterFormState extends State<RegisterForm> {
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 8),
           TextFormField(
             controller: _passwordController,
             obscureText: !_isVisible,
             decoration: InputDecoration(
+              prefixIcon: const Icon(
+                Icons.lock_outline, // Example icon
+                color: Colors.grey, // Icon color
+              ),
               hintText: 'Enter the password',
               contentPadding: EdgeInsets.symmetric(
                   vertical: 10.0,
@@ -166,17 +179,22 @@ class _RegisterFormState extends State<RegisterForm> {
                 fontSize:
                     16), // Slightly larger font size for better readability
           ),
+          const SizedBox(height: 8),
           Text(
             'Confirm Password',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 8),
           TextFormField(
             controller: _confirmPasswordController,
             decoration: InputDecoration(
-              hintText: 'Enter the password another time',
+              prefixIcon: const Icon(
+                Icons.lock_outline, // Example icon
+                color: Colors.grey, // Icon color
+              ),
+              hintText: 'Repeat password',
               contentPadding: EdgeInsets.symmetric(
                   vertical: 10.0,
                   horizontal: 12.0), // Padding inside the text field
@@ -208,16 +226,21 @@ class _RegisterFormState extends State<RegisterForm> {
               return null; // Return null if the text is valid
             },
           ),
+          const SizedBox(height: 8),
           Text(
             'Phone number',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 8),
           TextFormField(
             controller: _phoneController,
             decoration: InputDecoration(
+              prefixIcon: const Icon(
+                Icons.phone, // Example icon
+                color: Colors.grey, // Icon color
+              ),
               hintText: 'Enter phone number',
               contentPadding: EdgeInsets.symmetric(
                   vertical: 10.0,

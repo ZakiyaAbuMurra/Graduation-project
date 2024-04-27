@@ -16,9 +16,16 @@ class RegisterPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                // width: double.infinity,
+                child: Image.asset(
+                  'assets/images/greenRecyclear.png',
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
               SizedBox(height: size.height * 0.05),
               Text(
-                'Auth Page',
+                'Sign Up Page',
                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
