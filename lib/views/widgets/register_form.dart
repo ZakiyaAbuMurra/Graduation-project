@@ -21,6 +21,8 @@ class _RegisterFormState extends State<RegisterForm> {
   final _phototUrlController = TextEditingController();
 
   bool _isVisible = false;
+  bool _isVisible_con = false;
+
   bool isLogin = true;
 
   Future<void> register() async {
@@ -158,7 +160,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   _isVisible
                       ? Icons.visibility
                       : Icons
-                          .visibility_off, // Toggles the icon based on the password visibility
+                          .visibility_off_outlined, // Toggles the icon based on the password visibility
                 ),
                 onPressed: () {
                   setState(() {
@@ -175,7 +177,7 @@ class _RegisterFormState extends State<RegisterForm> {
               }
               return null; // Return null if the text is valid
             },
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize:
                     16), // Slightly larger font size for better readability
           ),
@@ -195,7 +197,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 color: Colors.grey, // Icon color
               ),
               hintText: 'Repeat password',
-              contentPadding: EdgeInsets.symmetric(
+              contentPadding: const EdgeInsets.symmetric(
                   vertical: 10.0,
                   horizontal: 12.0), // Padding inside the text field
               border: OutlineInputBorder(
@@ -207,15 +209,15 @@ class _RegisterFormState extends State<RegisterForm> {
               suffixIcon: IconButton(
                 onPressed: () {
                   setState(() {
-                    _isVisible = !_isVisible;
+                    _isVisible_con = !_isVisible_con;
                   });
                 },
-                icon: Icon(_isVisible
+                icon: Icon(_isVisible_con
                     ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined),
+                    : Icons.visibility),
               ),
             ),
-            obscureText: !_isVisible,
+            obscureText: _isVisible_con,
             validator: (value) {
               if (value!.isEmpty) {
                 return 'Please confirm password';
