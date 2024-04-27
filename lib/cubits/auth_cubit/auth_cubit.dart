@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/services/auth_service.dart';
 
@@ -14,7 +15,18 @@ class AuthCubit extends Cubit<AuthState> {
       final result =
           await authServices.signInWithEmailAndPassword(email, password);
       if (result) {
-        emit(AuthSuccess());
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          final userType = await authServices.getUserType(user.uid);
+          if (userType != null) {
+            print("User Type: $userType");  // Print to console
+            emit(AuthSuccess(userType: userType));
+          } else {
+            emit(AuthFailure('User type is undefined.'));
+          }
+        } else {
+          emit(AuthFailure('User is not logged in.'));
+        }
       } else {
         emit(AuthFailure('Failed to sign in'));
       }
@@ -23,7 +35,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
- 
   Future<void> signUpWithEmailAndPassword(String email, String password,
       String name, String phone, String photoUrl) async {
     emit(AuthLoading());

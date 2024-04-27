@@ -6,47 +6,26 @@ import 'package:recyclear/Admin/pages/users_request_page.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class CustomBottomNavbar extends StatefulWidget {
-  const CustomBottomNavbar({super.key});
+  const CustomBottomNavbar({Key? key}) : super(key: key);
 
   @override
   State<CustomBottomNavbar> createState() => _CustomBottomNavbarState();
 }
 
-class _CustomBottomNavbarState extends State<CustomBottomNavbar>
-    with WidgetsBindingObserver {
+class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   int currentPageIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
+  List<Widget> pageList = [
+      MapSample(),
+        DashBoard(),
+        Store(),
+        UsersRequest(),
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused) {
-      debugPrint('App is paused');
-    } else if (state == AppLifecycleState.resumed) {
-      debugPrint('App is resumed');
-    }
-  }
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
-      drawer: const Drawer(
-        child: Center(
-          child: Text('Inside the drawer!'),
-        ),
-      ),
       appBar: AppBar(
         centerTitle: true,
         actions: [
@@ -55,63 +34,88 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar>
             icon: const Icon(Icons.notifications),
           ),
         ],
-        title: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.location_on,
-                  color: AppColors.green,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'RecyClear App',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-          ],
-        ),
+        title: const Text('RecyClear App'),
       ),
-      bottomNavigationBar: size.width >= 800
-          ? null
-          : NavigationBar(
-              onDestinationSelected: (int index) {
-                setState(() {
-                  currentPageIndex = index;
-                });
-              },
-              selectedIndex: currentPageIndex,
-              destinations: const <Widget>[
-                NavigationDestination(
-                  selectedIcon: Icon(Icons.map),
-                  icon: Icon(Icons.map_outlined),
-                  label: 'Map',
-                ),
-                NavigationDestination(
-                  selectedIcon: Icon(Icons.dashboard),
-                  icon: Icon(Icons.dashboard_outlined),
-                  label: 'DashBoard',
-                ),
-                NavigationDestination(
-                  selectedIcon: Icon(Icons.store),
-                  icon: Icon(Icons.store_outlined),
-                  label: 'Store',
-                ),
-                NavigationDestination(
-                  selectedIcon: Icon(Icons.announcement),
-                  icon: Icon(Icons.announcement_outlined),
-                  label: 'Users Request',
-                ),
-              ],
-            ),
-      body: <Widget>[
-        MapSample(),
-        DashBoard(),
-        Store(),
-        UsersRequest(),
-      ][currentPageIndex],
+      drawer: MediaQuery.of(context).size.width >= 800 ? buildDrawer() : null,
+      bottomNavigationBar: MediaQuery.of(context).size.width < 800
+          ? buildBottomNavigationBar()
+          : null,
+      body: pageList[currentPageIndex],
     );
+  }
+
+  Widget buildDrawer() {
+    return Drawer(
+      child: ListView(
+        children: <Widget>[
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+            ),
+            child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
+          ),
+          ListTile(
+            leading: const Icon(Icons.map),
+            title: const Text('Map'),
+            onTap: () => selectPage(0),
+          ),
+          ListTile(
+            leading: const Icon(Icons.dashboard),
+            title: const Text('DashBoard'),
+            onTap: () => selectPage(1),
+          ),
+          ListTile(
+            leading: const Icon(Icons.store),
+            title: const Text('Store'),
+            onTap: () => selectPage(2),
+          ),
+          ListTile(
+            leading: const Icon(Icons.announcement),
+            title: const Text('Users Request'),
+            onTap: () => selectPage(3),
+          ),
+        ],
+      ),
+    );
+  }
+
+  NavigationBar buildBottomNavigationBar() {
+    return NavigationBar(
+      selectedIndex: currentPageIndex,
+      onDestinationSelected: (int index) {
+        setState(() {
+          currentPageIndex = index;
+        });
+      },
+      destinations: const <NavigationDestination>[
+        NavigationDestination(
+          icon: Icon(Icons.map_outlined),
+          selectedIcon: Icon(Icons.map),
+          label: 'Map',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.dashboard_outlined),
+          selectedIcon: Icon(Icons.dashboard),
+          label: 'Dashboard',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.store_outlined),
+          selectedIcon: Icon(Icons.store),
+          label: 'Store',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.announcement_outlined),
+          selectedIcon: Icon(Icons.announcement),
+          label: 'Requests',
+        ),
+      ],
+    );
+  }
+
+  void selectPage(int index) {
+    setState(() {
+      currentPageIndex = index;
+    });
+    Navigator.pop(context); // Close the drawer
   }
 }

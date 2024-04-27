@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/custom_button_nav_bar.dart';
+import 'package:recyclear/Driver/driver_home.dart';
+import 'package:recyclear/User/user_home.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/pages/login_page.dart';
 import 'package:recyclear/views/pages/register_page.dart';
@@ -17,16 +19,27 @@ class AppRouter {
           builder: (_) => const CustomBottomNavbar(),
           settings: settings,
         );
-         case AppRoutes.register:
+      case AppRoutes.register:
         return MaterialPageRoute(
           builder: (_) => const RegisterPage(),
+          settings: settings,
+        );
+      case AppRoutes.driverHome:
+        return MaterialPageRoute(
+          builder: (_) => const driverHome(),
+          settings: settings,
+        );
+
+      case AppRoutes.userHome:
+        return MaterialPageRoute(
+          builder: (_) => const UserHome(),
           settings: settings,
         );
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
             body: Center(
-              child: Text('Error Page!'),
+              child: Text('Error Page hmmmmmm!'),
             ),
           ),
         );

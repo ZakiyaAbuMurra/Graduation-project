@@ -18,7 +18,7 @@ class LoginPage extends StatelessWidget {
             children: [
               SizedBox(height: size.height * 0.05),
               Text(
-                'Auth Page',
+                'LogIn w',
                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

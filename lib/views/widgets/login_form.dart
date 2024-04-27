@@ -30,8 +30,6 @@ class _LoginFormState extends State<LoginForm> {
     }
   }
 
-
-
   String? validatePassword(String value) {
     String pattern =
         r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
@@ -131,7 +129,7 @@ class _LoginFormState extends State<LoginForm> {
                 current is AuthSuccess || current is AuthFailure,
             listener: (context, state) {
               if (state is AuthSuccess) {
-                Navigator.pushNamed(context, AppRoutes.bottomNavbar);
+                navigateBasedOnUserType(state.userType!, context);
               } else if (state is AuthFailure) {
                 showDialog(
                     context: context,
@@ -163,7 +161,7 @@ class _LoginFormState extends State<LoginForm> {
                 );
               }
               return MainButton(
-                onPressed: login ,
+                onPressed: login,
                 title: isLogin ? 'Login' : 'Register',
               );
             },
@@ -204,4 +202,24 @@ class _LoginFormState extends State<LoginForm> {
       ),
     );
   }
+
+ void navigateBasedOnUserType(String userType, BuildContext context) {
+    String routeName;
+    switch (userType) {
+      case 'driver':
+        routeName = AppRoutes.driverHome;  // Update these constants as needed
+        break;
+      case 'admin':
+        routeName = AppRoutes.bottomNavbar;   // Make sure this route is defined in AppRouter
+        break;
+      case 'user':
+        routeName = AppRoutes.userHome;    // Make sure this route is defined in AppRouter
+        break;
+         default:
+        routeName = AppRoutes.adminHome;   // Make sure this route is defined in AppRouter
+        break;
+    }
+    Navigator.pushReplacementNamed(context, routeName);
+}
+
 }
