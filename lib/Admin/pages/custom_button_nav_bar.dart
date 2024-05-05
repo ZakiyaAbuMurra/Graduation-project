@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
+import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/Admin/pages/users_request_page.dart';
@@ -60,6 +61,8 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
     var hasDrawer = isMobile || kIsWeb; // Drawer for both mobile and web
 
     return Scaffold(
+
+
       appBar: AppBar(
         centerTitle: true,
         actions: [
