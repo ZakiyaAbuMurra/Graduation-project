@@ -35,6 +35,7 @@ class _RegisterFormState extends State<RegisterForm> {
         _nameController.text,
         _phoneController.text,
         _phototUrlController.text,
+        'user',
       );
     }
   }

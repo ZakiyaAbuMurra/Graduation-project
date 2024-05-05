@@ -6,7 +6,7 @@ import 'package:recyclear/utils/api_paths.dart';
 abstract class AuthServices {
   Future<bool> signInWithEmailAndPassword(String email, String password);
   Future<bool> signUpWithEmailAndPassword(String email, String password,
-      String name, String phone, String photoUrl);
+      String name, String phone, String photoUrl , String type);
   Future<void> sendPasswordResetEmail(String email);
 
   // Add a method signature for getUserType
@@ -80,7 +80,7 @@ class AuthServicesImpl implements AuthServices {
   @override
   Future<bool> signUpWithEmailAndPassword(
       String email, String password, String name, String phone, String photoUrl,
-      {String type = 'user'}) async {
+      String type) async {
     try {
       final userCredential = await firebaseAuth.createUserWithEmailAndPassword(
         email: email,

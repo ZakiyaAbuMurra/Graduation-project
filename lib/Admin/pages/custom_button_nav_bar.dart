@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:recyclear/Admin/pages/create_driver_account.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/Admin/pages/users_request_page.dart';
 import 'package:recyclear/services/firestore_services.dart';
-import 'package:recyclear/utils/app_colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class CustomBottomNavbar extends StatefulWidget {
@@ -57,7 +57,6 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   Widget build(BuildContext context) {
     var isMobile = MediaQuery.of(context).size.width <
         800; // Adjust the width as per your design
-    var hasDrawer = isMobile || kIsWeb; // Drawer for both mobile and web
 
     return Scaffold(
       appBar: AppBar(
@@ -109,11 +108,26 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
           if (!isMobile) ...buildDrawerItems(), // Add drawer items for web
           if (isMobile) ...[
             ListTile(
+              leading: const Icon(Icons.add),
+              title: const Text('Create Truck Driver account '),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CreateDriverAccount()),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.account_circle),
               title: const Text('Profile'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
                 // Navigate to profile page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DashBoard()),
+                );
               },
             ),
             ListTile(

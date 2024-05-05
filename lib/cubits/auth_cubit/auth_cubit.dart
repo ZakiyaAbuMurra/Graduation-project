@@ -19,7 +19,7 @@ class AuthCubit extends Cubit<AuthState> {
         if (user != null) {
           final userType = await authServices.getUserType(user.uid);
           if (userType != null) {
-            print("User Type: $userType");  // Print to console
+            print("User Type: $userType"); // Print to console
             emit(AuthSuccess(userType: userType));
           } else {
             emit(AuthFailure('User type is undefined.'));
@@ -36,11 +36,17 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> signUpWithEmailAndPassword(String email, String password,
-      String name, String phone, String photoUrl) async {
+      String name, String phone, String photoUrl, String type) async {
     emit(AuthLoading());
     try {
       final result = await authServices.signUpWithEmailAndPassword(
-          email, password, name, phone, photoUrl);
+        email,
+        password,
+        name,
+        phone,
+        photoUrl,
+        type,
+      );
       if (result) {
         emit(AuthSuccess());
       } else {
