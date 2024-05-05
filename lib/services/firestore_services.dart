@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:recyclear/models/bin_model.dart';
+import 'package:recyclear/services/notification_service.dart';
 
 class FirestoreService {
   FirestoreService._();
@@ -85,5 +87,33 @@ class FirestoreService {
       result.sort(sort);
     }
     return result;
+  }
+
+  void monitorBinHeightAndNotify() {
+    collectionStream<BinModel>(
+      path: 'bin info',
+      builder: (data, documentId) {
+        debugPrint('Received data from Firestore: $data');
+        return BinModel.fromMap(data, documentId);
+      },
+    ).listen(
+      (binList) {
+        for (var bin in binList) {
+          if (bin.height > 70) {
+            debugPrint(
+                "Showing notification for bin at location: ${bin.location}");
+
+            NotificationService().showNotification(
+              title: 'Bin Height Alert',
+              body: 'The bin at ${bin.location} is now ${bin.height}cm high.',
+              payload: 'Bin ID: ${bin.id}',
+            );
+          }
+        }
+      },
+      onError: (error) {
+        debugPrint('Error in monitoring bins: $error');
+      },
+    );
   }
 }
