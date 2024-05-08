@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "name": "Flutter (lib\\Admin\\pages\\submit_feedback_page.dart)",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib\\Admin\\pages\\submit_feedback_page.dart"
+        }
+    ]
+}

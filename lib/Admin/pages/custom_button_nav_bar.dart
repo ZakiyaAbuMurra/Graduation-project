@@ -3,7 +3,7 @@ import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
-import 'package:recyclear/Admin/pages/users_request_page.dart';
+import 'package:recyclear/User/users_request_page.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class CustomBottomNavbar extends StatefulWidget {
@@ -139,10 +139,10 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar>
               ],
             ),
       body: <Widget>[
-        MapSample(),
-        DashBoard(),
-        Store(),
-        UsersRequest(),
+        const MapSample(),
+        const DashBoard(),
+        const Store(),
+        const UsersRequest(),
       ][currentPageIndex],
     );
   }

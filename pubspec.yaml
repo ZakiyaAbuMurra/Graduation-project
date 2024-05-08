@@ -17,10 +17,14 @@ dependencies:
   firebase_auth: ^4.18.0
   flutter_bloc: ^8.1.3 
   cloud_firestore: ^4.15.10
+  image_picker: ^0.8.1
+  firebase_storage: ^11.7.4
   
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  reviews_slider: ^2.0.0
+  
 
   flutter_lints: ^3.0.0
 
