@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/create_driver_account.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
+import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/Admin/pages/users_request_page.dart';
@@ -126,7 +127,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
                 // Navigate to profile page
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => DashBoard()),
+                  MaterialPageRoute(builder: (context) => EditProfile()),
                 );
               },
             ),

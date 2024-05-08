@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/cubits/auth_cubit/auth_cubit.dart';
-import 'package:recyclear/services/auth_service.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
