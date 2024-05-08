@@ -1,10 +1,31 @@
 {
+
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
     "configurations": [
-        {
-            "name": "Flutter (lib\\Admin\\pages\\submit_feedback_page.dart)",
+  {"name": "Flutter (lib\\User\\submit_feedback_page.dart)",
             "type": "dart",
             "request": "launch",
-            "program": "lib\\Admin\\pages\\submit_feedback_page.dart"
+            "program": "lib\\User\\submit_feedback_page.dart"},
+        {
+            "name": "recyclear",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "recyclear (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "recyclear (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+
         }
     ]
 }

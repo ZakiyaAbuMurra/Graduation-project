@@ -9,9 +9,7 @@ import 'package:recyclear/utils/route/app_routes.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp(
-    // name: 'name-here',
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const MyApp());
@@ -20,7 +18,38 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
+  // This widget is the root of your application.
+//   @override
+//   Widget build(BuildContext context) {
+//     return BlocProvider(
+//       create: (context) {
+//         final cubit = AuthCubit();
+//         cubit.getCurrentUser();
+//         return cubit;
+//       },
+//       child: Builder(builder: (context) {
+//         final cubit = BlocProvider.of<AuthCubit>(context);
+//         return BlocBuilder<AuthCubit, AuthState>(
+//           bloc: cubit,
+//           buildWhen: (previous, current) =>
+//               current is AuthInitial || current is AuthSuccess,
+//           builder: (context, state) {
+//             return MaterialApp(
+//               title: 'ReCyclear App',
+//               theme: AppTheme.lightTheme,
+//               initialRoute: state is AuthSuccess
+//                   ? AppRoutes.bottomNavbar
+//                   : AppRoutes.homeLogin,
+//               onGenerateRoute: AppRouter.onGenerateRoute,
+//             );
+//           },
+//         );
+//       }),
+//     );
+//   }
+// }
+
+//I commented on this because it was asking me to do the login each time I rebuilt the app  // @override
   Widget build(BuildContext context) {
     return BlocProvider(
         create: (context) => AuthCubit(),
@@ -28,7 +57,7 @@ class MyApp extends StatelessWidget {
           title: 'App',
           theme: AppTheme.lightTheme,
           initialRoute: AppRoutes.homeLogin,
-          onGenerateRoute: AppRouter.onGenerateRoute,
+         onGenerateRoute: AppRouter.onGenerateRoute,
         ));
   }
 }
