@@ -56,5 +56,8 @@
     <!-- Add User Notifications Usage Description here -->
     <key>NSUserNotificationUsageDescription</key>
     <string>We use notifications to inform you of recycling tips and updates.</string>
+        <!-- Add User Location here -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>recyclear needs access to location when open.</string> 
 </dict>
 </plist>

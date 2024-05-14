@@ -22,7 +22,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
       FirebaseAuth.instance.currentUser; // Get the currently signed-in user
 
   List<Widget> pageList = [
-    MapSample(),
+    //MapSample(),
     DashBoard(),
     Store(),
     UsersRequest(),
