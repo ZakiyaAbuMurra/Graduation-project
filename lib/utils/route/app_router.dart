@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/custom_button_nav_bar.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Driver/driver_home.dart';
+import 'package:recyclear/User/custom_button_bav_bar_user.dart';
 import 'package:recyclear/User/user_home.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/pages/EnableLocation.dart';
@@ -19,6 +20,11 @@ class AppRouter {
       case AppRoutes.bottomNavbar:
         return MaterialPageRoute(
           builder: (_) => const CustomBottomNavbar(),
+          settings: settings,
+        );
+        case AppRoutes.bottomNavBarUser:
+        return MaterialPageRoute(
+          builder: (_) => const CustomBottomNavbarUser(),
           settings: settings,
         );
       case AppRoutes.register:
