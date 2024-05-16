@@ -58,6 +58,6 @@
     <string>We use notifications to inform you of recycling tips and updates.</string>
         <!-- Add User Location here -->
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>recyclear needs access to location when open.</string> 
+    <string>recyclear needs access to location when open.</string>  
 </dict>
 </plist>

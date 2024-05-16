@@ -263,7 +263,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 current is AuthSuccess || current is AuthFailure,
             listener: (context, state) {
               if (state is AuthSuccess) {
-                Navigator.pushNamed(context, AppRoutes.userHome);
+                Navigator.pushNamed(context, AppRoutes.bottomNavBarUser);
               } else if (state is AuthFailure) {
                 showDialog(
                     context: context,
