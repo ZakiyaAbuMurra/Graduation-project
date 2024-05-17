@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:recyclear/Admin/pages/requested_bin.dart';
 import 'package:recyclear/User/coupons_problem_page.dart';
 import 'package:recyclear/User/fault_in_bin_page.dart';
 import 'package:recyclear/User/report_incorrect_bin_location_page.dart';
 import 'package:recyclear/User/request_bin_page.dart';
 import 'package:recyclear/User/submit_feedback_page.dart';
 import 'package:recyclear/services/auth_service.dart';
-import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/views/widgets/contact_type_box.dart';
 
 class RequestsPage extends StatefulWidget {
@@ -57,31 +57,26 @@ class _RequestsPageState extends State<RequestsPage> {
                 Expanded(
                   child: ContactTypeBox(
                     icon: Icons.delete_outline,
-                    text: 'Have a bin',
-                    buttonLabel: 'Own a bin now!',
-                    buttonColor: AppColors.primary,
-                    onTap: () {
-                      if (userType == 'user') {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const RequestBinPage(),
-                        ));
-                      } else {
-                        // Navigate to a different page or show a message for non-admin users
-                      }
-                    },
+                    userType: userType,
+                    userText: 'Have a bin',
+                    adminText: 'Manage bins',
+                    userButtonLabel: 'Own a bin now!',
+                    adminButtonLabel: 'Manage now!',
+                    userPage: const RequestBinPage(),
+                    adminPage:const RequestBinPage(),
                   ),
                 ),
                 Expanded(
                   child: ContactTypeBox(
                     icon: Icons.feedback_outlined,
-                    text: 'Submit feedback',
-                    buttonLabel: 'Send it now!',
-                    buttonColor: AppColors.primary,
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const SubmitFeedbackPage(),
-                      ));
-                    },
+                    userType: userType,
+                    userText: 'Submit feedback',
+                    adminText: 'View feedback',
+                    userButtonLabel: 'Send it now!',
+                    adminButtonLabel: 'View now!',
+                    userPage: const SubmitFeedbackPage(),
+                    adminPage:
+                        const SubmitFeedbackPage(), // Replace with actual admin page
                   ),
                 ),
               ],
@@ -93,27 +88,27 @@ class _RequestsPageState extends State<RequestsPage> {
                 Expanded(
                   child: ContactTypeBox(
                     icon: Icons.report_outlined,
-                    text: 'Fault in the bin',
-                    buttonLabel: 'Report now!',
-                    buttonColor: AppColors.primary,
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const FaultInBinPage(),
-                      ));
-                    },
+                    userType: userType,
+                    userText: 'Fault in the bin',
+                    adminText: 'Manage faults',
+                    userButtonLabel: 'Report now!',
+                    adminButtonLabel: 'Manage now!',
+                    userPage: const FaultInBinPage(),
+                    adminPage:
+                        const FaultInBinPage(), // Replace with actual admin page
                   ),
                 ),
                 Expanded(
                   child: ContactTypeBox(
                     icon: Icons.location_off_outlined,
-                    text: 'Incorrect bin location',
-                    buttonLabel: 'Report now!',
-                    buttonColor: AppColors.primary,
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const ReportIncorrectBinPage(),
-                      ));
-                    },
+                    userType: userType,
+                    userText: 'Incorrect bin location',
+                    adminText: 'Manage locations',
+                    userButtonLabel: 'Report now!',
+                    adminButtonLabel: 'Manage now!',
+                    userPage: const ReportIncorrectBinPage(),
+                    adminPage:
+                        const ReportIncorrectBinPage(), // Replace with actual admin page
                   ),
                 ),
               ],
@@ -121,14 +116,14 @@ class _RequestsPageState extends State<RequestsPage> {
             const SizedBox(height: 20),
             ContactTypeBox(
               icon: Icons.local_offer_outlined,
-              text: 'Coupons problem',
-              buttonLabel: 'Report now!',
-              buttonColor: AppColors.primary,
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const CouponsProblemPage(),
-                ));
-              },
+              userType: userType,
+              userText: 'Coupons problem',
+              adminText: 'Manage coupons',
+              userButtonLabel: 'Report now!',
+              adminButtonLabel: 'Manage now!',
+              userPage: const CouponsProblemPage(),
+              adminPage:
+                  const CouponsProblemPage(), // Replace with actual admin page
             ),
             const SizedBox(height: 20),
           ],
