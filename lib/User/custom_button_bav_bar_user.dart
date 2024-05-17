@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
-import 'package:recyclear/User/user_home.dart';
+import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/views/pages/login_page.dart';
 
 class CustomBottomNavbarUser extends StatefulWidget {
@@ -23,7 +24,7 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
     //const MapSample(),
     const DashBoard(),
     const Store(),
-    const UserHome(),
+    const RequestsPage(),
   ];
 
   String? userName;
@@ -33,9 +34,19 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
   @override
   void initState() {
     super.initState();
+    initApp();
     if (user != null) {
       _loadUserData();
     }
+  }
+
+  void initApp() async {
+    // Initialize notification service
+    await NotificationService().initializeNotification();
+    debugPrint('Before the start Monitoring Bin');
+    // Start monitoring bin heights
+    FirestoreService.instance.monitorBinHeightAndNotify();
+    debugPrint('After the start Monitoring Bin');
   }
 
   Future<void> _loadUserData() async {

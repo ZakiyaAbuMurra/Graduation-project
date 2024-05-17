@@ -99,7 +99,8 @@ class FirestoreService {
     ).listen(
       (binList) {
         for (var bin in binList) {
-          if (bin.height > 70) {
+          debugPrint("-------- the height is : ${bin.height}  ");
+          if (bin.height > 60) {
             debugPrint(
                 "Showing notification for bin at location: ${bin.location}");
 
