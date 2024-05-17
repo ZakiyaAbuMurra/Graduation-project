@@ -34,20 +34,12 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
   @override
   void initState() {
     super.initState();
-    initApp();
     if (user != null) {
       _loadUserData();
     }
   }
 
-  void initApp() async {
-    // Initialize notification service
-    await NotificationService().initializeNotification();
-    debugPrint('Before the start Monitoring Bin');
-    // Start monitoring bin heights
-    FirestoreService.instance.monitorBinHeightAndNotify();
-    debugPrint('After the start Monitoring Bin');
-  }
+
 
   Future<void> _loadUserData() async {
     // Use the FirestoreService to get the user's data
