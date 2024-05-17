@@ -3,7 +3,7 @@ import 'package:recyclear/Admin/pages/custom_button_nav_bar.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Driver/driver_home.dart';
 import 'package:recyclear/User/custom_button_bav_bar_user.dart';
-import 'package:recyclear/User/user_home.dart';
+import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/pages/EnableLocation.dart';
 import 'package:recyclear/views/pages/login_page.dart';
@@ -22,7 +22,7 @@ class AppRouter {
           builder: (_) => const CustomBottomNavbar(),
           settings: settings,
         );
-        case AppRoutes.bottomNavBarUser:
+      case AppRoutes.bottomNavBarUser:
         return MaterialPageRoute(
           builder: (_) => const CustomBottomNavbarUser(),
           settings: settings,
@@ -37,19 +37,18 @@ class AppRouter {
           builder: (_) => const driverHome(),
           settings: settings,
         );
-         case AppRoutes.enableLocation:
+      case AppRoutes.enableLocation:
         return MaterialPageRoute(
           builder: (_) => const EnableLocation(),
           settings: settings,
         );
 
-
       case AppRoutes.userHome:
         return MaterialPageRoute(
-          builder: (_) => const UserHome(),
+          builder: (_) => const RequestsPage(),
           settings: settings,
         );
-      
+
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

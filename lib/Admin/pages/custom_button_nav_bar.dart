@@ -8,6 +8,8 @@ import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/Admin/pages/users_request_page.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recyclear/services/notification_service.dart';
+import 'package:recyclear/views/pages/notification_page.dart';
 
 class CustomBottomNavbar extends StatefulWidget {
   const CustomBottomNavbar({Key? key}) : super(key: key);
@@ -22,7 +24,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
       FirebaseAuth.instance.currentUser; // Get the currently signed-in user
 
   List<Widget> pageList = [
-    //MapSample(),
+    // MapSample(),
     DashBoard(),
     Store(),
     UsersRequest(),
@@ -35,9 +37,19 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   @override
   void initState() {
     super.initState();
+    initApp();
     if (user != null) {
       _loadUserData();
     }
+  }
+
+  void initApp() async {
+    // Initialize notification service
+    await NotificationService().initializeNotification();
+    debugPrint('Before the start Monitoring Bin');
+    // Start monitoring bin heights
+    FirestoreService.instance.monitorBinHeightAndNotify();
+    debugPrint('After the start Monitoring Bin');
   }
 
   Future<void> _loadUserData() async {
@@ -64,7 +76,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {}, 
             icon: const Icon(Icons.notifications),
           ),
         ],
