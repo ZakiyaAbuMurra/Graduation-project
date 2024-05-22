@@ -5,7 +5,6 @@ import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/views/pages/login_page.dart';
 
 class CustomBottomNavbarUser extends StatefulWidget {

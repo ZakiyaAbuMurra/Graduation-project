@@ -3,24 +3,38 @@ import 'package:recyclear/utils/app_colors.dart';
 
 class ContactTypeBox extends StatelessWidget {
   final IconData icon;
-  final String text;
-  final String buttonLabel;
-  final Color buttonColor;
-  final VoidCallback onTap;
+  final String? userType;
+  final String userText;
+  final String adminText;
+  final String userButtonLabel;
+  final String adminButtonLabel;
+  final Widget userPage;
+  final Widget adminPage;
 
   const ContactTypeBox({
     Key? key,
     required this.icon,
-    required this.text,
-    required this.buttonLabel,
-    required this.buttonColor,
-    required this.onTap,
+    required this.userType,
+    required this.userText,
+    required this.adminText,
+    required this.userButtonLabel,
+    required this.adminButtonLabel,
+    required this.userPage,
+    required this.adminPage,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final text = userType == 'admin' ? adminText : userText;
+    final buttonLabel = userType == 'admin' ? adminButtonLabel : userButtonLabel;
+    final page = userType == 'admin' ? adminPage : userPage;
+
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => page,
+        ));
+      },
       child: SizedBox(
         width: 150,
         child: Container(
@@ -73,19 +87,22 @@ class ContactTypeBox extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: onTap,
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => page,
+                  ));
+                },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(buttonColor),
-                  foregroundColor:
-                      MaterialStateProperty.all<Color>(AppColors.white),
+                  backgroundColor: MaterialStateProperty.all<Color>(AppColors.primary),
+                  foregroundColor: MaterialStateProperty.all<Color>(AppColors.white),
                   alignment: Alignment.center,
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18.0),
                       side: BorderSide(
-                          color: const Color.fromARGB(255, 47, 88, 69)
-                              .withOpacity(0.5),
-                          width: 2.0),
+                        color: const Color.fromARGB(255, 47, 88, 69).withOpacity(0.5),
+                        width: 2.0,
+                      ),
                     ),
                   ),
                 ),

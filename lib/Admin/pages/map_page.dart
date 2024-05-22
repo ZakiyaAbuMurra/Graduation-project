@@ -5,8 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:recyclear/utils/app_colors.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 class MapSample extends StatefulWidget {
   final double latitude;
@@ -41,7 +39,7 @@ class _MapSampleState extends State<MapSample> {
     });
   }
 
-    final _databaseRef = FirebaseDatabase.instance.ref();
+   // final _databaseRef = FirebaseDatabase.instance.ref();
 
   @override
   void initState() {
