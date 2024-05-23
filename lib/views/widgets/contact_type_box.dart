@@ -26,8 +26,10 @@ class ContactTypeBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = userType == 'admin' ? adminText : userText;
-    final buttonLabel = userType == 'admin' ? adminButtonLabel : userButtonLabel;
+    final buttonLabel =
+        userType == 'admin' ? adminButtonLabel : userButtonLabel;
     final page = userType == 'admin' ? adminPage : userPage;
+    final boxWidth = MediaQuery.of(context).size.width * 0.4;
 
     return GestureDetector(
       onTap: () {
@@ -36,7 +38,7 @@ class ContactTypeBox extends StatelessWidget {
         ));
       },
       child: SizedBox(
-        width: 150,
+        width: boxWidth,
         child: Container(
           margin: const EdgeInsets.all(8.0),
           padding: const EdgeInsets.all(8.0),
@@ -93,14 +95,17 @@ class ContactTypeBox extends StatelessWidget {
                   ));
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(AppColors.primary),
-                  foregroundColor: MaterialStateProperty.all<Color>(AppColors.white),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(AppColors.primary),
+                  foregroundColor:
+                      MaterialStateProperty.all<Color>(AppColors.white),
                   alignment: Alignment.center,
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18.0),
                       side: BorderSide(
-                        color: const Color.fromARGB(255, 47, 88, 69).withOpacity(0.5),
+                        color: const Color.fromARGB(255, 47, 88, 69)
+                            .withOpacity(0.5),
                         width: 2.0,
                       ),
                     ),
