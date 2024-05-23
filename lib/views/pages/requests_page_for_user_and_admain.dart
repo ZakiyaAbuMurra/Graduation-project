@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/requested_bin.dart';
+import 'package:recyclear/User/book_appointment_empty_bin.dart';
 import 'package:recyclear/User/coupons_problem_page.dart';
 import 'package:recyclear/User/fault_in_bin_page.dart';
 import 'package:recyclear/User/report_incorrect_bin_location_page.dart';
@@ -63,7 +64,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     userButtonLabel: 'Own a bin now!',
                     adminButtonLabel: 'Manage now!',
                     userPage: const RequestBinPage(),
-                    adminPage:const RequestBinPage(),
+                    adminPage: const RequestBinPage(),
                   ),
                 ),
                 Expanded(
@@ -114,16 +115,36 @@ class _RequestsPageState extends State<RequestsPage> {
               ],
             ),
             const SizedBox(height: 20),
-            ContactTypeBox(
-              icon: Icons.local_offer_outlined,
-              userType: userType,
-              userText: 'Coupons problem',
-              adminText: 'Manage coupons',
-              userButtonLabel: 'Report now!',
-              adminButtonLabel: 'Manage now!',
-              userPage: const CouponsProblemPage(),
-              adminPage:
-                  const CouponsProblemPage(), // Replace with actual admin page
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ContactTypeBox(
+                    icon: Icons.local_offer_outlined,
+                    userType: userType,
+                    userText: 'Coupons problem',
+                    adminText: 'Manage coupons',
+                    userButtonLabel: 'Report now!',
+                    adminButtonLabel: 'Manage now!',
+                    userPage: const CouponsProblemPage(),
+                    adminPage:
+                        const CouponsProblemPage(), // Replace with actual admin page
+                  ),
+                ),
+                Expanded(
+                  child: ContactTypeBox(
+                    icon: Icons.calendar_month_outlined,
+                    userType: userType,
+                    userText: 'Book to empty bin',
+                    adminText: 'Manage empty bin',
+                    userButtonLabel: 'Book now!',
+                    adminButtonLabel: 'Manage now!',
+                    userPage: const BookAppointmentPage(),
+                    adminPage:
+                        const BookAppointmentPage(), // Replace with actual admin page
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
           ],
