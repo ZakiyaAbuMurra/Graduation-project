@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           title: 'App',
           theme: AppTheme.lightTheme,
-          initialRoute: AppRoutes.enableLocation,
+          initialRoute: AppRoutes.homeLogin,
          onGenerateRoute: AppRouter.onGenerateRoute,
         ));
   }

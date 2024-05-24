@@ -59,5 +59,10 @@
         <!-- Add User Location here -->
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>recyclear needs access to location when open.</string> 
+    <key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+</dict>
 </dict>
 </plist>

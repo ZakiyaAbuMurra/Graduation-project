@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
+import 'package:recyclear/views/pages/home_page.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
 
 class EnableLocation extends StatefulWidget {
@@ -19,6 +20,10 @@ class EnableLocation extends StatefulWidget {
 }
 
 class _EnableLocationState extends State<EnableLocation> {
+    @override
+  void dispose() {
+    super.dispose();
+  }
   bool scanning = false;
   String address = '';
   double locLongitude = 0 ;
@@ -38,13 +43,7 @@ class _EnableLocationState extends State<EnableLocation> {
               child: MainButton(
                 onPressed: (){
                   checkPermission();
-                   Navigator.push(
-                  
-          
-                    context,
-                    MaterialPageRoute(builder: (context) => MapSample(latitude: locLlatitude, longitude: locLongitude))
-                    
-                  );
+                  Navigator.pushReplacementNamed(context, AppRoutes.homeLogin);
                 },
                 child: const Text('Get User Location', style:TextStyle(
                   color: AppColors.white,
@@ -118,7 +117,7 @@ class _EnableLocationState extends State<EnableLocation> {
     });
 
     try{
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation);
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       print(position.latitude);
       locLlatitude = position.latitude;
       print("\n");
