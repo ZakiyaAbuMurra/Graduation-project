@@ -1,7 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import 'package:recyclear/Admin/pages/view_feedback_page.dart';
+
 import 'package:recyclear/Admin/pages/requested_bin.dart';
 import 'package:recyclear/User/book_appointment_empty_bin.dart';
+
 import 'package:recyclear/User/coupons_problem_page.dart';
 import 'package:recyclear/User/fault_in_bin_page.dart';
 import 'package:recyclear/User/report_incorrect_bin_location_page.dart';
@@ -77,7 +81,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     adminButtonLabel: 'View now!',
                     userPage: const SubmitFeedbackPage(),
                     adminPage:
-                        const SubmitFeedbackPage(), // Replace with actual admin page
+                        ViewFeedbackPage(), // Replace with actual admin page
                   ),
                 ),
               ],
