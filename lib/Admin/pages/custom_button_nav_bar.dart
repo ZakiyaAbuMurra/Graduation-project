@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/create_driver_account.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
+import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,7 +23,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
       FirebaseAuth.instance.currentUser; // Get the currently signed-in user
 
   List<Widget> pageList = const [
-    Store(), //TODO :  After fixed the map , replace the correct one
+    MapSample(), //TODO :  After fixed the map , replace the correct one
     DashBoard(),
     Store(),
     RequestsPage(),
