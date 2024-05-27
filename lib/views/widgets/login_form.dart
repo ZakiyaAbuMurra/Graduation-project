@@ -325,8 +325,8 @@ class _LoginFormState extends State<LoginForm> {
             .bottomNavbar; // Make sure this route is defined in AppRouter
         break;
       case 'user':
-        routeName =
-            AppRoutes.userHome; // Make sure this route is defined in AppRouter
+        routeName = AppRoutes
+            .bottomNavBarUser; // Make sure this route is defined in AppRouter
         break;
       default:
         routeName =

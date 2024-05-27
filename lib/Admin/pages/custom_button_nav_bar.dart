@@ -7,9 +7,10 @@ import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
-import 'package:recyclear/Admin/pages/users_request_page.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recyclear/services/notification_service.dart';
+import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 
 class CustomBottomNavbar extends StatefulWidget {
   const CustomBottomNavbar({Key? key}) : super(key: key);
@@ -23,11 +24,11 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   User? user =
       FirebaseAuth.instance.currentUser; // Get the currently signed-in user
 
-  List<Widget> pageList = [
-    NewMap(),
+  List<Widget> pageList = const [
+    MapSample(), //TODO :  After fixed the map , replace the correct on
     DashBoard(),
     Store(),
-    UsersRequest(),
+    RequestsPage(),
   ];
 
   String? userName;
@@ -37,9 +38,19 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   @override
   void initState() {
     super.initState();
+    initApp();
     if (user != null) {
       _loadUserData();
     }
+  }
+
+  void initApp() async {
+    // Initialize notification service
+    await NotificationService().initializeNotification();
+    debugPrint('Before the start Monitoring Bin');
+    // Start monitoring bin heights
+    FirestoreService.instance.monitorBinHeightAndNotify();
+    debugPrint('After the start Monitoring Bin');
   }
 
   Future<void> _loadUserData() async {

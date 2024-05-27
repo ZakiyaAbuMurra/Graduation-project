@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class BinModel {
   final String assignedTo;
   final int height;
@@ -16,9 +14,6 @@ class BinModel {
   final int notifiTemp;
   final int notifiyLevel;
   final int temp;
-  
-
-
 
   BinModel({
     required this.assignedTo,
@@ -41,7 +36,7 @@ class BinModel {
   factory BinModel.fromMap(Map<String, dynamic> map, String documentId) {
     return BinModel(
       assignedTo: map['assignTo'] as String? ?? 'default assignedTo',
-      height: map['Height'] as int? ?? 0,
+      height: map['height'] as int? ?? 0,
       id: documentId,
       lastPackUp: map['pickDate'] as String? ?? 'default_lastPAck',
       location: map['location '] as String? ?? 'default location',
@@ -50,12 +45,11 @@ class BinModel {
       width: map['Width'] as int? ?? 0,
       color: map['color'] as String? ?? 'default color',
       fillLevel: map['fill-level'] as int? ?? 0,
-      humidity:  map['Humidity'] as int? ?? 0,
-      temp:  map['temp'] as int? ?? 0,
-      notifiTemp:  map['notifiyTemp'] as int? ?? 0,
-      notifiyHumidity:  map['notifiyHumidity'] as int? ?? 0,
+      humidity: map['Humidity'] as int? ?? 0,
+      temp: map['temp'] as int? ?? 0,
+      notifiTemp: map['notifiyTemp'] as int? ?? 0,
+      notifiyHumidity: map['notifiyHumidity'] as int? ?? 0,
       notifiyLevel: map['notifiyLevel'] as int? ?? 0,
-
     );
   }
 
@@ -71,11 +65,11 @@ class BinModel {
       'status': status,
       'Material': wasteType,
       'Width': width,
-      'color':color,
-      'fill-level':fillLevel,
+      'color': color,
+      'fill-level': fillLevel,
       'Humidity': humidity,
-      'temp':temp,
-      'notifiyTemp':notifiTemp,
+      'temp': temp,
+      'notifiyTemp': notifiTemp,
       'notifiyHumidity': notifiyHumidity,
       'notifiyLevel': notifiyLevel,
     };
