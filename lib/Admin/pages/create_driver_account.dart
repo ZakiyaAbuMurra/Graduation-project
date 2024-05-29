@@ -24,7 +24,7 @@ class CreateDriverAccount extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.arrow_back),
+                      icon: const Icon(Icons.arrow_back),
                       onPressed: () {
                         Navigator.of(context)
                             .pop(); // Goes back to the previous screen
@@ -100,7 +100,7 @@ class _RegisterFormState extends State<RegisterForm> {
         _nameController.text,
         _phoneController.text,
         _phototUrlController.text,
-        'driver', 
+        'driver',
       );
     }
   }
@@ -212,7 +212,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 color: Colors.grey, // Icon color
               ),
               hintText: 'Enter the password',
-              contentPadding: EdgeInsets.symmetric(
+              contentPadding: const EdgeInsets.symmetric(
                   vertical: 10.0,
                   horizontal: 12.0), // Padding inside the text field
               border: OutlineInputBorder(
@@ -310,7 +310,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 color: Colors.grey, // Icon color
               ),
               hintText: 'Enter phone number',
-              contentPadding:const EdgeInsets.symmetric(
+              contentPadding: const EdgeInsets.symmetric(
                   vertical: 10.0,
                   horizontal: 12.0), // Padding inside the text field
               border: OutlineInputBorder(
@@ -386,7 +386,8 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
             fillColor: Colors.grey[200],
             filled: true,
-            contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           ),
           validator: validator,
         ),

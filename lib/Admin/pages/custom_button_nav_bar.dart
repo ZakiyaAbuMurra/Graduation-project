@@ -10,7 +10,7 @@ import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 
 class CustomBottomNavbar extends StatefulWidget {
-  const CustomBottomNavbar({Key? key}) : super(key: key);
+  const CustomBottomNavbar({super.key});
 
   @override
   State<CustomBottomNavbar> createState() => _CustomBottomNavbarState();
@@ -111,7 +111,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
                   : CircleAvatar(
                       child: Text(
                         userName != null ? userName![0] : 'U',
-                        style: TextStyle(fontSize: 40.0),
+                        style: const TextStyle(fontSize: 40.0),
                       ),
                     ),
             ),
@@ -125,7 +125,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => CreateDriverAccount()),
+                      builder: (context) => const CreateDriverAccount()),
                 );
               },
             ),
@@ -137,7 +137,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
                 // Navigate to profile page
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => EditProfile()),
+                  MaterialPageRoute(builder: (context) => const EditProfile()),
                 );
               },
             ),
@@ -152,7 +152,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
           ],
           if (!isMobile) ...[
             // Add Profile and Logout for web at the bottom
-            Divider(),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.account_circle),
               title: const Text('Profile'),
