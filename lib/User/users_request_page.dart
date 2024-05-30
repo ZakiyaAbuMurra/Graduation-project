@@ -6,8 +6,9 @@ import 'package:recyclear/User/request_bin_page.dart';
 import 'package:recyclear/User/submit_feedback_page.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
-class UserHome extends StatelessWidget {
-  const UserHome({super.key});
+//Not Used
+class UsersRequest extends StatelessWidget {
+  const UsersRequest({super.key});
 
   @override
   Widget build(BuildContext context) {

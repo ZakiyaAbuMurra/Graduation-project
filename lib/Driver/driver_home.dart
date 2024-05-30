@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:recyclear/services/firestore_services.dart';
+import 'package:recyclear/services/notification_service.dart';
 
 class driverHome extends StatefulWidget {
   const driverHome({super.key});
@@ -8,6 +10,22 @@ class driverHome extends StatefulWidget {
 }
 
 class _driverHomeState extends State<driverHome> {
+
+ 
+  @override
+  void initState() {
+    super.initState();
+    initApp();
+  }
+
+    void initApp() async {
+    // Initialize notification service
+    await NotificationService().initializeNotification();
+    debugPrint('Before the start Monitoring Bin');
+    // Start monitoring bin heights
+    FirestoreService.instance.monitorBinHeightAndNotify();
+    debugPrint('After the start Monitoring Bin');
+  } 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
