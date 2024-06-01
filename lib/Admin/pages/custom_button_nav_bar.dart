@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/NewMap.dart';
@@ -21,6 +22,8 @@ class CustomBottomNavbar extends StatefulWidget {
 
 class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   int currentPageIndex = 0;
+
+
   User? user =
       FirebaseAuth.instance.currentUser; // Get the currently signed-in user
 
@@ -35,14 +38,22 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   String? userEmail;
   String? userPhotoUrl;
 
-  @override
+
+   @override
   void initState() {
     super.initState();
     initApp();
     if (user != null) {
       _loadUserData();
     }
+    
   }
+
+
+
+ 
+
+
 
   void initApp() async {
     // Initialize notification service
