@@ -36,11 +36,11 @@ class AppRouter {
           builder: (_) => const driverHome(),
           settings: settings,
         );
-      // case AppRoutes.enableLocation:
-      //   return MaterialPageRoute(
-      //     builder: (_) => const EnableLocation(),
-      //     settings: settings,
-      //   );
+      case AppRoutes.enableLocation:
+        return MaterialPageRoute(
+          builder: (_) => const EnableLocation(),
+          settings: settings,
+        );
 
       case AppRoutes.userHome:
         return MaterialPageRoute(

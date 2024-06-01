@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:async'; // Add this line
+import 'dart:async';
+
+import 'package:recyclear/models/bin_model.dart'; // Add this line
 
 class MapSample extends StatefulWidget {
   const MapSample({super.key});
@@ -12,11 +15,49 @@ class MapSample extends StatefulWidget {
 class MapSampleState extends State<MapSample> {
  final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
+  List<DocumentSnapshot<Map<String, dynamic>>> binInfo = [];
+  final List<Marker> _markers = [];
+
+ Future<void> fetchBinLocations() async {
+    try {
+      // Fetch the bin data from Firestore
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance.collection('bins').get();
+
+      // Save the documents to the list and create markers
+      setState(() {
+        binInfo = querySnapshot.docs;
+        for (var bin in binInfo) {
+          print('/////////////////////////////');
+          print(bin.data());
+          GeoPoint geoPoint = bin.data()?['location'];
+          _markers.add(
+            Marker(
+              markerId: MarkerId(bin.id),
+              position: LatLng(geoPoint.latitude, geoPoint.longitude),
+              infoWindow: InfoWindow(
+                title: 'Bin ID: ${bin.data()?['binID']}',
+                snippet: 'Status: ${bin.data()?['status']}',
+              ),
+            ),
+          );
+        }
+      print('/////////////////////////////');
+
+      print(_markers.length);
+
+      });
+    } catch (e) {
+      print('Error fetching bin locations: $e');
+    }
+  }
+
+
+
 
 
   static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
+    target: LatLng(31.9014, 35.1999),
+    zoom: 8,
   );
 
   static const CameraPosition _kLake = CameraPosition(
@@ -25,12 +66,25 @@ class MapSampleState extends State<MapSample> {
       tilt: 59.440717697143555,
       zoom: 19.151926040649414);
 
+
+  @override
+  void initState() {
+    super.initState();
+    fetchBinLocations();
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return  Scaffold(
       body: 
      GoogleMap(
-      initialCameraPosition: CameraPosition(target: LatLng(37.42796133580664, -122.085749655962),zoom: 13),
+      initialCameraPosition: _kGooglePlex,
+       markers: Set<Marker>.of(_markers),
+       onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
+
       
     ));
   }
