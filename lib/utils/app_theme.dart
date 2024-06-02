@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:graduation_project/utils/app_colors.dart';
+import 'package:recyclear/utils/app_colors.dart';
 
 class AppTheme {
   static ThemeData lightTheme = ThemeData(

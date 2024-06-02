@@ -44,46 +44,42 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBvEt73IoQo-UYgbMpzkoJvFnlF8allinc',
+    apiKey: 'AIzaSyCDeuy4-w3DTBzQoBjr9k8BlMosRbksMGg',
     appId: '1:801296718867:web:7966b8ee715aca5d7333e6',
     messagingSenderId: '801296718867',
     projectId: 'graduation-project-47c85',
     authDomain: 'graduation-project-47c85.firebaseapp.com',
+    databaseURL: 'https://graduation-project-47c85-default-rtdb.firebaseio.com',
     storageBucket: 'graduation-project-47c85.appspot.com',
     measurementId: 'G-Q0ZPPVZM2S',
-    databaseURL:
-        'https://graduation-project-47c85-default-rtdb.firebaseio.com/',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDpgpThI8o5GdwohohRleVsZC38T37kBWo',
-    appId: '1:801296718867:android:8b91ad6155b1328d7333e6',
+    apiKey: 'AIzaSyBahmAe9lq9SnI4kZIJh1ZUTwbkiI1Ea-w',
+    appId: '1:801296718867:android:40e3af5517dd74897333e6',
     messagingSenderId: '801296718867',
     projectId: 'graduation-project-47c85',
+    databaseURL: 'https://graduation-project-47c85-default-rtdb.firebaseio.com',
     storageBucket: 'graduation-project-47c85.appspot.com',
-    databaseURL:
-        'https://graduation-project-47c85-default-rtdb.firebaseio.com/',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAciMVouN2OmS1BnaDSvfU7n_f-9oe9ppU',
-    appId: '1:801296718867:ios:668d35a07d2023a77333e6',
+    apiKey: 'AIzaSyCpyYFRCCavlDxza23JnmB2Cm1B5-G1Dbs',
+    appId: '1:801296718867:ios:8c07e289a236f1fb7333e6',
     messagingSenderId: '801296718867',
     projectId: 'graduation-project-47c85',
+    databaseURL: 'https://graduation-project-47c85-default-rtdb.firebaseio.com',
     storageBucket: 'graduation-project-47c85.appspot.com',
-    iosBundleId: 'com.example.graduationProject',
-    databaseURL:
-        'https://graduation-project-47c85-default-rtdb.firebaseio.com/',
+    iosBundleId: 'com.example.recyclear',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAciMVouN2OmS1BnaDSvfU7n_f-9oe9ppU',
-    appId: '1:801296718867:ios:91d742ab17bfa7f27333e6',
+    apiKey: 'AIzaSyCpyYFRCCavlDxza23JnmB2Cm1B5-G1Dbs',
+    appId: '1:801296718867:ios:cb7d346e831160eb7333e6',
     messagingSenderId: '801296718867',
     projectId: 'graduation-project-47c85',
+    databaseURL: 'https://graduation-project-47c85-default-rtdb.firebaseio.com',
     storageBucket: 'graduation-project-47c85.appspot.com',
-    iosBundleId: 'com.example.graduationProject.RunnerTests',
-    databaseURL:
-        'https://graduation-project-47c85-default-rtdb.firebaseio.com/',
+    iosBundleId: 'com.example.recyclear.RunnerTests',
   );
 }

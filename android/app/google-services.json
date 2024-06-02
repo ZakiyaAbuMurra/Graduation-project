@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "801296718867",
+    "firebase_url": "https://graduation-project-47c85-default-rtdb.firebaseio.com",
     "project_id": "graduation-project-47c85",
     "storage_bucket": "graduation-project-47c85.appspot.com"
   },
@@ -15,7 +16,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDpgpThI8o5GdwohohRleVsZC38T37kBWo"
+          "current_key": "AIzaSyBahmAe9lq9SnI4kZIJh1ZUTwbkiI1Ea-w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:801296718867:android:40e3af5517dd74897333e6",
+        "android_client_info": {
+          "package_name": "com.example.recyclear"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBahmAe9lq9SnI4kZIJh1ZUTwbkiI1Ea-w"
         }
       ],
       "services": {

@@ -1,6 +1,6 @@
 {
-    "name": "graduation_project",
-    "short_name": "graduation_project",
+    "name": "recyclear",
+    "short_name": "recyclear",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

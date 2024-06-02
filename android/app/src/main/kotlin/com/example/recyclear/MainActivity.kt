@@ -1,4 +1,4 @@
-package com.example.graduation_project
+package com.example.recyclear
 
 import io.flutter.embedding.android.FlutterActivity
 
