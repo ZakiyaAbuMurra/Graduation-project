@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-
+  
   font_awesome_flutter: ^10.1.0
   firebase_core: ^2.27.2
   firebase_auth: ^4.18.0
@@ -29,8 +29,12 @@ dependencies:
   permission_handler: ^11.3.1
   geolocator: ^11.0.0
   fluttertoast: ^8.2.5
-  carousel_slider: ^4.2.1
+
   shared_preferences: ^2.2.3
+  get: ^4.6.6
+  google_maps_flutter: ^2.6.0
+  carousel_slider: ^4.2.1
+
  
   
 dev_dependencies:

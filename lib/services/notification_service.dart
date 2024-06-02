@@ -19,7 +19,7 @@ class NotificationService {
   Future<void> initializeNotification() async {
     // App icon for Android notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
+        AndroidInitializationSettings('greentriangle');
 
     // Request permissions for iOS notifications
     final DarwinInitializationSettings initializationSettingsDarwin =
