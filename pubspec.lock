@@ -113,7 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
-
   csslib:
     dependency: transitive
     description:
@@ -122,8 +121,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-
-
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -467,7 +464,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.3"
-
   get:
     dependency: "direct main"
     description:
@@ -532,7 +528,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.4"
-
   http:
     dependency: transitive
     description:
@@ -621,7 +616,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.19.0"
-
   js:
     dependency: transitive
     description:
@@ -638,7 +632,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4"
-
   latlong2:
     dependency: "direct main"
     description:
@@ -887,7 +880,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.27.7"
-
   sanitize_html:
     dependency: transitive
     description:
@@ -896,7 +888,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-
   shared_preferences:
     dependency: "direct main"
     description:
