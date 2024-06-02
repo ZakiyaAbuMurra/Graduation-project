@@ -29,10 +29,11 @@ dependencies:
   permission_handler: ^11.3.1
   geolocator: ^11.0.0
   fluttertoast: ^8.2.5
+
   shared_preferences: ^2.2.3
   get: ^4.6.6
   google_maps_flutter: ^2.6.0
-
+  carousel_slider: ^4.2.1
 
  
   

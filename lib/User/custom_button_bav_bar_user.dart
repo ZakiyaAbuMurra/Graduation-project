@@ -3,6 +3,10 @@ import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/User/about_us_page.dart';
+
+import 'package:recyclear/User/dash_board_page.dart';
+import 'package:recyclear/User/store_page.dart';
+
 import 'package:recyclear/User/term_of_use_page.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
@@ -22,8 +26,10 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
   User? user = FirebaseAuth.instance.currentUser;
 
   List<Widget> pageList = [
-    const DashBoard(),
-    const Store(),
+
+    const UserDashBoard(),
+    const UserStore(),
+
     const RequestsPage(),
   ];
 
@@ -120,7 +126,7 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
             title: Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'Welcome to the Recyclear App! Here you can track your recycling progress, and manage your recycling activities efficiently. Earn points for recycling and redeem coupons at your favorite stores!. Let’s make the world a greener place together!',
+                'Welcome to Recyclear App! Here you can track your recycling progress, and manage your recycling activities efficiently. Earn points for recycling and redeem coupons at your favorite stores!. Let’s make the world a greener place together!',
                 textAlign: TextAlign.justify,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
