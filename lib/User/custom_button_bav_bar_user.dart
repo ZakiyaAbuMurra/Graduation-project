@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
+import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/User/about_us_page.dart';
 
@@ -27,6 +28,8 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
   User? user = FirebaseAuth.instance.currentUser;
 
   List<Widget> pageList = [
+
+    const MapSample(),
 
     const UserDashBoard(),
     const UserStore(),
@@ -189,6 +192,11 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
         });
       },
       destinations: const <NavigationDestination>[
+         NavigationDestination(
+          icon: Icon(Icons.map),
+          selectedIcon: Icon(Icons.map),
+          label: 'Map',
+        ),
         NavigationDestination(
           icon: Icon(Icons.dashboard_outlined),
           selectedIcon: Icon(Icons.dashboard),
