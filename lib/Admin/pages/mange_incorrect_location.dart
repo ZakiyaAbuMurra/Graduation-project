@@ -1,19 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
-class ViewFeedbackPage extends StatelessWidget {
+class ManageIncoorectLocation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('View Feedback'),
+        title: const Text('View Incorrect location for bins'),
         backgroundColor: AppColors.primary,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream:
-            FirebaseFirestore.instance.collection('users_feedback').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('report_incorrect_location')
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -22,21 +22,19 @@ class ViewFeedbackPage extends StatelessWidget {
             return const Center(child: Text('No Feedback Found'));
           }
           var feedbackDocs = snapshot.data!.docs;
-          List<FeedbackItem> feedbackList = feedbackDocs.map((doc) {
+          List<IncorrectLocation> IncorrectLocationList =
+              feedbackDocs.map((doc) {
             var data = doc.data() as Map<String, dynamic>;
-            return FeedbackItem(
-              user: data['user'] ?? 'Anonymous',
+            return IncorrectLocation(
+              description: data['user'] ?? 'Anonymous',
               feedback: data['feedback description'] ?? 'No feedback',
-              emoji: data['selected_emoji'] ?? '😊',
-              timestamp: (data['timestamp'] as Timestamp?)
-                  ?.toDate(), // Convert Timestamp to DateTime
             );
           }).toList();
 
           return ListView.builder(
-            itemCount: feedbackList.length,
+            itemCount: IncorrectLocationList.length,
             itemBuilder: (context, index) {
-              final feedbackItem = feedbackList[index];
+              final incorrectLocation = IncorrectLocationList[index];
               return Card(
                 margin: const EdgeInsets.symmetric(
                     vertical: 10.0, horizontal: 15.0),
@@ -57,10 +55,10 @@ class ViewFeedbackPage extends StatelessWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.person,
-                              color: Colors.green, size: 30),
+                              color: Color.fromRGBO(76, 175, 80, 1), size: 30),
                           const SizedBox(width: 10),
                           Text(
-                            feedbackItem.user,
+                            incorrectLocation.description,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -76,30 +74,6 @@ class ViewFeedbackPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.emoji_emotions,
-                                  color: AppColors.primary),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Emoji: ${feedbackItem.emoji}',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time,
-                                  color: AppColors.primary),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Timestamp: ${feedbackItem.timestamp != null ? DateFormat('yyyy-MM-dd – kk:mm').format(feedbackItem.timestamp!) : 'No timestamp'}',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
                           const Text(
                             'Feedback:',
                             style: TextStyle(
@@ -107,7 +81,7 @@ class ViewFeedbackPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            feedbackItem.feedback,
+                            incorrectLocation.feedback,
                             style: const TextStyle(fontSize: 16),
                           ),
                         ],
@@ -124,16 +98,12 @@ class ViewFeedbackPage extends StatelessWidget {
   }
 }
 
-class FeedbackItem {
-  final String user;
+class IncorrectLocation {
+  final String description;
   final String feedback;
-  final String emoji;
-  final DateTime? timestamp;
 
-  FeedbackItem({
-    required this.user,
+  IncorrectLocation({
+    required this.description,
     required this.feedback,
-    required this.emoji,
-    required this.timestamp,
   });
 }

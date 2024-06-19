@@ -30,15 +30,16 @@ class MapSampleState extends State<MapSample> {
       body: GoogleMap(
         mapType: MapType.hybrid,
         initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
+        // onMapCreated: (GoogleMapController controller) {
+        //   _controller.complete(controller);
+        // },
+        
       ),
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: _goToTheLake,
-      //   label: const Text('To the lake!'),
-      //   icon: const Icon(Icons.directions_boat),
-      // ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _goToTheLake,
+        label: const Text('To the lake!'),
+        icon: const Icon(Icons.directions_boat),
+      ),
     );
   }
 

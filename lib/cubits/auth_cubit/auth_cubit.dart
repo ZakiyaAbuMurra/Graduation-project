@@ -80,4 +80,17 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthFailure(e.toString()));
     }
   }
+
+  Future<void> getUser() async {
+    try {
+      User? userData = await authServices.currentUser();
+      if (userData != null) {
+        emit(AuthSuccess());
+      } else {
+        emit(AuthFailure('User not found'));
+      }
+    } on FirebaseAuthException catch (e) {
+      emit(AuthFailure(e.message!));
+    }
+  }
 }

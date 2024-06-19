@@ -14,6 +14,8 @@ class BinModel {
   final int notifiTemp;
   final int notifiyLevel;
   final int temp;
+      // dateTime: DateTime.fromMillisecondsSinceEpoch(map['dateTime']),
+//      dateTime: DateTime.fromMillisecondsSinceEpoch(map['dateTime']),
 
   BinModel({
     required this.assignedTo,

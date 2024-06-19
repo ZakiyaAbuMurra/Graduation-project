@@ -21,7 +21,7 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
 
   List<Widget> pageList = [
     //const MapSample(),
-    const DashBoard(),
+    DashboardPage(),
     const Store(),
     const RequestsPage(),
   ];

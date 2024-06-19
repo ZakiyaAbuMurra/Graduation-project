@@ -22,9 +22,9 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   User? user =
       FirebaseAuth.instance.currentUser; // Get the currently signed-in user
 
-  List<Widget> pageList = const [
+  List<Widget> pageList =  [
     MapSample(), //TODO :  After fixed the map , replace the correct one
-    DashBoard(),
+    DashboardPage(),
     Store(),
     RequestsPage(),
   ];
