@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:recyclear/models/feedback_model.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class ViewFeedbackPage extends StatelessWidget {
@@ -57,7 +58,7 @@ class ViewFeedbackPage extends StatelessWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.person,
-                              color: Colors.green, size: 30),
+                              color: AppColors.black, size: 30),
                           const SizedBox(width: 10),
                           Text(
                             feedbackItem.user,
@@ -79,7 +80,7 @@ class ViewFeedbackPage extends StatelessWidget {
                           Row(
                             children: [
                               const Icon(Icons.emoji_emotions,
-                                  color: AppColors.primary),
+                                  color: AppColors.black),
                               const SizedBox(width: 10),
                               Text(
                                 'Emoji: ${feedbackItem.emoji}',
@@ -91,7 +92,7 @@ class ViewFeedbackPage extends StatelessWidget {
                           Row(
                             children: [
                               const Icon(Icons.access_time,
-                                  color: AppColors.primary),
+                                  color: AppColors.black),
                               const SizedBox(width: 10),
                               Text(
                                 'Timestamp: ${feedbackItem.timestamp != null ? DateFormat('yyyy-MM-dd – kk:mm').format(feedbackItem.timestamp!) : 'No timestamp'}',
@@ -122,18 +123,4 @@ class ViewFeedbackPage extends StatelessWidget {
       ),
     );
   }
-}
-
-class FeedbackItem {
-  final String user;
-  final String feedback;
-  final String emoji;
-  final DateTime? timestamp;
-
-  FeedbackItem({
-    required this.user,
-    required this.feedback,
-    required this.emoji,
-    required this.timestamp,
-  });
 }

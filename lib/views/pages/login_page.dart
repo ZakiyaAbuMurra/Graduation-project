@@ -32,9 +32,10 @@ class LoginPage extends StatelessWidget {
                     SizedBox(height: size.height * 0.01),
                     Text(
                       'Login to your account',
-                      style: Theme.of(context).textTheme.headline5!.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineLarge!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     SizedBox(height: size.height * 0.01),
                     const LoginForm(),

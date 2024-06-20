@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:recyclear/Admin/pages/chat_page.dart';
 import 'package:recyclear/cubits/chat_cubit/chat_cubit.dart';
+import 'package:recyclear/models/bin_request.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class ManageBinsPage extends StatelessWidget {
@@ -12,7 +13,7 @@ class ManageBinsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manage Bins'),
-        backgroundColor: AppColors.primary.withOpacity(0.5),
+        backgroundColor: AppColors.primary,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream:
@@ -83,7 +84,7 @@ class _BinRequestCardState extends State<BinRequestCard> {
           children: [
             Row(
               children: [
-                const Icon(Icons.person, color: AppColors.primary, size: 30),
+                const Icon(Icons.person, color: AppColors.black, size: 30),
                 const SizedBox(width: 10),
                 Text(
                   widget.binRequest.name,
@@ -147,7 +148,7 @@ class _BinRequestCardState extends State<BinRequestCard> {
   Widget infoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, color: AppColors.primary),
+        Icon(icon, color: AppColors.lightBlack),
         const SizedBox(width: 10),
         Expanded(
           child: RichText(
@@ -166,22 +167,4 @@ class _BinRequestCardState extends State<BinRequestCard> {
       ],
     );
   }
-}
-
-class BinRequest {
-  final String address;
-  final String comments;
-  final String email;
-  final String name;
-  final String phoneNumber;
-  final DateTime? timestamp;
-
-  BinRequest({
-    required this.address,
-    required this.comments,
-    required this.email,
-    required this.name,
-    required this.phoneNumber,
-    required this.timestamp,
-  });
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:recyclear/models/incorrect_location_model.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class ManageIncoorectLocation extends StatelessWidget {
@@ -96,14 +97,4 @@ class ManageIncoorectLocation extends StatelessWidget {
       ),
     );
   }
-}
-
-class IncorrectLocation {
-  final String description;
-  final String feedback;
-
-  IncorrectLocation({
-    required this.description,
-    required this.feedback,
-  });
 }
