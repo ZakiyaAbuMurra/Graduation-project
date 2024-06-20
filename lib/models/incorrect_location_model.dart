@@ -1,9 +1,8 @@
-
-class IncorrectLocation {
+class FaultBins {
   final String description;
   final String feedback;
 
-  IncorrectLocation({
+  FaultBins({
     required this.description,
     required this.feedback,
   });

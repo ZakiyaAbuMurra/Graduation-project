@@ -1,40 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:recyclear/models/incorrect_location_model.dart';
+import 'package:recyclear/models/fault_in_bin_model.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
-class ManageIncoorectLocation extends StatelessWidget {
+class ViewFaultsBins extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('View Incorrect location for bins'),
+        title: const Text('View Faults in bins'),
         backgroundColor: AppColors.primary,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('report_incorrect_location')
-            .snapshots(),
+        stream:
+            FirebaseFirestore.instance.collection('fault_in_bin').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (!snapshot.hasData) {
-            return const Center(child: Text('No Feedback Found'));
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No Reported faults in bins'));
           }
+
           var feedbackDocs = snapshot.data!.docs;
-          List<FaultBins> IncorrectLocationList = feedbackDocs.map((doc) {
+          List<FaultBins> faultBinList = feedbackDocs.map((doc) {
             var data = doc.data() as Map<String, dynamic>;
             return FaultBins(
-              description: data['user'] ?? 'Anonymous',
-              feedback: data['Problem description'] ?? 'No feedback',
+              description: data['description'] ?? 'No description provided',
+              Country_name: data['Country name'] ?? 'Unknown',
+              Neighborhood_name: data['Neighborhood name'] ?? 'Unknown',
+              phoneNumber: data['phoneNumber'] ?? 'N/A',
             );
           }).toList();
 
           return ListView.builder(
-            itemCount: IncorrectLocationList.length,
+            itemCount: faultBinList.length,
             itemBuilder: (context, index) {
-              final incorrectLocation = IncorrectLocationList[index];
+              final faultBins = faultBinList[index];
               return Card(
                 margin: const EdgeInsets.symmetric(
                     vertical: 10.0, horizontal: 15.0),
@@ -58,7 +60,7 @@ class ManageIncoorectLocation extends StatelessWidget {
                               color: Color.fromRGBO(76, 175, 80, 1), size: 30),
                           const SizedBox(width: 10),
                           Text(
-                            incorrectLocation.description,
+                            faultBins.description,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -81,7 +83,40 @@ class ManageIncoorectLocation extends StatelessWidget {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            incorrectLocation.feedback,
+                            faultBins.description,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Country:',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            faultBins.Country_name,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Neighborhood:',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            faultBins.Neighborhood_name,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Phone Number:',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            faultBins.phoneNumber,
                             style: const TextStyle(fontSize: 16),
                           ),
                         ],
