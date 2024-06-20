@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class MapSample extends StatefulWidget {
 class MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
+
   List<DocumentSnapshot<Map<String, dynamic>>> binInfo = [];
   final List<Marker> _markers = [];
   final DatabaseReference _databaseReference = FirebaseDatabase.instance.reference().child('sensors/data');
@@ -163,6 +165,7 @@ class MapSampleState extends State<MapSample> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: GoogleMap(
+
         initialCameraPosition: _kGooglePlex,
         markers: Set<Marker>.of(_markers),
         myLocationEnabled: false,

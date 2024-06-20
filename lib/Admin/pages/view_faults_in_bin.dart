@@ -1,45 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:recyclear/models/feedback_model.dart';
+import 'package:recyclear/models/fault_in_bin_model.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
-class ViewFeedbackPage extends StatelessWidget {
+class ViewFaultsBins extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('View Feedback'),
+        title: const Text('View Faults in bins'),
         backgroundColor: AppColors.primary,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream:
-            FirebaseFirestore.instance.collection('users_feedback').snapshots(),
-
+            FirebaseFirestore.instance.collection('fault_in_bin').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (!snapshot.hasData) {
-            return const Center(child: Text('No Feedback Found'));
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No Reported faults in bins'));
           }
+
           var feedbackDocs = snapshot.data!.docs;
-          List<FeedbackItem> feedbackList = feedbackDocs.map((doc) {
+          List<FaultBins> faultBinList = feedbackDocs.map((doc) {
             var data = doc.data() as Map<String, dynamic>;
-            return FeedbackItem(
-              user: data['user'] ?? 'Anonymous',
-              feedback: data['feedback description'] ?? 'No feedback',
-              emoji: data['selected_emoji'] ?? '😊',
-              timestamp: (data['timestamp'] as Timestamp?)
-                  ?.toDate(), // Convert Timestamp to DateTime
+            return FaultBins(
+              description: data['description'] ?? 'No description provided',
+              Country_name: data['Country name'] ?? 'Unknown',
+              Neighborhood_name: data['Neighborhood name'] ?? 'Unknown',
+              phoneNumber: data['phoneNumber'] ?? 'N/A',
             );
           }).toList();
 
-
           return ListView.builder(
-            itemCount: feedbackList.length,
+            itemCount: faultBinList.length,
             itemBuilder: (context, index) {
-              final feedbackItem = feedbackList[index];
+              final faultBins = faultBinList[index];
               return Card(
                 margin: const EdgeInsets.symmetric(
                     vertical: 10.0, horizontal: 15.0),
@@ -60,10 +57,10 @@ class ViewFeedbackPage extends StatelessWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.person,
-                              color: AppColors.black, size: 30),
+                              color: Color.fromRGBO(76, 175, 80, 1), size: 30),
                           const SizedBox(width: 10),
                           Text(
-                            feedbackItem.user,
+                            faultBins.description,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -79,38 +76,47 @@ class ViewFeedbackPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.emoji_emotions,
-                                  color: AppColors.black),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Emoji: ${feedbackItem.emoji}',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time,
-                                  color: AppColors.black),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Timestamp: ${feedbackItem.timestamp != null ? DateFormat('yyyy-MM-dd – kk:mm').format(feedbackItem.timestamp!) : 'No timestamp'}',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
                           const Text(
-                            'Feedback:',
+                            'Problem description:',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            feedbackItem.feedback,
+                            faultBins.description,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Country:',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            faultBins.Country_name,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Neighborhood:',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            faultBins.Neighborhood_name,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Phone Number:',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            faultBins.phoneNumber,
                             style: const TextStyle(fontSize: 16),
                           ),
                         ],

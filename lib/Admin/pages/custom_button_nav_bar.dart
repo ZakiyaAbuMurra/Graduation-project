@@ -8,9 +8,12 @@ import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
+import 'package:recyclear/services/auth_service.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/services/notification_service.dart';
+import 'package:recyclear/utils/route/app_routes.dart';
+import 'package:recyclear/views/pages/login_page.dart';
 import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 
 class CustomBottomNavbar extends StatefulWidget {
@@ -26,9 +29,13 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   User? user =
       FirebaseAuth.instance.currentUser; // Get the currently signed-in user
 
-  List<Widget> pageList = const [
-    MapSample(), //TODO :  After fixed the map , replace the correct on
-    DashBoard(),
+  final AuthServices authServices =
+      AuthServicesImpl(); // Instantiate AuthServicesImpl
+
+  List<Widget> pageList = [
+    MapSample(), //TODO :  After fixed the map , replace the correct one
+    DashboardPage(),
+
     Store(),
     RequestsPage(),
   ];
@@ -159,9 +166,15 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
             ListTile(
               leading: const Icon(Icons.exit_to_app),
               title: const Text('Logout'),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context); // Close the drawer
-                // Handle user logout
+                // await authServices.signOut(); // Sign out the user
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          LoginPage()), // Navigate to login page
+                );
               },
             ),
           ],

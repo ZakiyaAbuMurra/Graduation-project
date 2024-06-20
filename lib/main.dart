@@ -54,7 +54,11 @@ class MyApp extends StatelessWidget {
 //I commented on this because it was asking me to do the login each time I rebuilt the app  // @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (context) => AuthCubit(),
+        create: (context) {
+          final cubit = AuthCubit();
+          cubit.getUser();
+          return cubit;
+        },
         child: MaterialApp(
           title: 'App',
           theme: AppTheme.lightTheme,

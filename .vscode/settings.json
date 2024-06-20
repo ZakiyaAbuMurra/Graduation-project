@@ -3,5 +3,6 @@
         "Firestore",
         "recyclear"
     ],
-    "cmake.sourceDirectory": "/Users/zakiyarasme/Downloads/flutter/ReCyclear/recyclear/linux/flutter"
+    "cmake.sourceDirectory": "/Users/zakiyarasme/Downloads/flutter/ReCyclear/recyclear/linux/flutter",
+    "git.ignoreLimitWarning": true
 }
