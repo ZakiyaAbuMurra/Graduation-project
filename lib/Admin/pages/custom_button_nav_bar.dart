@@ -1,5 +1,8 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:recyclear/Admin/pages/NewMap.dart';
+import 'package:recyclear/Admin/pages/add_bin.dart';
 import 'package:recyclear/Admin/pages/create_driver_account.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
@@ -22,6 +25,7 @@ class CustomBottomNavbar extends StatefulWidget {
 
 class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   int currentPageIndex = 0;
+
   User? user =
       FirebaseAuth.instance.currentUser; // Get the currently signed-in user
 
@@ -31,6 +35,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   List<Widget> pageList = [
     MapSample(), //TODO :  After fixed the map , replace the correct one
     DashboardPage(),
+
     Store(),
     RequestsPage(),
   ];
@@ -137,6 +142,16 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.recycling_rounded),
+              title: const Text('Add Bin'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddBin()),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.account_circle),
               title: const Text('Profile'),
               onTap: () {
@@ -173,6 +188,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
                 // Navigate to profile page
               },
             ),
+
             ListTile(
               leading: const Icon(Icons.exit_to_app),
               title: const Text('Logout'),

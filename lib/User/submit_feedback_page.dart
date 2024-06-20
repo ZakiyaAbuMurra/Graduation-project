@@ -38,35 +38,36 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text(
-              'Request Sent Successfully',
-              style: TextStyle(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(
                   child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    height: MediaQuery.of(context).size.width * 0.3,
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: MediaQuery.of(context).size.width * 0.4,
                     child: Image.asset(
-                      'assets/success_image.png',
+                      'assets/images/success_image.png',
                       fit: BoxFit.contain,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8.0),
+                const SizedBox(height: 16.0),
                 const Text(
-                  'We will take your feedback into consideration',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  '      Request Sent Successfully',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8.0),
-                Text(
-                  'Selected Emoji: $selectedEmoji', // Display selected emoji
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                const Text(
+                  'We will reply to you as soon as possible.',
+                  style: TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8.0),
+                const Text(
+                  '       Thank you for contacting us!',
+                  style: TextStyle(fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -101,7 +102,7 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
     return Scaffold(
       appBar: AppBar(
         title: Image.asset(
-           'assets/images/greenRecyclear.png',
+          'assets/images/greenRecyclear.png',
           height: 40,
         ),
         elevation: 0,
@@ -134,8 +135,9 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
                 const SizedBox(height: 16.0),
                 _buildTextField(
                   controller: _feedbackDescriptionController,
-                  labelText: 'Please give us your feedback',
+                  hintText: 'Please give us your feedback',
                   fieldName: 'Feedback Description',
+                  border: const OutlineInputBorder(),
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                 ),
@@ -206,8 +208,9 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
 
   Widget _buildTextField({
     required TextEditingController controller,
-    required String labelText,
+    required String hintText,
     required String fieldName,
+    required OutlineInputBorder border,
     TextInputType? keyboardType,
     int? maxLines,
     String? Function(String?)? validator,
@@ -215,13 +218,25 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          fieldName,
-          style: const TextStyle(
-            color: AppColors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          children: [
+            Text(
+              fieldName,
+              style: const TextStyle(
+                color: AppColors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const Text(
+              ' *',
+              style: TextStyle(
+                color: AppColors.red,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8.0),
         Container(
@@ -240,29 +255,21 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
           child: TextFormField(
             controller: controller,
             decoration: InputDecoration(
-              labelText: labelText,
-              labelStyle: const TextStyle(color: AppColors.grey),
-              border: const OutlineInputBorder(),
+              hintText: hintText,
+              hintStyle:
+                  const TextStyle(color: AppColors.grey), // Hint text style
+              border: border,
               focusedBorder: const OutlineInputBorder(
                 borderSide: BorderSide(color: AppColors.primary),
               ),
               filled: true,
               fillColor: AppColors.white,
-              suffixIcon: const Text(
-                '*', // Star sign for required fields
-                style: TextStyle(color: AppColors.red),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 16.0,
-                horizontal: 12.0,
-              ),
             ),
             keyboardType: keyboardType,
-            minLines: 5,
             maxLines: maxLines,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter $labelText';
+                return ' $hintText';
               }
               return validator != null ? validator(value) : null;
             },

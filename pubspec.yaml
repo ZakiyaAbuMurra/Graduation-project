@@ -33,6 +33,11 @@ dependencies:
   fl_chart: ^0.68.0
   firebase_analytics: ^10.10.7
 
+  shared_preferences: ^2.2.3
+  get: ^4.6.6
+  google_maps_flutter: ^2.6.0
+  carousel_slider: ^4.2.1
+
  
   
 dev_dependencies:

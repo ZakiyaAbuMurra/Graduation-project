@@ -1,28 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
-class FaultInBinPage extends StatefulWidget {
-  const FaultInBinPage({super.key});
+class BookAppointmentPage extends StatefulWidget {
+  const BookAppointmentPage({super.key});
 
   @override
-  _FaultInBinPageState createState() => _FaultInBinPageState();
+  _BookAppointmentPageState createState() => _BookAppointmentPageState();
 }
 
-class _FaultInBinPageState extends State<FaultInBinPage> {
+class _BookAppointmentPageState extends State<BookAppointmentPage> {
   final _formKey = GlobalKey<FormState>();
-  final _countrynameController = TextEditingController();
-  final _neighborhoodNameController = TextEditingController();
-  final _phoneNumberController = TextEditingController();
-  final _problemDescriptionController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
+  final _binNumberController = TextEditingController();
+  final _binLocationController = TextEditingController();
 
-  void _submitRequest() {
+  void _submitRequest() async {
     if (_formKey.currentState!.validate()) {
       // Check if any of the text controllers are empty
-      if (_countrynameController.text.isEmpty ||
-          _neighborhoodNameController.text.isEmpty ||
-          _phoneNumberController.text.isEmpty ||
-          _problemDescriptionController.text.isEmpty) {
+      if (_descriptionController.text.isEmpty ||
+          _dateController.text.isEmpty ||
+          _timeController.text.isEmpty ||
+          _binNumberController.text.isEmpty ||
+          _binLocationController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Please fill all the required fields'),
@@ -32,11 +37,13 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
         return;
       }
 
-      FirebaseFirestore.instance.collection('fault_in_bin').add({
-        'Country name': _countrynameController.text,
-        'Neighborhood name': _neighborhoodNameController.text,
-        'Contact phone Number': _phoneNumberController.text,
-        'Problem description': _problemDescriptionController.text,
+      FirebaseFirestore.instance.collection('bin_empty_requests').add({
+        'description': _descriptionController.text,
+        'date': _dateController.text,
+        'time': _timeController.text,
+        'bin number': _binNumberController.text,
+        'bin location': _binLocationController.text,
+        'user_id': FirebaseAuth.instance.currentUser!.uid,
         'timestamp': DateTime.now(),
       });
 
@@ -103,6 +110,32 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
     }
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _timeController.text = picked.format(context);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,7 +144,6 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
           'assets/images/greenRecyclear.png',
           height: 40,
         ),
-        //backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -123,7 +155,7 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Text(
-                  'Send a message to the support center',
+                  'Book an Appointment',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -132,7 +164,7 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
                 ),
                 const SizedBox(height: 8.0),
                 const Text(
-                  'Fault in a bin',
+                  'Notify us to empty your bin',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -141,59 +173,51 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
                 ),
                 const SizedBox(height: 16.0),
                 _buildTextField(
-                  controller: _countrynameController,
-                  hintText: 'Enter the country name',
-                  fieldName: 'Country Name',
-                  border: const OutlineInputBorder(),
-                ),
-                const SizedBox(height: 16.0),
-                _buildTextField(
-                  controller: _neighborhoodNameController,
-                  hintText: 'Enter the neighborhood name',
-                  fieldName: 'Neighborhood Name',
-                  border: const OutlineInputBorder(),
-                ),
-                const SizedBox(height: 16.0),
-                _buildTextField(
-                  controller: _phoneNumberController,
-                  hintText: 'Enter your phone number',
-                  fieldName: 'Contact Phone Number',
-                  border: const OutlineInputBorder(),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please enter your phone number';
-                    }
-                    // Check if the entered value contains only numbers
-                    if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                      return 'Please enter a valid phone number';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                _buildTextField(
-                  controller: _problemDescriptionController,
+                  controller: _descriptionController,
                   hintText: 'Please describe the issue...',
-                  fieldName: 'Problem Description',
+                  fieldName: 'Description',
                   border: const OutlineInputBorder(),
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
                 ),
                 const SizedBox(height: 16.0),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.grey.withOpacity(0.9),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                GestureDetector(
+                  onTap: () => _selectDate(context),
+                  child: AbsorbPointer(
+                    child: _buildTextField(
+                      controller: _dateController,
+                      hintText: 'Select a date',
+                      fieldName: 'Date',
+                      border: const OutlineInputBorder(),
+                    ),
                   ),
+                ),
+                const SizedBox(height: 16.0),
+                GestureDetector(
+                  onTap: () => _selectTime(context),
+                  child: AbsorbPointer(
+                    child: _buildTextField(
+                      controller: _timeController,
+                      hintText: 'Select a time',
+                      fieldName: 'Time',
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                _buildTextField(
+                  controller: _binNumberController,
+                  hintText: 'Please type the bin number',
+                  fieldName: 'Bin Number',
+                  border: const OutlineInputBorder(),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  maxLength: 3,
+                ),
+                const SizedBox(height: 16.0),
+                _buildTextField(
+                  controller: _binLocationController,
+                  hintText: 'Please type the bin location',
+                  fieldName: 'Bin Location',
+                  border: const OutlineInputBorder(),
                 ),
                 const SizedBox(height: 16.0),
                 ElevatedButton(
@@ -224,6 +248,8 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
     required String fieldName,
     required OutlineInputBorder border,
     TextInputType? keyboardType,
+    int? maxLength,
+    List<TextInputFormatter>? inputFormatters,
     int? maxLines,
     String? Function(String?)? validator,
   }) {
@@ -276,8 +302,11 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
               ),
               filled: true,
               fillColor: AppColors.white,
+              counterText: '', // Hide counter text
             ),
             keyboardType: keyboardType,
+            maxLength: maxLength,
+            inputFormatters: inputFormatters,
             maxLines: maxLines,
             validator: (value) {
               if (value == null || value.isEmpty) {
