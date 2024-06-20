@@ -13,7 +13,7 @@ class UserInfoCards extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         final userInfo = snapshot.data!.docs.map((doc) {
@@ -21,11 +21,14 @@ class UserInfoCards extends StatelessWidget {
             'name': doc['name'],
             'phone': doc['phone'],
             'email': doc['email'],
-            'photoUrl':
-                doc['photoUrl'], // Ensure this field is present in Firestore
+            'photoUrl': doc['photoUrl'],
+            'area': doc['area'],
+            'trucknumber': doc[
+                'trucknumber'], // make sure this matches the field name in Firestore
           };
         }).toList();
 
+        print('++++++++++++++ ${userInfo}');
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -118,7 +121,7 @@ class UserInfoCards extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            'Truck: ',
+                            'Truck: ', // Change 'truck' to 'trucknumber'
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blueGrey.shade700,
@@ -126,7 +129,7 @@ class UserInfoCards extends StatelessWidget {
                           ),
                           Expanded(
                             child: Text(
-                              '${info['truck']}',
+                              '${info['trucknumber']}', // make sure this matches the field name in Firestore
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.blueGrey.shade900,

@@ -34,8 +34,6 @@ class CreateDriverAccount extends StatelessWidget {
                       child: Container(
                         alignment: Alignment
                             .center, // Centers the image within the container
-
-                        // width: double.infinity,
                         child: Image.asset(
                           'assets/images/greenRecyclear.png',
                           fit: BoxFit.fitWidth,
@@ -84,6 +82,8 @@ class _RegisterFormState extends State<RegisterForm> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _phototUrlController = TextEditingController();
+  final _areaController = TextEditingController();
+  final _truckNumberController = TextEditingController();
 
   bool _isVisible = false;
   bool _isVisible_con = false;
@@ -100,7 +100,9 @@ class _RegisterFormState extends State<RegisterForm> {
         _nameController.text,
         _phoneController.text,
         _phototUrlController.text,
-        'driver', 
+        'driver',
+        _areaController.text,
+        _truckNumberController.text,
       );
     }
   }
@@ -279,8 +281,8 @@ class _RegisterFormState extends State<RegisterForm> {
                   });
                 },
                 icon: Icon(_isVisible_con
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility),
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off),
               ),
             ),
             obscureText: _isVisible_con,
@@ -310,7 +312,44 @@ class _RegisterFormState extends State<RegisterForm> {
                 color: Colors.grey, // Icon color
               ),
               hintText: 'Enter phone number',
-              contentPadding:const EdgeInsets.symmetric(
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10.0,
+                  horizontal: 12.0), // Padding inside the text field
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                    8.0), // Rounded corners for the input field
+              ),
+              fillColor: Colors.grey[200], // A subtle fill color
+              filled: true,
+            ),
+          ),
+          const SizedBox(height: 15),
+          const SizedBox(height: 8),
+          Text(
+            'Driving Area',
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+          CustomDropdown(controller: _areaController),
+          const SizedBox(height: 8),
+          Text(
+            'Truck number',
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _truckNumberController,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(
+                Icons.drive_eta_outlined, // Example icon
+                color: Colors.grey, // Icon color
+              ),
+              hintText: 'Enter the truck number ',
+              contentPadding: const EdgeInsets.symmetric(
                   vertical: 10.0,
                   horizontal: 12.0), // Padding inside the text field
               border: OutlineInputBorder(
@@ -391,6 +430,129 @@ class _RegisterFormState extends State<RegisterForm> {
           validator: validator,
         ),
       ],
+    );
+  }
+}
+
+const governorates = [
+  {'value': 'Jerusalem', 'label': 'Jerusalem'},
+  {'value': 'Gaza', 'label': 'Gaza'},
+  {'value': 'Hebron', 'label': 'Hebron'},
+  {'value': 'Jenin', 'label': 'Jenin'},
+  {'value': 'Tulkarem', 'label': 'Tulkarem'},
+  {'value': 'Nablus', 'label': 'Nablus'},
+  {'value': 'Ramallah and Al-Bireh', 'label': 'Ramallah and Al-Bireh'},
+  {'value': 'Bethlehem', 'label': 'Bethlehem'},
+  {'value': 'Qalqilya', 'label': 'Qalqilya'},
+  {'value': 'Salfit', 'label': 'Salfit'},
+  {'value': 'Jericho and Al Aghwar', 'label': 'Jericho and Al Aghwar'},
+  {'value': 'Rafah', 'label': 'Rafah'},
+  {'value': 'Khan Yunis', 'label': 'Khan Yunis'},
+  {'value': 'Deir al-Balah', 'label': 'Deir al-Balah'},
+  {'value': 'North Gaza', 'label': 'North Gaza'},
+];
+
+class CustomDropdown extends StatefulWidget {
+  final TextEditingController controller;
+
+  const CustomDropdown({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  _CustomDropdownState createState() => _CustomDropdownState();
+}
+
+class _CustomDropdownState extends State<CustomDropdown> {
+  OverlayEntry? _overlayEntry;
+  final LayerLink _layerLink = LayerLink();
+  bool _isDropdownOpen = false;
+
+  void _toggleDropdown() {
+    if (_isDropdownOpen) {
+      _closeDropdown();
+    } else {
+      _openDropdown();
+    }
+  }
+
+  void _openDropdown() {
+    _overlayEntry = _createOverlayEntry();
+    Overlay.of(context)!.insert(_overlayEntry!);
+    setState(() {
+      _isDropdownOpen = true;
+    });
+  }
+
+  void _closeDropdown() {
+    _overlayEntry?.remove();
+    setState(() {
+      _isDropdownOpen = false;
+    });
+  }
+
+  OverlayEntry _createOverlayEntry() {
+    RenderBox renderBox = context.findRenderObject() as RenderBox;
+    var size = renderBox.size;
+    var offset = renderBox.localToGlobal(Offset.zero);
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: size.width,
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0.0, size.height + 5.0),
+          child: Material(
+            elevation: 4.0,
+            child: Container(
+              height: 150.0, // Limit the height to show only three items
+              child: ListView(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                children: governorates.map((area) {
+                  return ListTile(
+                    title: Text(area['label'] as String),
+                    onTap: () {
+                      widget.controller.text = area['value'] as String;
+                      _closeDropdown();
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: TextFormField(
+        controller: widget.controller,
+        decoration: InputDecoration(
+          prefixIcon: const Icon(
+            Icons.home_work_outlined,
+            color: Colors.grey,
+          ),
+          hintText: 'Select the driving area',
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          fillColor: Colors.grey[200],
+          filled: true,
+          suffixIcon: IconButton(
+            icon: Icon(
+                _isDropdownOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down),
+            onPressed: _toggleDropdown,
+          ),
+        ),
+        readOnly: true,
+        onTap: _toggleDropdown,
+      ),
     );
   }
 }

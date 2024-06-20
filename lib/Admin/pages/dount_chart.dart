@@ -90,6 +90,7 @@ class _DonutChartState extends State<DonutChart> {
 
   List<PieChartSectionData> _getSections() {
     double total = binData.values.fold(0, (sum, value) => sum + value);
+    print('The total number of fetched status bin : ${total} ');
     if (total == 0) {
       return [
         PieChartSectionData(
