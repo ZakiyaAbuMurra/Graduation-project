@@ -191,9 +191,10 @@ class _LoginFormState extends State<LoginForm> {
                  padding:  EdgeInsets.only(left: MediaQuery.of(context).size.width*0.05),
                  child: SizedBox(
                   height: MediaQuery.of(context).size.height*0.05,
-                  width: MediaQuery.of(context).size.width *0.4,
+                  width: MediaQuery.of(context).size.width *0.46,
                  
                    child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
                      children: [
                        Checkbox(value: _rememberMe, onChanged: (value){
                         setState(() {
@@ -204,8 +205,8 @@ class _LoginFormState extends State<LoginForm> {
                                      ),
                     const Text("Remember Me", style: TextStyle(
                     color: Color.fromARGB(255, 110, 108, 108),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold
+                    fontSize: 14,
+                    //fontWeight: FontWeight.bold
                    
                    
                                  ),),

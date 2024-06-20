@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:ffi';
+import 'dart:math';
+import 'package:http/http.dart' as http;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,7 +10,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
@@ -25,11 +30,14 @@ class MapSample extends StatefulWidget {
 class MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
+    GoogleMapController? controller;
   List<DocumentSnapshot<Map<String, dynamic>>> binInfo = [];
   final List<Marker> _markers = [];
   final DatabaseReference _databaseReference =
       FirebaseDatabase.instance.reference().child('sensors/data');
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    Set<Polyline> _polylines = {};
+
 
   String _date = '';
   double _fillLevel = 0;
@@ -43,6 +51,11 @@ class MapSampleState extends State<MapSample> {
   String addressloc = '';
   String localLocation = '';
   bool showCard = false;
+  LatLng _currentPosition = LatLng(31.9014, 35.1999);
+  LatLng locroute = LatLng(31.9014, 35.1999);
+  double routeDistance = 0.0;
+  int routeTime = 0;
+ 
 
   StreamSubscription<DatabaseEvent>? _databaseSubscription;
   final List<Map<String, dynamic>> _markerData = [];
@@ -142,7 +155,9 @@ class MapSampleState extends State<MapSample> {
       print('Error adding data to history: $e');
     }
   }
-
+LatLng convertGeoPointToLatLng(GeoPoint geoPoint) {
+  return LatLng(geoPoint.latitude, geoPoint.longitude);
+}
   void _tappedMarker(String docId) {
     if (mounted) {
       setState(() {
@@ -151,6 +166,13 @@ class MapSampleState extends State<MapSample> {
         _markerIndex =
             _markerData.indexWhere((marker) => marker['docId'] == _markerId);
         location = _markerData[_markerIndex]['location'];
+        locroute = convertGeoPointToLatLng( _markerData[_markerIndex]['location']);
+        double distance = calculateDistance(_currentPosition, locroute);
+        routeDistance = distance;
+        routeTime = calculateEstimatedTime(_currentPosition, locroute);
+        print("//////////////////// ${distance}");
+
+        
       });
       getAddress();
       _fetchLatestBinHistory();
@@ -167,6 +189,11 @@ class MapSampleState extends State<MapSample> {
       target: LatLng(37.43296265331129, -122.08832357078792),
       tilt: 59.440717697143555,
       zoom: 19.151926040649414);
+
+
+
+
+  
 
   Future<String> getAddressFromLatLng(GeoPoint location, String area) async {
     try {
@@ -193,8 +220,83 @@ class MapSampleState extends State<MapSample> {
     }
   }
 
- 
+ Future <List<LatLng>> getPolyLinePoints()async{
+  List <LatLng> polylineCoordinates = [];
+  PolylinePoints polylinePoints = PolylinePoints();
+  PolylineResult result = await polylinePoints.getRouteBetweenCoordinates("AIzaSyAzC8P3c9sFtFYnB836O1r7Av0t063b9G4", PointLatLng(_currentPosition.latitude, _currentPosition.longitude), PointLatLng(location!.latitude, location!.longitude),travelMode: TravelMode.driving);
 
+  if (result.points.isNotEmpty) {
+    result.points.forEach((PointLatLng point) { 
+      polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+    });
+    
+  }else{
+    print("////////////////////////// result List is empty");
+  }
+  return polylineCoordinates;
+ }
+
+ Future<List<LatLng>> getRouteCoordinates(LatLng start, LatLng end) async {
+  final response = await http.get(Uri.parse(
+      'http://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson'));
+  if (response.statusCode == 200) {
+    var data = json.decode(response.body);
+    var route = data['routes'][0]['geometry']['coordinates'] as List;
+    return route.map((point) => LatLng(point[1], point[0])).toList();
+  } else {
+    throw Exception('Failed to load route');
+  }
+}
+
+
+double calculateDistance(LatLng start, LatLng end) {
+  const earthRadius = 6371; // Radius of the earth in km
+
+  double dLat = _degreeToRadian(end.latitude - start.latitude);
+  double dLon = _degreeToRadian(end.longitude - start.longitude);
+
+  double a = 
+      sin(dLat / 2) * sin(dLat / 2) +
+      cos(_degreeToRadian(start.latitude)) * cos(_degreeToRadian(end.latitude)) *
+      sin(dLon / 2) * sin(dLon / 2); 
+
+  double c = 2 * atan2(sqrt(a), sqrt(1 - a)); 
+  double distance = earthRadius * c; // Distance in km
+
+  return distance;
+}
+
+double _degreeToRadian(double degree) {
+  return degree * pi / 180;
+}
+
+int calculateEstimatedTime(LatLng start, LatLng end) {
+  // Calculate distance between points using Haversine formula (in kilometers)
+  double distanceInKm = calculateDistance(start, end);
+
+  // Assume average speed in kilometers per hour (km/h)
+  double averageSpeedKmh = 35; // 60 km/h
+
+  // Calculate estimated time in hours
+  double estimatedTimeHours = distanceInKm / averageSpeedKmh;
+
+  // Convert hours to minutes and round to nearest integer
+  int estimatedTimeMinutes = (estimatedTimeHours * 60).round();
+
+  return estimatedTimeMinutes;
+}
+
+  Future<void> _getRoute() async {
+    List<LatLng> route = await getRouteCoordinates(_currentPosition, locroute as LatLng);
+    setState(() {
+      _polylines.add(Polyline(
+        polylineId: PolylineId('route'),
+        points: route,
+        color: Colors.blue,
+        width: 5,
+      ));
+    });
+  }
   Future<void> _fetchLatestBinHistory() async {
     try {
       QuerySnapshot querySnapshot = await _firestore
@@ -233,6 +335,61 @@ class MapSampleState extends State<MapSample> {
     }
   }
 
+Future<void> _getCurrentLocation() async {
+  bool serciveEnabled;
+  LocationPermission permission;
+
+  serciveEnabled = await Geolocator.isLocationServiceEnabled();
+
+  if(!serciveEnabled){
+    return Future.error("Location service are disabled");
+  }
+
+  permission = await Geolocator.checkPermission();
+  if(permission == LocationPermission.denied){
+    permission = await Geolocator.requestPermission();
+    if(permission == LocationPermission.denied){
+      return Future.error("Location Permissions are denied");
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    return Future.error("Location permissions are permanently denied, we cannot request permissions.");
+    
+  }
+
+  Position position = await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.high
+  );
+  setState(() {
+    _currentPosition = LatLng(position.latitude, position.longitude);
+      _markers.add(
+     Marker(
+              markerId: MarkerId('CurrnetLocation'),
+              position: LatLng(position.latitude, position.longitude),
+            ),
+
+  );
+    print("///////////////////////////////// ${position.latitude}\n ${position.longitude}");
+  });
+  GeoPoint locationCurrent = GeoPoint(position.latitude, position.longitude);
+  String current = await getAddressFromLatLng(locationCurrent, "name");
+  print("//////////////////////////////////// Current = ${current}\n");
+
+  _cameraToPosition(_currentPosition);
+
+  print(_markers.length);
+  controller?.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: _currentPosition,zoom: 8)));
+}
+
+Future<void> _cameraToPosition(LatLng pos) async {
+  final GoogleMapController controller = await _controller.future;
+  CameraPosition _newCameraPosition = CameraPosition(target: pos,
+  zoom: 8);
+
+  await controller.animateCamera(CameraUpdate.newCameraPosition(_newCameraPosition));
+
+}
  @override
 void initState() {
   super.initState();
@@ -325,11 +482,14 @@ void initState() {
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: _kGooglePlex,
+            initialCameraPosition: CameraPosition(target: _currentPosition,zoom: 8),
             markers: Set<Marker>.of(_markers),
-            myLocationEnabled: false,
+            polylines: _polylines,
+            myLocationEnabled: true,
             mapType: MapType.normal,
             onMapCreated: (GoogleMapController controller) {
+              controller = controller;
+              _getCurrentLocation();
               _controller.complete(controller);
             },
           ),
@@ -368,21 +528,21 @@ void initState() {
                                 children: [
                                   const Text("Recycling Point",style: TextStyle(
                                     color: AppColors.primary,
-                                    fontSize: 18,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                   ),),
                                   Row(
                                     children: [
                                       const Text("Status: ",style: TextStyle(
                                         color: Color.fromARGB(255, 110, 108, 108),
-                                        fontSize: 18, 
+                                        fontSize: 14, 
                                        fontWeight: FontWeight.bold
 
                                        ),),
                                       Text(_markerData[_markerIndex]['status'].toString().toLowerCase() == 'full'?'Full':'Empty',style: TextStyle(
                                         color: _markerData[_markerIndex]['status'].toString().toLowerCase() == 'full'? AppColors.red : AppColors.green,
                                         //fontWeight: FontWeight.bold,
-                                        fontSize: 20,
+                                        fontSize: 14,
                                       ),)
                                     ],
                                   ),
@@ -430,16 +590,16 @@ void initState() {
                                     children: [
                                      Padding(
                                        padding: EdgeInsets.only(left: MediaQuery.of(context).size.width*0.03),
-                                       child: const Text("3.5",style: TextStyle(
+                                       child:  Text(routeDistance.toStringAsPrecision(3),style: const TextStyle(
                                         color: AppColors.black,
-                                        fontSize: 20,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                                                          ),),
                           
                                      ),
                                      const Text("Distance", style: TextStyle(
                                       color: AppColors.lineColors,
-                                      fontSize: 16,
+                                      fontSize: 14,
                           
                                      ),)
                                    ],)
@@ -453,7 +613,7 @@ void initState() {
                           padding:  EdgeInsets.only(left: MediaQuery.of(context).size.width*0.03,right: MediaQuery.of(context).size.width*0.045),
                           child: Container(
                             height: MediaQuery.of(context).size.height*0.08,
-                            width: MediaQuery.of(context).size.width*0.43,
+                            width: MediaQuery.of(context).size.width*0.41,
                             decoration: BoxDecoration(
                               borderRadius:BorderRadius.circular(5),
                               border: Border.all(
@@ -465,26 +625,26 @@ void initState() {
                                 padding:  EdgeInsets.only(left: MediaQuery.of(context).size.width*0.03),
                                 child: Row(children: [
                                    Image.asset("assets/images/clock.png",
-                                   height: MediaQuery.of(context).size.height*0.065,
-                                   width: MediaQuery.of(context).size.width*0.065,),
+                                   height: MediaQuery.of(context).size.height*0.05,
+                                   width: MediaQuery.of(context).size.width*0.05,),
                                    Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                      Padding(
-                                       padding: EdgeInsets.only(left: MediaQuery.of(context).size.width*0.03),
-                                       child: const Text("5 min",style: TextStyle(
+                                       padding: EdgeInsets.only(left: MediaQuery.of(context).size.width*0.025),
+                                       child:  Text(routeTime.toString() + "min",style: const TextStyle(
                                         color: AppColors.black,
-                                        fontSize: 20,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                                                          ),),
                           
                                      ),
                                      Padding(
-                                       padding:EdgeInsets.only(left: MediaQuery.of(context).size.width*0.03),
+                                       padding:EdgeInsets.only(left: MediaQuery.of(context).size.width*0.015),
                                        child: const Text("Estimated Time", style: TextStyle(
                                         color: AppColors.lineColors,
-                                        fontSize: 16,
+                                        fontSize: 12,
                                                                  
                                        ),),
                                      ),
@@ -511,11 +671,11 @@ void initState() {
                           ),
                           child: Row(children: [
                             Icon(Icons.location_on,
-                            size: MediaQuery.of(context).size.height*0.04,
+                            size: MediaQuery.of(context).size.height*0.035,
                             color: AppColors.primary,),
                             Text(addressloc,style: const TextStyle(
                               color: AppColors.black,
-                              fontSize: 16
+                              fontSize: 14
                             ),)
                           ],),
                         
@@ -526,7 +686,7 @@ void initState() {
                           padding:  EdgeInsets.only(left: MediaQuery.of(context).size.width*0.045),
                           child: Container(
                             alignment: Alignment.center,
-                            height: MediaQuery.of(context).size.height*0.08,
+                            height: MediaQuery.of(context).size.height*0.085,
                             width: MediaQuery.of(context).size.width*0.43,
                             decoration: BoxDecoration(
                               borderRadius:BorderRadius.circular(MediaQuery.of(context).size.height*0.08),
@@ -545,7 +705,7 @@ void initState() {
         foregroundColor: MaterialStateProperty.all(Colors.white),     // Text and icon color
         shape: MaterialStateProperty.all(
           RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(MediaQuery.of(context).size.height * 0.08),
+            borderRadius: BorderRadius.circular(MediaQuery.of(context).size.height * 0.07),
           ),
                                 ),
                                 ),
@@ -553,7 +713,7 @@ void initState() {
                                 
                                 child: const Text("Learn More", style: TextStyle(
                                  color: AppColors.green,
-                                 fontSize: 18,
+                                 fontSize: 14,
                                  fontWeight: FontWeight.bold,
                                                           
                                 ),),
@@ -561,52 +721,47 @@ void initState() {
                           
                           ),
                         
-
-                         Padding(
-                          padding:  EdgeInsets.only(left: MediaQuery.of(context).size.width*0.03,right: MediaQuery.of(context).size.width*0.045),
+ Padding(
+                          padding:  EdgeInsets.only(left: MediaQuery.of(context).size.width*0.045),
                           child: Container(
-                            height: MediaQuery.of(context).size.height*0.08,
+                            alignment: Alignment.center,
+                            height: MediaQuery.of(context).size.height*0.085,
                             width: MediaQuery.of(context).size.width*0.43,
                             decoration: BoxDecoration(
-                              borderRadius:BorderRadius.circular(5),
+                              borderRadius:BorderRadius.circular(MediaQuery.of(context).size.height*0.08),
                               border: Border.all(
                                 color: AppColors.primary
                               ) ,
-                              color:  AppColors.green.withOpacity(0.2),
+                              color:  AppColors.white,
                               ),
-                              child: Padding(
-                                padding:  EdgeInsets.only(left: MediaQuery.of(context).size.width*0.03),
-                                child: Row(children: [
-                                   Image.asset("assets/images/clock.png",
-                                   height: MediaQuery.of(context).size.height*0.065,
-                                   width: MediaQuery.of(context).size.width*0.065,),
-                                   Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                     Padding(
-                                       padding: EdgeInsets.only(left: MediaQuery.of(context).size.width*0.03),
-                                       child: const Text("5 min",style: TextStyle(
-                                        color: AppColors.black,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                                                         ),),
-                          
-                                     ),
-                                     Padding(
-                                       padding:EdgeInsets.only(left: MediaQuery.of(context).size.width*0.03),
-                                       child: const Text("Estimated Time", style: TextStyle(
-                                        color: AppColors.lineColors,
-                                        fontSize: 16,
-                                                                 
-                                       ),),
-                                     ),
-                                   ],)
-                                ],),
-                              ),
+                              child: ElevatedButton(
+                                onPressed: (){
+                                //ToDo 
+                                _getRoute();
+
+                                },
+                                style:ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(AppColors.white),  // Background color
+        foregroundColor: MaterialStateProperty.all(Colors.white),     // Text and icon color
+        shape: MaterialStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(MediaQuery.of(context).size.height * 0.07),
+          ),
+                                ),
+                                ),
+
+                                
+                                child: Container(
+                                  child: const Text("Navigate", style: TextStyle(
+                                   color: AppColors.green,
+                                   fontSize: 14,
+                                   fontWeight: FontWeight.bold,
+                                                            
+                                  ),),
+                                ),
+                              ),),
                           
                           ),
-                        )
                       ],),
 
                      
