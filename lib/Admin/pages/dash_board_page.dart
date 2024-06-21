@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recyclear/Admin/pages/bin_info_card.dart';
 import 'package:recyclear/Admin/pages/dount_chart.dart';
 import 'package:recyclear/Admin/pages/driver_info_card.dart';
 import 'package:recyclear/Admin/pages/total_waste_chart.dart';
@@ -17,6 +18,7 @@ class DashboardPage extends StatelessWidget {
               const SizedBox(height: 20),
               UserInfoCards(),
               const SizedBox(height: 20),
+              BinInfoCards(),
               TotalWasteChart(),
             ],
           ),
