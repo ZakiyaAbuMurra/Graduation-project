@@ -9,4 +9,5 @@ class AppRoutes {
   static const String map = '/mapSample';
   static const String chat = '/chat';
   static const String bottomNavBarUser = '/bottomnavbaruser'; 
+  static const String driverNavbar = '/bottom-navbar-driver';
 }

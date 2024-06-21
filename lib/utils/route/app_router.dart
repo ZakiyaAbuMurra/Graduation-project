@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/Admin/pages/chat_page.dart';
 import 'package:recyclear/Admin/pages/custom_button_nav_bar.dart';
+import 'package:recyclear/Driver/custom_button_nav_bar_driver.dart';
 import 'package:recyclear/Driver/driver_home.dart';
 import 'package:recyclear/User/custom_button_bav_bar_user.dart';
 import 'package:recyclear/cubits/chat_cubit/chat_cubit.dart';
@@ -37,6 +38,11 @@ class AppRouter {
       case AppRoutes.driverHome:
         return MaterialPageRoute(
           builder: (_) => const driverHome(),
+          settings: settings,
+        );
+         case AppRoutes.driverNavbar:
+        return MaterialPageRoute(
+          builder: (_) => const DriverBottomNavbarUser(),
           settings: settings,
         );
       // case AppRoutes.enableLocation:
