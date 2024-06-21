@@ -5,8 +5,6 @@
   notification services.
 */
 import 'package:flutter/material.dart';
-import 'package:recyclear/services/firestore_services.dart';
-import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/views/widgets/add_bin_form.dart';
 
 class AddBin extends StatefulWidget {

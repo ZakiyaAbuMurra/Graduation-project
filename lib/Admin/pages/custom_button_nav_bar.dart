@@ -14,7 +14,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/pages/login_page.dart';
+import 'package:recyclear/views/pages/notification_page.dart';
 import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomBottomNavbar extends StatefulWidget {
   const CustomBottomNavbar({Key? key}) : super(key: key);
@@ -35,7 +37,6 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   List<Widget> pageList = [
     MapSample(), //TODO :  After fixed the map , replace the correct one
     DashboardPage(),
-
     Store(),
     RequestsPage(),
   ];
@@ -86,7 +87,19 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotificationsScreen(
+                    FirebaseFirestore.instance
+                        .collection('notifications')
+                        .orderBy('timestamp', descending: true)
+                        .snapshots(),
+                  ),
+                ),
+              );
+            },
             icon: const Icon(Icons.notifications),
           ),
         ],

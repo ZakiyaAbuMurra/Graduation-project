@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:recyclear/models/incorrect_location_model.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class ManageIncoorectLocation extends StatelessWidget {
@@ -8,7 +7,7 @@ class ManageIncoorectLocation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('View Incorrect location for bins'),
+        title: const Text('View Incorrect Location for Bins'),
         backgroundColor: AppColors.primary,
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -55,7 +54,7 @@ class ManageIncoorectLocation extends StatelessWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.person,
-                              color: Color.fromRGBO(76, 175, 80, 1), size: 30),
+                              color: Colors.black, size: 30),
                           const SizedBox(width: 10),
                           Text(
                             incorrectLocation.description,
@@ -74,15 +73,27 @@ class ManageIncoorectLocation extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Problem description:',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            incorrectLocation.feedback,
-                            style: const TextStyle(fontSize: 16),
+                          Row(
+                            children: [
+                              const Icon(Icons.description,
+                                  color: Colors.black, size: 24),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'Problem description:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  incorrectLocation.feedback,
+                                  style: const TextStyle(fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -96,4 +107,14 @@ class ManageIncoorectLocation extends StatelessWidget {
       ),
     );
   }
+}
+
+class FaultBins {
+  final String description;
+  final String feedback;
+
+  FaultBins({
+    required this.description,
+    required this.feedback,
+  });
 }

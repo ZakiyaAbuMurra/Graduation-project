@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,9 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:recyclear/services/location_controller.dart';
-import 'package:recyclear/sharedPreferences.dart';
 import 'package:recyclear/utils/app_colors.dart';
-import 'package:image_picker/image_picker.dart';
 
 class NewMap extends StatefulWidget {
   const NewMap({super.key});

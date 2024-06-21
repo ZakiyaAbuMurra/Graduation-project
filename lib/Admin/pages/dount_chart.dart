@@ -13,8 +13,8 @@ class _DonutChartState extends State<DonutChart> {
   Map<String, double> binData = {
     'Half': 0,
     'Not Working': 0,
-    'Empty': 0,
-    'Full': 0,
+    'empty': 0,
+    'full': 0,
   };
   bool isLoading = true;
 
@@ -38,7 +38,6 @@ class _DonutChartState extends State<DonutChart> {
 
       for (var doc in snapshot.docs) {
         String status = doc['status'];
-        print('The status bin -- fetchData :  ${status} ');
         if (data.containsKey(status)) {
           data[status] = data[status]! + 1;
         }
@@ -59,28 +58,35 @@ class _DonutChartState extends State<DonutChart> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 6,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             const Text(
               'Bin Status',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             isLoading
                 ? CircularProgressIndicator()
-                : Container(
-                    height: 200,
-                    child: PieChart(
-                      PieChartData(
-                        sections: _getSections(),
-                        centerSpaceRadius: 40,
-                        sectionsSpace: 2,
+                : Column(
+                    children: [
+                      Container(
+                        height: 250,
+                        child: PieChart(
+                          PieChartData(
+                            sections: _getSections(),
+                            centerSpaceRadius: 50,
+                            sectionsSpace: 4,
+                            startDegreeOffset: -90,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 20),
+                      _buildLegend(),
+                    ],
                   ),
           ],
         ),
@@ -90,30 +96,53 @@ class _DonutChartState extends State<DonutChart> {
 
   List<PieChartSectionData> _getSections() {
     double total = binData.values.fold(0, (sum, value) => sum + value);
-    print('The total number of fetched status bin : ${total} ');
     if (total == 0) {
       return [
         PieChartSectionData(
           color: Colors.grey,
           value: 1,
-          title: 'No Data',
+          title: '',
         ),
       ];
     }
     return binData.entries.map((entry) {
-      double percentage = (entry.value / total) * 100;
       return PieChartSectionData(
         color: _getColor(entry.key),
         value: entry.value,
-        title: '${entry.key} (${percentage.toStringAsFixed(1)}%)',
+        title: '',
+        radius: 60,
       );
     }).toList();
+  }
+
+  Widget _buildLegend() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: binData.entries.map((entry) {
+        double total = binData.values.fold(0, (sum, value) => sum + value);
+        double percentage = (entry.value / total) * 100;
+        return Row(
+          children: [
+            Container(
+              width: 16,
+              height: 16,
+              color: _getColor(entry.key),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '${entry.key} (${percentage.toStringAsFixed(1)}%)',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+          ],
+        );
+      }).toList(),
+    );
   }
 
   Color _getColor(String status) {
     switch (status) {
       case 'Half':
-        return Colors.yellow;
+        return Colors.orange;
       case 'Not Working':
         return Colors.grey;
       case 'empty':

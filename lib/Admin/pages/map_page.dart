@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 
-import 'package:recyclear/models/bin_model.dart'; // Add this line
 
 class MapSample extends StatefulWidget {
   const MapSample({super.key});

@@ -478,7 +478,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
 
   void _openDropdown() {
     _overlayEntry = _createOverlayEntry();
-    Overlay.of(context)!.insert(_overlayEntry!);
+    Overlay.of(context).insert(_overlayEntry!);
     setState(() {
       _isDropdownOpen = true;
     });
@@ -494,7 +494,6 @@ class _CustomDropdownState extends State<CustomDropdown> {
   OverlayEntry _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     var size = renderBox.size;
-    var offset = renderBox.localToGlobal(Offset.zero);
 
     return OverlayEntry(
       builder: (context) => Positioned(

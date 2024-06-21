@@ -15,7 +15,6 @@ class ViewFeedbackPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream:
             FirebaseFirestore.instance.collection('users_feedback').snapshots(),
-
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -34,7 +33,6 @@ class ViewFeedbackPage extends StatelessWidget {
                   ?.toDate(), // Convert Timestamp to DateTime
             );
           }).toList();
-
 
           return ListView.builder(
             itemCount: feedbackList.length,
@@ -67,7 +65,7 @@ class ViewFeedbackPage extends StatelessWidget {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
-                              color: AppColors.primary,
+                              color: AppColors.black,
                             ),
                           ),
                         ],
