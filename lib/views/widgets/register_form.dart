@@ -30,13 +30,14 @@ class _RegisterFormState extends State<RegisterForm> {
       debugPrint('Email: ${_emailController.text}');
       debugPrint('Password: ${_passwordController.text}');
       await BlocProvider.of<AuthCubit>(context).signUpWithEmailAndPassword(
-        _emailController.text,
-        _passwordController.text,
-        _nameController.text,
-        _phoneController.text,
-        _phototUrlController.text,
-        'user',
-      );
+          _emailController.text,
+          _passwordController.text,
+          _nameController.text,
+          _phoneController.text,
+          _phototUrlController.text,
+          'user',
+          'No area',
+          'No TRuck');
     }
   }
 

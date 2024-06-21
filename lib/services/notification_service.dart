@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:rxdart/rxdart.dart';
 
 class NotificationService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   static final NotificationService _notificationService =
       NotificationService._internal();
 
@@ -17,11 +20,9 @@ class NotificationService {
   NotificationService._internal();
 
   Future<void> initializeNotification() async {
-    // App icon for Android notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('greentriangle');
 
-    // Request permissions for iOS notifications
     final DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
       requestSoundPermission: true,
@@ -29,7 +30,6 @@ class NotificationService {
       requestAlertPermission: true,
     );
 
-    // Combine platform-specific settings
     final InitializationSettings initializationSettings =
         InitializationSettings(
       android: initializationSettingsAndroid,
@@ -42,7 +42,6 @@ class NotificationService {
 
   Future<void> showNotification(
       {int id = 0, String? title, String? body, String? payload}) async {
-    // Define channel settings for Android notifications
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'your_channel_id',
@@ -53,7 +52,6 @@ class NotificationService {
       showWhen: false,
     );
 
-    // Define settings for iOS notifications
     const DarwinNotificationDetails iosPlatformChannelSpecifics =
         DarwinNotificationDetails(
       presentAlert: true,
@@ -61,13 +59,11 @@ class NotificationService {
       presentSound: true,
     );
 
-    // Combine platform-specific details into general notification details
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
       iOS: iosPlatformChannelSpecifics,
     );
 
-    // Show the notification
     await flutterLocalNotificationsPlugin.show(
       id,
       title ?? 'Notification',
@@ -80,6 +76,18 @@ class NotificationService {
   void _handleNotificationResponse(NotificationResponse response) {
     if (response.payload != null) {
       onNotificationClick.add(response.payload);
+    }
+  }
+
+  Future<void> saveNotification(String title, String body) async {
+    try {
+      await _firestore.collection('notifications').add({
+        'title': title,
+        'body': body,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error saving notification: $e');
     }
   }
 }

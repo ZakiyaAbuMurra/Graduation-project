@@ -1,5 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:recyclear/Admin/pages/mange_bins_page.dart';
+import 'package:recyclear/Admin/pages/mange_incorrect_location.dart';
+import 'package:recyclear/Admin/pages/view_apponiment_empty_bin.dart';
+import 'package:recyclear/Admin/pages/view_coupones.dart';
+import 'package:recyclear/Admin/pages/view_faults_in_bin.dart';
+import 'package:recyclear/Admin/pages/view_feedback_page.dart';
 
 import 'package:recyclear/Admin/pages/requested_bin.dart';
 import 'package:recyclear/User/book_appointment_empty_bin.dart';
@@ -62,11 +68,11 @@ class _RequestsPageState extends State<RequestsPage> {
                     icon: Icons.delete_outline,
                     userType: userType,
                     userText: 'Have a bin',
-                    adminText: 'Manage bins',
+                    adminText: 'View requested bins',
                     userButtonLabel: 'Own a bin now!',
                     adminButtonLabel: 'Manage now!',
                     userPage: const RequestBinPage(),
-                    adminPage: const RequestBinPage(),
+                    adminPage: ManageBinsPage(),
                   ),
                 ),
                 Expanded(
@@ -79,9 +85,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     adminButtonLabel: 'View now!',
                     userPage: const SubmitFeedbackPage(),
                     adminPage:
-
-                        const SubmitFeedbackPage(), // Replace with actual admin page
-
+                        ViewFeedbackPage(), // Replace with actual admin page
                   ),
                 ),
               ],
@@ -95,12 +99,12 @@ class _RequestsPageState extends State<RequestsPage> {
                     icon: Icons.report_outlined,
                     userType: userType,
                     userText: 'Fault in the bin',
-                    adminText: 'Manage faults',
+                    adminText: 'View faults in the bins',
                     userButtonLabel: 'Report now!',
                     adminButtonLabel: 'Manage now!',
                     userPage: const FaultInBinPage(),
                     adminPage:
-                        const FaultInBinPage(), // Replace with actual admin page
+                        ViewFaultsBins(), // Replace with actual admin page
                   ),
                 ),
                 Expanded(
@@ -108,12 +112,12 @@ class _RequestsPageState extends State<RequestsPage> {
                     icon: Icons.location_off_outlined,
                     userType: userType,
                     userText: 'Incorrect bin location',
-                    adminText: 'Manage locations',
+                    adminText: 'View incorrect location',
                     userButtonLabel: 'Report now!',
                     adminButtonLabel: 'Manage now!',
                     userPage: const ReportIncorrectBinPage(),
                     adminPage:
-                        const ReportIncorrectBinPage(), // Replace with actual admin page
+                        ManageIncoorectLocation(), // Replace with actual admin page
                   ),
                 ),
               ],
@@ -132,7 +136,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     adminButtonLabel: 'Manage now!',
                     userPage: const CouponsProblemPage(),
                     adminPage:
-                        const CouponsProblemPage(), // Replace with actual admin page
+                        ManageCouponProblems(), // Replace with actual admin page
                   ),
                 ),
                 Expanded(
@@ -145,7 +149,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     adminButtonLabel: 'Manage now!',
                     userPage: const BookAppointmentPage(),
                     adminPage:
-                        const BookAppointmentPage(), // Replace with actual admin page
+                        ManageBinEmptyRequests(), // Replace with actual admin page
                   ),
                 ),
               ],

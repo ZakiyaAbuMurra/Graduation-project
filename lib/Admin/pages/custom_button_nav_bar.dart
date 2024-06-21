@@ -1,19 +1,19 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:recyclear/Admin/pages/NewMap.dart';
 import 'package:recyclear/Admin/pages/add_bin.dart';
 import 'package:recyclear/Admin/pages/create_driver_account.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
+import 'package:recyclear/services/auth_service.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/views/pages/login_page.dart';
+import 'package:recyclear/views/pages/notification_page.dart';
 import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomBottomNavbar extends StatefulWidget {
   const CustomBottomNavbar({Key? key}) : super(key: key);
@@ -28,9 +28,12 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   User? user =
       FirebaseAuth.instance.currentUser; // Get the currently signed-in user
 
-  List<Widget> pageList = const [
-    MapSample(), //TODO :  After fixed the map , replace the correct on
-    DashBoard(),
+  final AuthServices authServices =
+      AuthServicesImpl(); // Instantiate AuthServicesImpl
+
+  List<Widget> pageList = [
+    MapSample(), //TODO :  After fixed the map , replace the correct one
+    DashboardPage(),
     Store(),
     RequestsPage(),
   ];
@@ -81,7 +84,19 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotificationsScreen(
+                    FirebaseFirestore.instance
+                        .collection('notifications')
+                        .orderBy('timestamp', descending: true)
+                        .snapshots(),
+                  ),
+                ),
+              );
+            },
             icon: const Icon(Icons.notifications),
           ),
         ],
@@ -107,9 +122,9 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
         children: [
           Center(
             child: UserAccountsDrawerHeader(
-              accountName: Text(userName ??
+              accountName: Text(user?.displayName ??
                   'Your Name'), // Replace with data fetched from Firestore
-              accountEmail: Text(userEmail ??
+              accountEmail: Text(user?.email ??
                   'email@example.com'), // Replace with data fetched from Firestore
               currentAccountPicture: (userPhotoUrl != null)
                   ? CircleAvatar(
@@ -161,16 +176,15 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
             ListTile(
               leading: const Icon(Icons.exit_to_app),
               title: const Text('Logout'),
-             onTap: () async{
-                final pref = await SharedPreferences.getInstance();
-                await pref.remove('email');
-                await pref.remove('password');
-                await pref.remove('rememberMe');
-                await FirebaseAuth.instance.signOut();
-
-                Navigator.of(context)
-                            .push(MaterialPageRoute(builder:(context)=> const LoginPage() )); 
-                // Handle user logout
+              onTap: () async {
+                Navigator.pop(context); // Close the drawer
+                // await authServices.signOut(); // Sign out the user
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          LoginPage()), // Navigate to login page
+                );
               },
             ),
           ],
@@ -189,7 +203,6 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
               leading: const Icon(Icons.exit_to_app),
               title: const Text('Logout'),
               onTap: () {
-               
                 // Handle user logout
               },
             ),

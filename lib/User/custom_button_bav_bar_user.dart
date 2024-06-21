@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
-import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/User/about_us_page.dart';
 
@@ -14,7 +13,6 @@ import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/views/pages/login_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomBottomNavbarUser extends StatefulWidget {
   const CustomBottomNavbarUser({super.key});
@@ -29,7 +27,6 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
 
   List<Widget> pageList = [
 
-    const MapSample(),
 
     const UserDashBoard(),
     const UserStore(),
@@ -62,14 +59,12 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
   }
 
   Future<void> _logout() async {
-     final pref = await SharedPreferences.getInstance();
-                await pref.remove('email');
-                await pref.remove('password');
-                await pref.remove('rememberMe');
-                await FirebaseAuth.instance.signOut();
-
-                Navigator.of(context)
-                            .push(MaterialPageRoute(builder:(context)=> const LoginPage() )); 
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (Route<dynamic> route) => false,
+    );
   }
 
   @override
@@ -192,11 +187,6 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
         });
       },
       destinations: const <NavigationDestination>[
-         NavigationDestination(
-          icon: Icon(Icons.map),
-          selectedIcon: Icon(Icons.map),
-          label: 'Map',
-        ),
         NavigationDestination(
           icon: Icon(Icons.dashboard_outlined),
           selectedIcon: Icon(Icons.dashboard),

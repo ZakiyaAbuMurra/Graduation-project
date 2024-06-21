@@ -9,35 +9,39 @@ class LoginPage extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      // extendBodyBehindAppBar: true,
       body: Container(
         width: double.infinity,
         child: SafeArea(
           top: false,
           child: SingleChildScrollView(
-            // padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                //  SizedBox(height: size.height * 0.1),
-                Container(
-                  width: double.infinity,
-                  child: Image.asset(
-                    'assets/images/login.png',
-                    fit: BoxFit.fitWidth, // Change this depending on your image
-                  ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 600, // Set a max-width for web
                 ),
-                SizedBox(height: size.height * 0.01),
-                Text(
-                  'Login to your account',
-                  style: Theme.of(context).textTheme.headline5!.copyWith(
-                        fontWeight: FontWeight.bold,
-                        //  color: AppColors.bla,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      child: Image.asset(
+                        'assets/images/login.png',
+                        fit: BoxFit.fitWidth,
                       ),
+                    ),
+                    SizedBox(height: size.height * 0.01),
+                    Text(
+                      'Login to your account',
+                      style:
+                          Theme.of(context).textTheme.headlineLarge!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                    SizedBox(height: size.height * 0.01),
+                    const LoginForm(),
+                  ],
                 ),
-                SizedBox(height: size.height * 0.01),
-                const LoginForm(),
-              ],
+              ),
             ),
           ),
         ),
