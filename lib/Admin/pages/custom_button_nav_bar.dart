@@ -1,7 +1,5 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:recyclear/Admin/pages/NewMap.dart';
 import 'package:recyclear/Admin/pages/add_bin.dart';
 import 'package:recyclear/Admin/pages/create_driver_account.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
@@ -12,7 +10,6 @@ import 'package:recyclear/services/auth_service.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/services/notification_service.dart';
-import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/pages/login_page.dart';
 import 'package:recyclear/views/pages/notification_page.dart';
 import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
@@ -125,9 +122,9 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
         children: [
           Center(
             child: UserAccountsDrawerHeader(
-              accountName: Text(userName ??
+              accountName: Text(user?.displayName ??
                   'Your Name'), // Replace with data fetched from Firestore
-              accountEmail: Text(userEmail ??
+              accountEmail: Text(user?.email ??
                   'email@example.com'), // Replace with data fetched from Firestore
               currentAccountPicture: (userPhotoUrl != null)
                   ? CircleAvatar(

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'auth_state.dart';
 
@@ -100,6 +101,16 @@ class AuthCubit extends Cubit<AuthState> {
       }
     } on FirebaseAuthException catch (e) {
       emit(AuthFailure(e.message!));
+    }
+  }
+
+  Future<bool> rememberMe() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    bool rememberMe = preferences.getBool('rememberMe') ?? false;
+    if (rememberMe && FirebaseAuth.instance.currentUser != null) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

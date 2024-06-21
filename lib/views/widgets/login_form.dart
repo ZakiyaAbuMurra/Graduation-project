@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/cubits/auth_cubit/auth_cubit.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -20,16 +25,38 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _isVisible = true;
   bool isLogin = true;
+  bool _rememberMe = false;
 
   Future<void> login() async {
     if (_formKey.currentState!.validate()) {
       debugPrint('Email: ${_emailController.text}');
       debugPrint('Password: ${_passwordController.text}');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('rememberMe', _rememberMe);
+      if (_rememberMe) {
+        await prefs.setString('email', _emailController.text);
+        await prefs.setString('password', _passwordController.text);
+      } else {
+        await prefs.remove('email');
+        await prefs.remove('password');
+      }
+
       await BlocProvider.of<AuthCubit>(context).signInWithEmailAndPassword(
         _emailController.text,
         _passwordController.text,
       );
     }
+  }
+
+  Future<void> _loadUserPreferences() async {
+    final pref = await SharedPreferences.getInstance();
+    setState(() {
+      _rememberMe = pref.getBool('rememberMe') ?? false;
+      if (_rememberMe) {
+        _emailController.text = pref.getString('email') ?? '';
+        _passwordController.text = pref.getString("password") ?? '';
+      }
+    });
   }
 
   String? validatePassword(String value) {
@@ -51,6 +78,12 @@ class _LoginFormState extends State<LoginForm> {
     } else {
       return 'Please enter a valid email';
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserPreferences();
   }
 
   @override
@@ -148,14 +181,44 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
           if (isLogin)
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: TextButton(
-                onPressed: () {
-                  _showResetPasswordDialog(); // This will open the password reset dialog
-                },
-                child: const Text('Forgot Password?'),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.05),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: _rememberMe,
+                          onChanged: (value) {
+                            setState(() {
+                              _rememberMe = value!;
+                            });
+                          },
+                          checkColor: AppColors.primary,
+                        ),
+                        const Text(
+                          "Remember Me",
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 110, 108, 108),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _showResetPasswordDialog(); // This will open the password reset dialog
+                  },
+                  child: const Text('Forgot Password?'),
+                ),
+              ],
             ),
           const SizedBox(height: 10),
           BlocConsumer<AuthCubit, AuthState>(
