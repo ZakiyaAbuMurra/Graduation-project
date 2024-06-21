@@ -1,42 +1,44 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:recyclear/models/fault_in_bin_model.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
-class ViewFaultsBins extends StatelessWidget {
+class ManageBinEmptyRequests extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('View Faults in Bins'),
+        title: const Text('View Bin Empty Requests'),
         backgroundColor: AppColors.primary,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream:
-            FirebaseFirestore.instance.collection('fault_in_bin').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('bin_empty_requests')
+            .orderBy('timestamp', descending: true)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No Reported Faults in Bins'));
+          if (!snapshot.hasData) {
+            return const Center(child: Text('No Requests Found'));
           }
-
-          var feedbackDocs = snapshot.data!.docs;
-          List<FaultBins> faultBinList = feedbackDocs.map((doc) {
+          var requestDocs = snapshot.data!.docs;
+          List<BinEmptyRequest> binEmptyRequestList = requestDocs.map((doc) {
             var data = doc.data() as Map<String, dynamic>;
-            return FaultBins(
-              description: data['description'] ?? 'No description provided',
-              Country_name: data['Country name'] ?? 'Unknown',
-              Neighborhood_name: data['Neighborhood name'] ?? 'Unknown',
-              phoneNumber: data['phoneNumber'] ?? 'N/A',
+            return BinEmptyRequest(
+              description: data['description'] ?? 'No description',
+              date: data['date'] ?? 'No date',
+              time: data['time'] ?? 'No time',
+              binNumber: data['bin number'] ?? 'No bin number',
+              binLocation: data['bin location'] ?? 'No bin location',
+              userId: data['user_id'] ?? 'Unknown user',
             );
           }).toList();
 
           return ListView.builder(
-            itemCount: faultBinList.length,
+            itemCount: binEmptyRequestList.length,
             itemBuilder: (context, index) {
-              final faultBins = faultBinList[index];
+              final binEmptyRequest = binEmptyRequestList[index];
               return Card(
                 margin: const EdgeInsets.symmetric(
                     vertical: 10.0, horizontal: 15.0),
@@ -52,17 +54,16 @@ class ViewFaultsBins extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.green[50],
                         borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(10.0),
-                        ),
+                            top: Radius.circular(10.0)),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.person,
+                          const Icon(Icons.delete,
                               color: Colors.black, size: 30),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              faultBins.description,
+                              'Bin Number: ${binEmptyRequest.binNumber}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
@@ -86,7 +87,7 @@ class ViewFaultsBins extends StatelessWidget {
                                   color: Colors.black, size: 24),
                               const SizedBox(width: 10),
                               const Text(
-                                'Problem description:',
+                                'Description:',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -95,7 +96,7 @@ class ViewFaultsBins extends StatelessWidget {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  faultBins.description,
+                                  binEmptyRequest.description,
                                   style: const TextStyle(fontSize: 16),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -105,11 +106,11 @@ class ViewFaultsBins extends StatelessWidget {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              const Icon(Icons.public,
+                              const Icon(Icons.location_on,
                                   color: Colors.black, size: 24),
                               const SizedBox(width: 10),
                               const Text(
-                                'Country:',
+                                'Location:',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -118,7 +119,7 @@ class ViewFaultsBins extends StatelessWidget {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  faultBins.Country_name,
+                                  binEmptyRequest.binLocation,
                                   style: const TextStyle(fontSize: 16),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -128,11 +129,11 @@ class ViewFaultsBins extends StatelessWidget {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              const Icon(Icons.location_city,
+                              const Icon(Icons.access_time,
                                   color: Colors.black, size: 24),
                               const SizedBox(width: 10),
                               const Text(
-                                'Neighborhood:',
+                                'Date and Time:',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -141,30 +142,7 @@ class ViewFaultsBins extends StatelessWidget {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  faultBins.Neighborhood_name,
-                                  style: const TextStyle(fontSize: 16),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              const Icon(Icons.phone,
-                                  color: Colors.black, size: 24),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'Phone Number:',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  faultBins.phoneNumber,
+                                  '${binEmptyRequest.date} at ${binEmptyRequest.time}',
                                   style: const TextStyle(fontSize: 16),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -185,16 +163,20 @@ class ViewFaultsBins extends StatelessWidget {
   }
 }
 
-class FaultBins {
+class BinEmptyRequest {
   final String description;
-  final String Country_name;
-  final String Neighborhood_name;
-  final String phoneNumber;
+  final String date;
+  final String time;
+  final String binNumber;
+  final String binLocation;
+  final String userId;
 
-  FaultBins({
+  BinEmptyRequest({
     required this.description,
-    required this.Country_name,
-    required this.Neighborhood_name,
-    required this.phoneNumber,
+    required this.date,
+    required this.time,
+    required this.binNumber,
+    required this.binLocation,
+    required this.userId,
   });
 }

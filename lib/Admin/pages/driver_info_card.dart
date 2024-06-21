@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:recyclear/utils/app_colors.dart';
 
 class UserInfoCards extends StatelessWidget {
   UserInfoCards({Key? key}) : super(key: key);
@@ -44,7 +45,10 @@ class UserInfoCards extends StatelessWidget {
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.white, Colors.blue.shade50],
+                      colors: [
+                        Colors.white,
+                        Color.fromARGB(255, 210, 247, 226)
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -54,7 +58,7 @@ class UserInfoCards extends StatelessWidget {
                         color: Colors.grey.withOpacity(0.2),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
@@ -68,19 +72,19 @@ class UserInfoCards extends StatelessWidget {
                           backgroundImage: info['photoUrl'] != null &&
                                   info['photoUrl'].isNotEmpty
                               ? NetworkImage(info['photoUrl'])
-                              : AssetImage('assets/images/avater.png')
+                              : const AssetImage('assets/images/avater.png')
                                   as ImageProvider,
                         ),
                       ),
-                      SizedBox(height: 10),
-                      Divider(),
+                      const SizedBox(height: 10),
+                      const Divider(),
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             'Name: ',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey.shade700,
+                              color: AppColors.black,
                             ),
                           ),
                           Expanded(
@@ -95,58 +99,58 @@ class UserInfoCards extends StatelessWidget {
                           ),
                         ],
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             'Phone: ',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey.shade700,
+                              color: AppColors.black,
                             ),
                           ),
                           Expanded(
                             child: Text(
                               '${info['phone']}',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
-                                color: Colors.blueGrey.shade900,
+                                color: AppColors.black,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             'Truck: ', // Change 'truck' to 'trucknumber'
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey.shade700,
+                              color: AppColors.black,
                             ),
                           ),
                           Expanded(
                             child: Text(
                               '${info['trucknumber']}', // make sure this matches the field name in Firestore
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
-                                color: Colors.blueGrey.shade900,
+                                color: AppColors.black,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             'Area: ',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey.shade700,
+                              color: AppColors.black,
                             ),
                           ),
                           Expanded(
@@ -171,15 +175,4 @@ class UserInfoCards extends StatelessWidget {
       },
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(
-        title: Text('User Info Cards'),
-      ),
-      body: UserInfoCards(),
-    ),
-  ));
 }

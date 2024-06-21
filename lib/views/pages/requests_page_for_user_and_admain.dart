@@ -2,9 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/mange_bins_page.dart';
 import 'package:recyclear/Admin/pages/mange_incorrect_location.dart';
+import 'package:recyclear/Admin/pages/view_apponiment_empty_bin.dart';
+import 'package:recyclear/Admin/pages/view_coupones.dart';
 import 'package:recyclear/Admin/pages/view_faults_in_bin.dart';
 import 'package:recyclear/Admin/pages/view_feedback_page.dart';
-
 
 import 'package:recyclear/Admin/pages/requested_bin.dart';
 import 'package:recyclear/User/book_appointment_empty_bin.dart';
@@ -72,7 +73,6 @@ class _RequestsPageState extends State<RequestsPage> {
                     adminButtonLabel: 'Manage now!',
                     userPage: const RequestBinPage(),
                     adminPage: ManageBinsPage(),
-
                   ),
                 ),
                 Expanded(
@@ -86,7 +86,6 @@ class _RequestsPageState extends State<RequestsPage> {
                     userPage: const SubmitFeedbackPage(),
                     adminPage:
                         ViewFeedbackPage(), // Replace with actual admin page
-
                   ),
                 ),
               ],
@@ -124,7 +123,6 @@ class _RequestsPageState extends State<RequestsPage> {
               ],
             ),
             const SizedBox(height: 20),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -138,7 +136,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     adminButtonLabel: 'Manage now!',
                     userPage: const CouponsProblemPage(),
                     adminPage:
-                        const CouponsProblemPage(), // Replace with actual admin page
+                        ManageCouponProblems(), // Replace with actual admin page
                   ),
                 ),
                 Expanded(
@@ -151,7 +149,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     adminButtonLabel: 'Manage now!',
                     userPage: const BookAppointmentPage(),
                     adminPage:
-                        const BookAppointmentPage(), // Replace with actual admin page
+                        ManageBinEmptyRequests(), // Replace with actual admin page
                   ),
                 ),
               ],
