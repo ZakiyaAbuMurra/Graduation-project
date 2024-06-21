@@ -4,8 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:recyclear/models/chat_message_model.dart';
 import 'package:recyclear/services/chat_services.dart';
-import 'package:recyclear/services/firestore_services.dart';
-
 part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {

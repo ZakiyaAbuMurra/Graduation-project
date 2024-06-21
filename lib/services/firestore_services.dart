@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:recyclear/models/bin_model.dart';
 import 'package:recyclear/services/notification_service.dart';
 
@@ -8,11 +8,6 @@ class FirestoreService {
   static final instance = FirestoreService._();
 
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
-
-   
-
-
-
 
   Future<void> setData({
     required String path,
@@ -113,6 +108,11 @@ class FirestoreService {
               title: 'Bin Height Alert',
               body: 'The bin at ${bin.location} is now ${bin.height}cm high.',
               payload: 'Bin ID: ${bin.id}',
+            );
+
+            NotificationService().saveNotification(
+              'Bin Height Alert',
+              'The bin at ${bin.location} is now ${bin.height}cm high.',
             );
           }
         }

@@ -62,9 +62,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           title: 'App',
           theme: AppTheme.lightTheme,
-
-          initialRoute: AppRoutes.enableLocation,
-
+        //  initialRoute: AppRoutes.enableLocation,
           onGenerateRoute: AppRouter.onGenerateRoute,
         ));
   }
