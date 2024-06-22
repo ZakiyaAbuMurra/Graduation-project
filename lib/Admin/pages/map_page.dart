@@ -73,6 +73,7 @@ class MapSampleState extends State<MapSample> {
           await FirebaseFirestore.instance.collection('bins').get();
 
       // Save the documents to the list and create markers
+      if(mounted){
       setState(() {
         binInfo = querySnapshot.docs;
 
@@ -101,7 +102,9 @@ class MapSampleState extends State<MapSample> {
             ),
           );
         }
-      });
+      }
+      );
+      }
     } catch (e) {
       print('Error fetching bin locations: $e');
     }
@@ -294,6 +297,7 @@ class MapSampleState extends State<MapSample> {
   Future<void> _getRoute() async {
     List<LatLng> route =
         await getRouteCoordinates(_currentPosition, locroute as LatLng);
+      if(mounted){
     setState(() {
       _polylines.add(Polyline(
         polylineId: PolylineId('route'),
@@ -302,6 +306,7 @@ class MapSampleState extends State<MapSample> {
         width: 5,
       ));
     });
+      }
   }
 
   Future<void> _fetchLatestBinHistory() async {
@@ -367,6 +372,7 @@ class MapSampleState extends State<MapSample> {
 
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
+      if(mounted){
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
       _markers.add(
@@ -378,6 +384,7 @@ class MapSampleState extends State<MapSample> {
       print(
           "///////////////////////////////// ${position.latitude}\n ${position.longitude}");
     });
+      }
     GeoPoint locationCurrent = GeoPoint(position.latitude, position.longitude);
     String current = await getAddressFromLatLng(locationCurrent, "name");
     print("//////////////////////////////////// Current = ${current}\n");
@@ -447,7 +454,8 @@ class MapSampleState extends State<MapSample> {
     _getCurrentLocation();
   }
   void updateUIWithData(Map<dynamic, dynamic> data) {
-    
+   if (!mounted) return;
+    setState(() { 
       _binId = data['binId'] ?? '';
       _date = data['date'] ?? '';
       _fillLevel = data['fill-level'] is int ? (data['fill-level'] as int).toDouble() : data['fill-level'];
@@ -489,7 +497,7 @@ class MapSampleState extends State<MapSample> {
           print("Failed to retrieve bin: $error");
         });
       }
- 
+    });
   }
 
   @override
@@ -628,9 +636,11 @@ class MapSampleState extends State<MapSample> {
                                         ),
                                         IconButton(
                                             onPressed: () {
+                                              if(mounted){
                                               setState(() {
                                                 showCard = false;
                                               });
+                                              }
                                             },
                                             icon: Icon(
                                               Icons.cancel,
