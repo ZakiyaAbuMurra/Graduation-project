@@ -5,6 +5,7 @@ import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/User/about_us_page.dart';
 
 import 'package:recyclear/User/dash_board_page.dart';
+import 'package:recyclear/User/scan_qr_code_page.dart';
 import 'package:recyclear/User/store_page.dart';
 
 import 'package:recyclear/User/term_of_use_page.dart';
@@ -26,11 +27,9 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
   User? user = FirebaseAuth.instance.currentUser;
 
   List<Widget> pageList = [
-
-
     const UserDashBoard(),
     const UserStore(),
-
+    QRCodeScannerView(),
     const RequestsPage(),
   ];
 
@@ -196,6 +195,11 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
           icon: Icon(Icons.store_outlined),
           selectedIcon: Icon(Icons.store),
           label: 'Store',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.scanner_outlined),
+          selectedIcon: Icon(Icons.scanner),
+          label: 'Scanner',
         ),
         NavigationDestination(
           icon: Icon(Icons.announcement_outlined),
