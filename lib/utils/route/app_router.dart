@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/Admin/pages/chat_page.dart';
 import 'package:recyclear/Admin/pages/custom_button_nav_bar.dart';
 import 'package:recyclear/Driver/driver_home.dart';
+import 'package:recyclear/Guest/guest_home.dart';
 import 'package:recyclear/User/custom_button_bav_bar_user.dart';
 import 'package:recyclear/cubits/chat_cubit/chat_cubit.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
@@ -19,6 +20,11 @@ class AppRouter {
           builder: (_) => const LoginPage(),
           settings: settings,
         );
+
+      case AppRoutes.guestHome:
+        return MaterialPageRoute(
+            builder: (_) => GuestHome(), settings: settings);
+
       case AppRoutes.bottomNavbar:
         return MaterialPageRoute(
           builder: (_) => const CustomBottomNavbar(),
@@ -44,7 +50,7 @@ class AppRouter {
       //     builder: (_) => const EnableLocation(),
       //     settings: settings,
       //   );
-     
+
       case AppRoutes.userHome:
         return MaterialPageRoute(
           builder: (_) => const RequestsPage(),

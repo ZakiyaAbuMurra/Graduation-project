@@ -15,6 +15,7 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
   Barcode? result;
   QRViewController? controller;
   bool isProcessing = false; // Flag to prevent multiple increments
+  DateTime? lastScanTime; // To keep track of the last successful scan time
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +85,7 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
       } catch (e) {
         print('Error processing scanned data: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-         const SnackBar(content: Text('Error processing scanned data')),
+          const SnackBar(content: Text('Error processing scanned data')),
         );
         setState(() {
           isProcessing = false; // Reset the flag on error
@@ -111,21 +112,32 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
 
         // Check if the time difference is within the error margin (e.g., 2 minutes)
         if (currentTime.difference(binTime).inMinutes.abs() <= 2) {
-          await _incrementUserPoints();
+          if (lastScanTime == null ||
+              currentTime.difference(lastScanTime!).inMinutes.abs() > 2) {
+            await _incrementUserPoints();
+            lastScanTime = currentTime; // Update last scan time
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content:
+                      Text('You can only scan once within the error margin.')),
+            );
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Time difference is more than 2 minutes.')),
+            const SnackBar(
+                content: Text('Time difference is more than 5 minutes.')),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-         const  SnackBar(content: Text('No history found for this bin.')),
+          const SnackBar(content: Text('No history found for this bin.')),
         );
       }
     } catch (e) {
       print('Error retrieving bin history: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-       const SnackBar(content: Text('Error retrieving bin history.')),
+        const SnackBar(content: Text('Error retrieving bin history.')),
       );
     }
   }
