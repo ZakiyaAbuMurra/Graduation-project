@@ -1,68 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:recyclear/Admin/pages/dash_board_page.dart';
-import 'package:recyclear/Admin/pages/edit_profile.dart';
-import 'package:recyclear/Admin/pages/store_page.dart';
+import 'package:recyclear/Guest/requests_page_for_guest.dart';
 import 'package:recyclear/User/about_us_page.dart';
-
 import 'package:recyclear/User/dash_board_page.dart';
 import 'package:recyclear/User/scan_qr_code_page.dart';
 import 'package:recyclear/User/store_page.dart';
-
 import 'package:recyclear/User/term_of_use_page.dart';
 import 'package:recyclear/utils/app_colors.dart';
-import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
-import 'package:recyclear/services/firestore_services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/views/pages/login_page.dart';
+import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 
-class CustomBottomNavbarUser extends StatefulWidget {
-  const CustomBottomNavbarUser({super.key});
+class GuestBottomNavbar extends StatefulWidget {
+  const GuestBottomNavbar({super.key});
 
   @override
-  State<CustomBottomNavbarUser> createState() => _CustomBottomNavbarUserState();
+  State<GuestBottomNavbar> createState() => _GuestBottomNavbarState();
 }
 
-class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
+class _GuestBottomNavbarState extends State<GuestBottomNavbar> {
   int currentPageIndex = 0;
-  User? user = FirebaseAuth.instance.currentUser;
 
   List<Widget> pageList = [
     const UserDashBoard(),
     const UserStore(),
-    QRCodeScannerView(),
-    const RequestsPage(),
+    QRCodeScannerView(), // Placeholder for Scanner page
+    const RequestsPageForGuest(), // Using the same page but with restrictions
   ];
 
-  String? userName;
-  String? userEmail;
-
-  @override
-  void initState() {
-    super.initState();
-    if (user != null) {
-      _loadUserData();
-    }
-  }
-
-  Future<void> _loadUserData() async {
-    // Use the FirestoreService to get the user's data
-    final userData = await FirestoreService.instance.getDocument(
-      path: 'users/${user!.uid}', // Adjust the path to your users collection
-      builder: (data, documentID) => data,
-    );
-
-    setState(() {
-      userName = userData['name'] as String?;
-      userEmail = userData['email'] as String?;
-    });
-  }
-
-  Future<void> _logout() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-      (Route<dynamic> route) => false,
+  void _showLoginPrompt(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Restricted Feature'),
+          content:
+              const Text('Please log in or sign up to access this feature.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Log In / Sign Up'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -84,7 +75,10 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
       ),
       drawer: buildDrawer(),
       bottomNavigationBar: buildBottomNavigationBar(),
-      body: pageList[currentPageIndex],
+      body: IndexedStack(
+        index: currentPageIndex,
+        children: pageList,
+      ),
     );
   }
 
@@ -96,18 +90,18 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
           Container(
             color: AppColors.primary,
             padding: const EdgeInsets.only(top: 40.0, bottom: 20.0),
-            child: ListTile(
+            child: const ListTile(
               title: Text(
-                userName ?? 'Your Name',
-                style: const TextStyle(
+                'Guest User',
+                style: TextStyle(
                   color: AppColors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),
               ),
               subtitle: Text(
-                userEmail ?? 'email@example.com',
-                style: const TextStyle(
+                'Hello Guest',
+                style: TextStyle(
                   color: AppColors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -126,24 +120,13 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
             title: Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'Welcome to Recyclear App! Here you can track your recycling progress, and manage your recycling activities efficiently. Earn points for recycling and redeem coupons at your favorite stores!. Let’s make the world a greener place together!',
+                'Welcome to Recyclear App! As a guest, you can browse the app. Please log in to access all features.',
                 textAlign: TextAlign.justify,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.account_circle),
-            title: const Text('Profile'),
-            onTap: () {
-              Navigator.pop(context); // Close the drawer
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const EditProfile()),
-              );
-            },
           ),
           ListTile(
             leading: const Icon(Icons.info),
@@ -169,8 +152,14 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
           ),
           ListTile(
             leading: const Icon(Icons.exit_to_app),
-            title: const Text('Logout'),
-            onTap: _logout,
+            title: const Text('Login / Sign Up'),
+            onTap: () {
+              Navigator.pop(context); // Close the drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
           ),
         ],
       ),
@@ -181,9 +170,14 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
     return NavigationBar(
       selectedIndex: currentPageIndex,
       onDestinationSelected: (int index) {
-        setState(() {
-          currentPageIndex = index;
-        });
+        if (index == 2) {
+          // Scanner and Requests pages
+          _showLoginPrompt(context);
+        } else {
+          setState(() {
+            currentPageIndex = index;
+          });
+        }
       },
       destinations: const <NavigationDestination>[
         NavigationDestination(
