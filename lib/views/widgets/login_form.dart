@@ -31,15 +31,15 @@ class _LoginFormState extends State<LoginForm> {
     if (_formKey.currentState!.validate()) {
       debugPrint('Email: ${_emailController.text}');
       debugPrint('Password: ${_passwordController.text}');
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('rememberMe', _rememberMe);
-      if (_rememberMe) {
-        await prefs.setString('email', _emailController.text);
-        await prefs.setString('password', _passwordController.text);
-      } else {
-        await prefs.remove('email');
-        await prefs.remove('password');
-      }
+      // final prefs = await SharedPreferences.getInstance();
+      // await prefs.setBool('rememberMe', _rememberMe);
+      // if (_rememberMe) {
+      //   await prefs.setString('email', _emailController.text);
+      //   await prefs.setString('password', _passwordController.text);
+      // } else {
+      //   await prefs.remove('email');
+      //   await prefs.remove('password');
+      // }
 
       await BlocProvider.of<AuthCubit>(context).signInWithEmailAndPassword(
         _emailController.text,
@@ -48,16 +48,16 @@ class _LoginFormState extends State<LoginForm> {
     }
   }
 
-  Future<void> _loadUserPreferences() async {
-    final pref = await SharedPreferences.getInstance();
-    setState(() {
-      _rememberMe = pref.getBool('rememberMe') ?? false;
-      if (_rememberMe) {
-        _emailController.text = pref.getString('email') ?? '';
-        _passwordController.text = pref.getString("password") ?? '';
-      }
-    });
-  }
+  // Future<void> _loadUserPreferences() async {
+  //   final pref = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     _rememberMe = pref.getBool('rememberMe') ?? false;
+  //     if (_rememberMe) {
+  //       _emailController.text = pref.getString('email') ?? '';
+  //       _passwordController.text = pref.getString("password") ?? '';
+  //     }
+  //   });
+  // }
 
   String? validatePassword(String value) {
     String pattern =
@@ -83,7 +83,7 @@ class _LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    _loadUserPreferences();
+    // _loadUserPreferences();
   }
 
   @override
