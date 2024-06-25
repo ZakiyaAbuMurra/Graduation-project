@@ -8,7 +8,6 @@ import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -166,26 +165,6 @@ class _LoginFormState extends State<LoginForm> {
                   child: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.05,
                     width: MediaQuery.of(context).size.width * 0.4,
-                    child: Row(
-                      children: [
-                        Checkbox(
-                          value: _rememberMe,
-                          onChanged: (value) {
-                            setState(() {
-                              _rememberMe = value!;
-                            });
-                          },
-                          checkColor: AppColors.primary,
-                        ),
-                        const Text(
-                          "Remember Me",
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 110, 108, 108),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 TextButton(

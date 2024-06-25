@@ -7,7 +7,6 @@ import 'package:recyclear/Admin/pages/view_coupones.dart';
 import 'package:recyclear/Admin/pages/view_faults_in_bin.dart';
 import 'package:recyclear/Admin/pages/view_feedback_page.dart';
 
-import 'package:recyclear/Admin/pages/requested_bin.dart';
 import 'package:recyclear/User/book_appointment_empty_bin.dart';
 
 import 'package:recyclear/User/coupons_problem_page.dart';

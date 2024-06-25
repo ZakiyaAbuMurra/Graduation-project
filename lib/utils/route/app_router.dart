@@ -23,7 +23,7 @@ class AppRouter {
 
       case AppRoutes.guestHome:
         return MaterialPageRoute(
-            builder: (_) => GuestHome(), settings: settings);
+            builder: (_) => GuestBottomNavbar(), settings: settings);
 
       case AppRoutes.bottomNavbar:
         return MaterialPageRoute(
