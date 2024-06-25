@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class RequestBinPage extends StatefulWidget {
@@ -15,15 +16,40 @@ class _RequestBinPageState extends State<RequestBinPage> {
   final _phoneNumberController = TextEditingController();
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
+  final _countryController = TextEditingController();
   final _commentsController = TextEditingController();
 
-  void _submitRequest() {
+  List<String> palestineCountries = [
+    'Jerusalem',
+    'Hebron',
+    'Ramallah',
+    'Birzeit',
+    'Nablus',
+    'Bethlehem',
+    'Jenin',
+    'Tulkarm',
+    'Qalqilya',
+    'Salfit',
+    'Tubas',
+    'Jericho',
+    'Gaza',
+    'Rafah',
+    'Khan Younis',
+    'Deir al-Balah',
+    'Beit Lahia',
+    'Jabalia'
+  ];
+
+  User? get currentUser => FirebaseAuth.instance.currentUser;
+
+  Future<void> _submitRequest() async {
     if (_formKey.currentState!.validate()) {
       // Check if any of the text controllers are empty
       if (_nameController.text.isEmpty ||
           _phoneNumberController.text.isEmpty ||
           _emailController.text.isEmpty ||
-          _addressController.text.isEmpty) {
+          _addressController.text.isEmpty ||
+          _countryController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Please fill all the required fields'),
@@ -33,12 +59,27 @@ class _RequestBinPageState extends State<RequestBinPage> {
         return;
       }
 
+      String userName = 'Anonymous';
+      String userEmail = currentUser?.email ?? 'anonymous@example.com';
+
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid)
+          .get();
+
+      if (userDoc.exists) {
+        userName = userDoc.get('name') ?? 'Anonymous';
+      }
+
       FirebaseFirestore.instance.collection('bin_requests').add({
         'name': _nameController.text,
         'phoneNumber': _phoneNumberController.text,
         'email': _emailController.text,
         'address': _addressController.text,
+        'country': _countryController.text,
         'comments': _commentsController.text,
+        'User name': userName,
+        'User email': userEmail,
         'timestamp': DateTime.now(),
       });
 
@@ -113,7 +154,6 @@ class _RequestBinPageState extends State<RequestBinPage> {
           'assets/images/greenRecyclear.png',
           height: 40,
         ),
-        //backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -147,6 +187,7 @@ class _RequestBinPageState extends State<RequestBinPage> {
                   hintText: 'Enter your full name',
                   fieldName: 'Full Name',
                   border: const OutlineInputBorder(),
+                  iconData: Icons.person,
                 ),
                 const SizedBox(height: 16.0),
                 _buildTextField(
@@ -165,6 +206,7 @@ class _RequestBinPageState extends State<RequestBinPage> {
                     }
                     return null;
                   },
+                  iconData: Icons.phone,
                 ),
                 const SizedBox(height: 16.0),
                 _buildTextField(
@@ -184,13 +226,17 @@ class _RequestBinPageState extends State<RequestBinPage> {
                     }
                     return null;
                   },
+                  iconData: Icons.email,
                 ),
+                const SizedBox(height: 16.0),
+                _buildCountryDropdown(),
                 const SizedBox(height: 16.0),
                 _buildTextField(
                   controller: _addressController,
                   hintText: 'Enter your address',
                   fieldName: 'Address',
                   border: const OutlineInputBorder(),
+                  iconData: Icons.location_on,
                 ),
                 const SizedBox(height: 16.0),
                 _buildTextField(
@@ -200,21 +246,8 @@ class _RequestBinPageState extends State<RequestBinPage> {
                   border: const OutlineInputBorder(),
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                ),
-                const SizedBox(height: 16.0),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.grey.withOpacity(0.9),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+                  iconData: Icons.comment,
+                  optional: true,
                 ),
                 const SizedBox(height: 16.0),
                 ElevatedButton(
@@ -247,6 +280,8 @@ class _RequestBinPageState extends State<RequestBinPage> {
     TextInputType? keyboardType,
     int? maxLines,
     String? Function(String?)? validator,
+    required IconData iconData,
+    bool optional = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,7 +296,73 @@ class _RequestBinPageState extends State<RequestBinPage> {
                 fontSize: 16,
               ),
             ),
-            const Text(
+            if (!optional)
+              const Text(
+                ' *',
+                style: TextStyle(
+                  color: AppColors.red,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8.0),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(8.0),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.grey.withOpacity(0.9),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: const TextStyle(color: AppColors.grey),
+              border: border,
+              focusedBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+              filled: true,
+              fillColor: AppColors.white,
+              prefixIcon: Icon(iconData),
+            ),
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            validator: (value) {
+              if (!optional && (value == null || value.isEmpty)) {
+                return hintText;
+              }
+              return validator != null ? validator(value) : null;
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCountryDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Text(
+              'Country',
+              style: TextStyle(
+                color: AppColors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            Text(
               ' *',
               style: TextStyle(
                 color: AppColors.red,
@@ -285,27 +386,37 @@ class _RequestBinPageState extends State<RequestBinPage> {
               ),
             ],
           ),
-          child: TextFormField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle:
-                  const TextStyle(color: AppColors.grey), // Hint text style
-              border: border,
-              focusedBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: AppColors.primary),
-              ),
+          child: DropdownButtonFormField<String>(
+            value: _countryController.text.isNotEmpty
+                ? _countryController.text
+                : null,
+            icon: const Icon(Icons.arrow_drop_down, color: AppColors.primary),
+            iconSize: 24,
+            elevation: 16,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
               filled: true,
               fillColor: AppColors.white,
             ),
-            keyboardType: keyboardType,
-            maxLines: maxLines,
+            onChanged: (String? newValue) {
+              setState(() {
+                _countryController.text = newValue!;
+              });
+            },
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return ' $hintText';
+                return 'Please select your country';
               }
-              return validator != null ? validator(value) : null;
+              return null;
             },
+            items: palestineCountries
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
           ),
         ),
       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class CouponsProblemPage extends StatefulWidget {
@@ -14,7 +15,9 @@ class _CouponsProblemPageState extends State<CouponsProblemPage> {
   final _phoneNumberController = TextEditingController();
   final _problemDescriptionController = TextEditingController();
 
-  void _submitRequest() {
+  User? get currentUser => FirebaseAuth.instance.currentUser;
+
+  Future<void> _submitRequest() async {
     if (_formKey.currentState!.validate()) {
       // Check if any of the text controllers are empty
       if (_phoneNumberController.text.isEmpty ||
@@ -28,9 +31,23 @@ class _CouponsProblemPageState extends State<CouponsProblemPage> {
         return;
       }
 
+      String userName = 'Anonymous';
+      String userEmail = currentUser?.email ?? 'anonymous@example.com';
+
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid)
+          .get();
+
+      if (userDoc.exists) {
+        userName = userDoc.get('name') ?? 'Anonymous';
+      }
+
       FirebaseFirestore.instance.collection('coupons_problem').add({
         'Contact phone Number': _phoneNumberController.text,
         'Problem description': _problemDescriptionController.text,
+        'User name': userName,
+        'User email': userEmail,
         'timestamp': DateTime.now(),
       });
 
@@ -139,6 +156,7 @@ class _CouponsProblemPageState extends State<CouponsProblemPage> {
                   hintText: 'Enter your phone number',
                   fieldName: 'Contact Phone Number',
                   border: const OutlineInputBorder(),
+                  iconData: Icons.phone,
                   keyboardType: TextInputType.phone,
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -157,6 +175,7 @@ class _CouponsProblemPageState extends State<CouponsProblemPage> {
                   hintText: 'Please describe the issue...',
                   fieldName: 'Problem Description',
                   border: const OutlineInputBorder(),
+                  iconData: Icons.description,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                 ),
@@ -203,6 +222,7 @@ class _CouponsProblemPageState extends State<CouponsProblemPage> {
     required String hintText,
     required String fieldName,
     required OutlineInputBorder border,
+    required IconData iconData,
     TextInputType? keyboardType,
     int? maxLines,
     String? Function(String?)? validator,
@@ -256,6 +276,7 @@ class _CouponsProblemPageState extends State<CouponsProblemPage> {
               ),
               filled: true,
               fillColor: AppColors.white,
+              prefixIcon: Icon(iconData),
             ),
             keyboardType: keyboardType,
             maxLines: maxLines,

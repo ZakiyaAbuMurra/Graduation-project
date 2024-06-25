@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class FaultInBinPage extends StatefulWidget {
@@ -11,15 +12,37 @@ class FaultInBinPage extends StatefulWidget {
 
 class _FaultInBinPageState extends State<FaultInBinPage> {
   final _formKey = GlobalKey<FormState>();
-  final _countrynameController = TextEditingController();
   final _neighborhoodNameController = TextEditingController();
   final _phoneNumberController = TextEditingController();
   final _problemDescriptionController = TextEditingController();
+  final _countryController = TextEditingController();
 
-  void _submitRequest() {
+  List<String> palestineCountries = [
+    'Jerusalem',
+    'Hebron',
+    'Ramallah',
+    'Birzeit',
+    'Nablus',
+    'Bethlehem',
+    'Jenin',
+    'Tulkarm',
+    'Qalqilya',
+    'Salfit',
+    'Tubas',
+    'Jericho',
+    'Gaza',
+    'Rafah',
+    'Khan Younis',
+    'Deir al-Balah',
+    'Beit Lahia',
+    'Jabalia'
+  ];
+
+  User? get currentUser => FirebaseAuth.instance.currentUser;
+
+  Future<void> _submitRequest() async {
     if (_formKey.currentState!.validate()) {
-      // Check if any of the text controllers are empty
-      if (_countrynameController.text.isEmpty ||
+      if (_countryController.text.isEmpty ||
           _neighborhoodNameController.text.isEmpty ||
           _phoneNumberController.text.isEmpty ||
           _problemDescriptionController.text.isEmpty) {
@@ -32,11 +55,25 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
         return;
       }
 
+      String userName = 'Anonymous';
+      String userEmail = currentUser?.email ?? 'anonymous@example.com';
+
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid)
+          .get();
+
+      if (userDoc.exists) {
+        userName = userDoc.get('name') ?? 'Anonymous';
+      }
+
       FirebaseFirestore.instance.collection('fault_in_bin').add({
-        'Country name': _countrynameController.text,
+        'Country name': _countryController.text,
         'Neighborhood name': _neighborhoodNameController.text,
         'Contact phone Number': _phoneNumberController.text,
         'Problem description': _problemDescriptionController.text,
+        'User name': userName,
+        'User email': userEmail,
         'timestamp': DateTime.now(),
       });
 
@@ -111,7 +148,6 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
           'assets/images/greenRecyclear.png',
           height: 40,
         ),
-        //backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -140,18 +176,14 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                _buildTextField(
-                  controller: _countrynameController,
-                  hintText: 'Enter the country name',
-                  fieldName: 'Country Name',
-                  border: const OutlineInputBorder(),
-                ),
+                _buildCountryDropdown(),
                 const SizedBox(height: 16.0),
                 _buildTextField(
                   controller: _neighborhoodNameController,
                   hintText: 'Enter the neighborhood name',
                   fieldName: 'Neighborhood Name',
                   border: const OutlineInputBorder(),
+                  iconData: Icons.location_city,
                 ),
                 const SizedBox(height: 16.0),
                 _buildTextField(
@@ -164,12 +196,12 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
                     if (value!.isEmpty) {
                       return 'Please enter your phone number';
                     }
-                    // Check if the entered value contains only numbers
                     if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
                       return 'Please enter a valid phone number';
                     }
                     return null;
                   },
+                  iconData: Icons.phone,
                 ),
                 const SizedBox(height: 16.0),
                 _buildTextField(
@@ -179,21 +211,7 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
                   border: const OutlineInputBorder(),
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                ),
-                const SizedBox(height: 16.0),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.grey.withOpacity(0.9),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+                  iconData: Icons.description,
                 ),
                 const SizedBox(height: 16.0),
                 ElevatedButton(
@@ -223,6 +241,7 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
     required String hintText,
     required String fieldName,
     required OutlineInputBorder border,
+    required IconData iconData,
     TextInputType? keyboardType,
     int? maxLines,
     String? Function(String?)? validator,
@@ -268,14 +287,14 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
             controller: controller,
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle:
-                  const TextStyle(color: AppColors.grey), // Hint text style
+              hintStyle: const TextStyle(color: AppColors.grey),
               border: border,
               focusedBorder: const OutlineInputBorder(
                 borderSide: BorderSide(color: AppColors.primary),
               ),
               filled: true,
               fillColor: AppColors.white,
+              prefixIcon: Icon(iconData),
             ),
             keyboardType: keyboardType,
             maxLines: maxLines,
@@ -285,6 +304,81 @@ class _FaultInBinPageState extends State<FaultInBinPage> {
               }
               return validator != null ? validator(value) : null;
             },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCountryDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Text(
+              'Country',
+              style: TextStyle(
+                color: AppColors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            Text(
+              ' *',
+              style: TextStyle(
+                color: AppColors.red,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8.0),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(8.0),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.grey.withOpacity(0.9),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: DropdownButtonFormField<String>(
+            value: _countryController.text.isNotEmpty
+                ? _countryController.text
+                : null,
+            icon: const Icon(Icons.arrow_drop_down, color: AppColors.primary),
+            iconSize: 24,
+            elevation: 16,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+              filled: true,
+              fillColor: AppColors.white,
+            ),
+            onChanged: (String? newValue) {
+              setState(() {
+                _countryController.text = newValue!;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select your country';
+              }
+              return null;
+            },
+            items: palestineCountries
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
           ),
         ),
       ],
