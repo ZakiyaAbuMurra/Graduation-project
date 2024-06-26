@@ -71,12 +71,7 @@ class _EditProfileState extends State<EditProfile> {
                         radius: MediaQuery.of(context).size.width *
                             0.165, // Set radius based on device width
                         backgroundColor: AppColors.white,
-                        backgroundImage: photoUrl.isNotEmpty
-                            ? Image.memory(
-                                base64Decode(photoUrl),
-                                fit: BoxFit.cover,
-                              ).image
-                            : null,
+                        backgroundImage: _getImageProvider(photoUrl),
                         child: photoUrl.isEmpty
                             ? const Icon(Icons.add_a_photo)
                             : null,
@@ -165,6 +160,19 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
+  ImageProvider _getImageProvider(String photoUrl) {
+    if (photoUrl.startsWith('http') || photoUrl.startsWith('https')) {
+      return NetworkImage(photoUrl);
+    } else {
+      try {
+        return MemoryImage(base64Decode(photoUrl));
+      } catch (e) {
+        print('Error decoding base64 image: $e');
+        return const AssetImage('assets/images/default_avatar.png');
+      }
+    }
+  }
+
   void _showOptionsDialog() {
     showDialog(
       context: context,
@@ -206,8 +214,8 @@ class _EditProfileState extends State<EditProfile> {
             content: SizedBox(
               width: 300,
               height: 300,
-              child: Image.memory(
-                base64Decode(photoUrl),
+              child: Image(
+                image: _getImageProvider(photoUrl),
                 fit: BoxFit.cover,
               ),
             ),

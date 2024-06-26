@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/cubits/auth_cubit/auth_cubit.dart';
@@ -20,6 +22,7 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _isVisible = true;
   bool isLogin = true;
+  bool _rememberMe = false;
 
   Future<void> login() async {
     if (_formKey.currentState!.validate()) {
@@ -51,6 +54,11 @@ class _LoginFormState extends State<LoginForm> {
     } else {
       return 'Please enter a valid email';
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -148,14 +156,24 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
           if (isLogin)
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: TextButton(
-                onPressed: () {
-                  _showResetPasswordDialog(); // This will open the password reset dialog
-                },
-                child: const Text('Forgot Password?'),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.05),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    width: MediaQuery.of(context).size.width * 0.4,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _showResetPasswordDialog(); // This will open the password reset dialog
+                  },
+                  child: const Text('Forgot Password?'),
+                ),
+              ],
             ),
           const SizedBox(height: 10),
           BlocConsumer<AuthCubit, AuthState>(
@@ -262,7 +280,7 @@ class _LoginFormState extends State<LoginForm> {
                       icon: Image.asset('assets/images/google.png',
                           height:
                               24.0), // Use an appropriate height for your logo
-// Icon for Google
+                      // Icon for Google
                       label: const Text('Google'),
                       onPressed: () {
                         // Google sign-in logic
@@ -307,6 +325,20 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: MainButton(
+                child: Text('Continue as Guest'),
+                bgColor: Colors.grey.withOpacity(0.4),
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, AppRoutes.guestHome);
+                },
+              ),
             ),
           ),
         ],

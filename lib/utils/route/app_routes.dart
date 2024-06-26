@@ -7,5 +7,7 @@ class AppRoutes {
   static const String userHome = '/userHome';
   static const String enableLocation = '/enableLocation';
   static const String map = '/mapSample';
+  static const String chat = '/chat';
   static const String bottomNavBarUser = '/bottomnavbaruser'; 
+   static const guestHome = '/guest-home';
 }
