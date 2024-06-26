@@ -29,6 +29,7 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
   List<Widget> pageList = [
     const UserDashBoard(),
     const UserStore(),
+    QRCodeScannerView(),
     const RequestsPage(),
   ];
 
@@ -188,7 +189,7 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
         NavigationDestination(
           icon: Icon(Icons.dashboard_outlined),
           selectedIcon: Icon(Icons.dashboard),
-          label: 'Blog',
+          label: 'Dashboard',
         ),
         NavigationDestination(
           icon: Icon(Icons.store_outlined),
