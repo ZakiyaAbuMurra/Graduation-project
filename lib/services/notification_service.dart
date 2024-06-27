@@ -79,11 +79,13 @@ class NotificationService {
     }
   }
 
-  Future<void> saveNotification(String title, String body) async {
+  Future<void> saveNotification(String title, String body,String area,String type) async {
     try {
       await _firestore.collection('notifications').add({
         'title': title,
         'body': body,
+        'area':area,
+        'type': type,
         'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {
