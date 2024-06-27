@@ -38,6 +38,8 @@ dependencies:
   carousel_slider: ^4.2.1
   flutter_polyline_points: ^2.0.0
   http: ^1.2.1
+  collection: ^1.16.0
+
 
  
   

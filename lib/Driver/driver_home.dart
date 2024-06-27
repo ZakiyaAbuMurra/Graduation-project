@@ -15,17 +15,17 @@ class _driverHomeState extends State<driverHome> {
   @override
   void initState() {
     super.initState();
-    initApp();
+    //initApp();
   }
 
-    void initApp() async {
-    // Initialize notification service
-    await NotificationService().initializeNotification();
-    debugPrint('Before the start Monitoring Bin');
-    // Start monitoring bin heights
-    FirestoreService.instance.monitorBinHeightAndNotify();
-    debugPrint('After the start Monitoring Bin');
-  } 
+  //   void initApp() async {
+  //   // Initialize notification service
+  //   await NotificationService().initializeNotification();
+  //   debugPrint('Before the start Monitoring Bin');
+  //   // Start monitoring bin heights
+  //   FirestoreService.instance.monitorBinHeightAndNotify();
+  //   debugPrint('After the start Monitoring Bin');
+  // } 
   @override
   Widget build(BuildContext context) {
     return Scaffold(

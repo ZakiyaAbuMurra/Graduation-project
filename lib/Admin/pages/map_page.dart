@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get_rx/get_rx.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,7 +21,10 @@ import 'dart:async';
 
 import 'package:recyclear/models/bin_model.dart';
 import 'package:recyclear/services/auth_service.dart';
+import 'package:recyclear/services/firestore_services.dart';
+import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/utils/app_colors.dart';
+import 'package:recyclear/views/widgets/main_button.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Add this line
 
 class MapSample extends StatefulWidget {
@@ -36,12 +40,15 @@ class MapSampleState extends State<MapSample> {
   GoogleMapController? controller;
   List<DocumentSnapshot<Map<String, dynamic>>> binInfo = [];
   final List<Marker> _markers = [];
+  final List<LatLng> routeList = [];
   final DatabaseReference _databaseReference =
       FirebaseDatabase.instance.reference().child('sensors/data');
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Set<Polyline> _polylines = {};
+  Set<Polyline> _shortestPolylines = {};
   final prefrance = SharedPreferences.getInstance();
   final AuthServices authServices = AuthServicesImpl();
+  
 
   String _date = '';
   double _fillLevel = 0;
@@ -60,11 +67,28 @@ class MapSampleState extends State<MapSample> {
   double routeDistance = 0.0;
   int routeTime = 0;
   String type = '';
+  bool getShortestRoute = false;
+
+  double notifiyHumidity = 0.0;
+  double notifiyTemperature = 0.0;
+  double notifiyLevel = 0.0; 
 
   StreamSubscription<DatabaseEvent>? _databaseSubscription;
   final List<Map<String, dynamic>> _markerData = [];
+  final List<Map<String,dynamic>> _routs = [];
   late Map<String, dynamic> _latestData;
   User? user = FirebaseAuth.instance.currentUser;
+
+
+
+    void initApp() async {
+    // Initialize notification service
+    await NotificationService().initializeNotification();
+    debugPrint('Before the start Monitoring Bin');
+    // Start monitoring bin heights
+    await FirestoreService.instance.monitorBinHeightAndNotify();
+    debugPrint('After the start Monitoring Bin');
+  }
 
   Future<void> fetchBinLocations() async {
     try {
@@ -92,6 +116,12 @@ class MapSampleState extends State<MapSample> {
             'date': bin.data()?['pickDate'],
             'ID': bin.data()?['binID']
           });
+
+          if(bin.data()?['status'].toString().toLowerCase() == 'full' || bin.data()?['status'].toString().toLowerCase() == "failure"){
+            routeList.add(
+              convertGeoPointToLatLng(bin.data()?['location'])
+            );
+          }
 
           GeoPoint geoPoint = bin.data()?['location'];
           _markers.add(
@@ -256,6 +286,53 @@ class MapSampleState extends State<MapSample> {
     }
   }
 
+  List<LatLng> shortestRoutePoints = [];
+ Future<void> _loadRoute() async {
+  
+    
+    List<LatLng> route = await getShortestPath(routeList);
+    setState(() {
+      shortestRoutePoints = route;
+    });
+  }
+  Future<List<LatLng>> getShortestPath(List<LatLng> points) async {
+try{
+    // Insert the current location as the start point
+    points.insert(0, _currentPosition);
+
+    // Convert the list of LatLng to a string format for the OSRM API
+    String coordinates = points.map((point) => '${point.longitude},${point.latitude}').join(';');
+
+    // Construct the OSRM API URL
+    String url = 'http://router.project-osrm.org/route/v1/driving/$coordinates?overview=full&geometries=geojson';
+
+    // Log the URL for debugging
+    print('OSRM API URL: $url');
+
+    // Send a GET request to the OSRM API
+    final response = await http.get(Uri.parse(url));
+
+    // Check if the request was successful
+    if (response.statusCode == 200) {
+      // Parse the response body
+      final data = json.decode(response.body);
+      final route = data['routes'][0]['geometry']['coordinates'];
+
+      // Convert the coordinates to a list of LatLng
+      List<LatLng> routePoints = route.map<LatLng>((coord) => LatLng(coord[1], coord[0])).toList();
+      
+      return routePoints;
+    } else {
+      // Log the response body for debugging
+      print('Failed to load route: ${response.body}');
+      throw Exception('Failed to load route: ${response.reasonPhrase}');
+    }
+  } catch (e) {
+    print('Error getting shortest path: $e');
+    throw Exception('Failed to load route: $e');
+  }
+}
+
   double calculateDistance(LatLng start, LatLng end) {
     const earthRadius = 6371; // Radius of the earth in km
 
@@ -303,6 +380,21 @@ class MapSampleState extends State<MapSample> {
         polylineId: PolylineId('route'),
         points: route,
         color: Colors.blue,
+        width: 5,
+      ));
+    });
+      }
+  }
+
+    Future<void> _shortestpath() async {
+    List<LatLng> route =
+        await getShortestPath(routeList);
+      if(mounted){
+    setState(() {
+      _shortestPolylines.add(Polyline(
+        polylineId: PolylineId('shortesRoute'),
+        points: route,
+        color: Colors.red,
         width: 5,
       ));
     });
@@ -419,83 +511,188 @@ class MapSampleState extends State<MapSample> {
       print("No user in firbase");
     }
   }
+Map<String, dynamic>? binData;
+
+  Future <Map<dynamic,dynamic>?> getNotifiedData(int binID)async{
+    try{
+
+
+      QuerySnapshot snapshot = await _firestore.collection('bins').where('binID',isEqualTo: binID).get();
+
+      if(snapshot.docs.isNotEmpty){
+       binData = snapshot.docs.first.data() as Map<String, dynamic>;
+
+          return binData;
+      } else {
+
+        return null;
+      }
+    }catch(e){
+      print('Error getting data: $e');
+      return null;
+
+    }
+
+  }
+
+  Future <void> getNotifiedData2(int binID) async{
+
+    await getNotifiedData(binID);
+    if (binData!=null){
+      if(mounted){
+        setState(() {
+          
+      notifiyHumidity =  binData?['notifiyHumidity'] is int
+                  ? (binData?['notifiyHumidity'] as int).toDouble()
+                  : binData?['notifiyHumidity']; 
+                 
+      notifiyLevel =  binData?['notifyLevel'] is int
+                  ? (binData?['notifyLevel'] as int).toDouble()
+                  : binData?['notifyLevel'];
+      notifiyTemperature =   binData?['notifiyTemperature'] is int
+                  ? (binData?['notifiyTemperature'] as int).toDouble()
+                  : binData?['notifiyTemperature'];
+      
+
+        
+          
+        });
+    
+      }
+
+    }else{
+      print('bin data is null');
+    }
+
+  }
 
     @override
   void initState() {
     super.initState();
+  
 
+       //  initApp();
+    
+ 
     // Fetch initial data or perform any setup logic
     fetchBinLocations();
+    _getCurrentLocation();
+    print("------------------------------------------------------------- ${_currentPosition}");
 
     // Setup database subscription
-    _databaseSubscription = _databaseReference.onValue.listen((event) {
+ _databaseSubscription = _databaseReference.onValue.listen((event) async {
       try {
         final data = event.snapshot.value as Map<dynamic, dynamic>;
         if (data != null) {
-          // Handle data updates
-          if(mounted){
-            setState(() {
-          updateUIWithData(data);
+          print("Data received:");
+          print("Bin ID: ${data['binId']}");
+          print("Date: ${data['date']}");
+          print("Fill Level: ${data['fill-level']}");
+          print("Humidity: ${data['humidity']}");
+          print("Temperature: ${data['temperature']}");
+          print("Time: ${data['time']}");
 
+             FirebaseFirestore.instance
+                    .collection('bins')
+                    .where('binID', isEqualTo: data['binId'])
+                    .get()
+                    .then((querySnapshot) {
+                  for (var doc in querySnapshot.docs) {
+                    doc.reference.update({'fill-level': data['fill-level'], 
+                    'Humidity':data['humidity'],
+                    'temp':data['temperature'],
+                    'changes':DateTime.now()},
+                    ).then((_) {
+                      print(
+                          "Bin: ${data['binId']} data updated");
+                    }).catchError((error) {
+                      print("Failed to update bin status: $error");
+                    });
+                  }
+                }).catchError((error) {
+                  print("Failed to retrieve bin: $error");
+                });
+
+
+          if (mounted) {
+            await getNotifiedData2(data['binId']);
+            setState(() {
+
+            print(notifiyLevel);
+
+            
+
+
+         
+
+
+              
+
+              _binId = data['binId'];
+              _date = data['date'];
+              _fillLevel = data['fill-level'] is int
+                  ? (data['fill-level'] as int).toDouble()
+                  : data['fill-level'];
+              _humidity = data['humidity'] is int
+                  ? (data['humidity'] as int).toDouble()
+                  : data['humidity'];
+              _temperature = data['temperature'] is int
+                  ? (data['temperature'] as int).toDouble()
+                  : data['temperature'];
+              _time = data['time'];
             });
+
+              addDataToHistory();
           }
-          // Add data to history or perform other actions
-          addDataToHistory();
+
+        
+
+
+          
+              if (data['fill-level'] >= notifiyLevel)  {
+               initApp();
+
+                FirebaseFirestore.instance
+                    .collection('bins')
+                    .where('binID', isEqualTo: data['binId'])
+                    .get()
+                    .then((querySnapshot) {
+                  for (var doc in querySnapshot.docs) {
+                    doc.reference.update({'status': 'full'}).then((_) {
+                      print(
+                          "Bin status updated to 'full' for bin ID: ${data['binId']}");
+                    }).catchError((error) {
+                      print("Failed to update bin status: $error");
+                    });
+                  }
+                }).catchError((error) {
+                  print("Failed to retrieve bin: $error");
+                });
+              } 
+              
+              else {
+                FirebaseFirestore.instance
+                    .collection('bins')
+                    .where('binID', isEqualTo: data['binId'])
+                    .get()
+                    .then((querySnapshot) {
+                  for (var doc in querySnapshot.docs) {
+                    doc.reference.update({'status': 'empty'}).then((_) {
+                      print(
+                          "Bin status updated to 'empty' for bin ID: ${data['binId']}");
+                    }).catchError((error) {
+                      print("Failed to update bin status: $error");
+                    });
+                  }
+                }).catchError((error) {
+                  print("Failed to retrieve bin: $error");
+                });
+              }
         } else {
           print('Received null data from Firebase Realtime Database.');
         }
       } catch (e) {
         print('Error handling data from Firebase Realtime Database: $e');
-      }
-    });
-
-    // Example method calls for your application
-    getType();
-    _getCurrentLocation();
-  }
-  void updateUIWithData(Map<dynamic, dynamic> data) {
-   if (!mounted) return;
-    setState(() { 
-      _binId = data['binId'] ?? '';
-      _date = data['date'] ?? '';
-      _fillLevel = data['fill-level'] is int ? (data['fill-level'] as int).toDouble() : data['fill-level'];
-      _humidity = data['humidity'] is int ? (data['humidity'] as int).toDouble() : data['humidity'];
-      _temperature = data['temperature'] is int ? (data['temperature'] as int).toDouble() : data['temperature'];
-      _time = data['time'] ?? '';
-
-      // Example logic to update Firestore based on fill-level
-      if (data['fill-level'] >= 30) {
-        FirebaseFirestore.instance
-            .collection('bins')
-            .where('binID', isEqualTo: _binId)
-            .get()
-            .then((querySnapshot) {
-          for (var doc in querySnapshot.docs) {
-            doc.reference.update({'status': 'full'}).then((_) {
-              print("Bin status updated to 'full' for bin ID: $_binId");
-            }).catchError((error) {
-              print("Failed to update bin status: $error");
-            });
-          }
-        }).catchError((error) {
-          print("Failed to retrieve bin: $error");
-        });
-      } else {
-        FirebaseFirestore.instance
-            .collection('bins')
-            .where('binID', isEqualTo: _binId)
-            .get()
-            .then((querySnapshot) {
-          for (var doc in querySnapshot.docs) {
-            doc.reference.update({'status': 'empty'}).then((_) {
-              print("Bin status updated to 'empty' for bin ID: $_binId");
-            }).catchError((error) {
-              print("Failed to update bin status: $error");
-            });
-          }
-        }).catchError((error) {
-          print("Failed to retrieve bin: $error");
-        });
       }
     });
   }
@@ -512,17 +709,21 @@ class MapSampleState extends State<MapSample> {
     return Scaffold(
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition:
-                CameraPosition(target: _currentPosition, zoom: 8),
-            markers: Set<Marker>.of(_markers),
-            polylines: _polylines,
-            myLocationEnabled: true,
-            mapType: MapType.normal,
-            onMapCreated: (GoogleMapController controller) {
-              controller = controller;
-              _controller.complete(controller);
-            },
+          Stack(
+            children: [
+              GoogleMap(
+                initialCameraPosition:
+                    CameraPosition(target: _currentPosition, zoom: 8),
+                markers: Set<Marker>.of(_markers),
+                polylines: _polylines,
+                myLocationEnabled: true,
+                mapType: MapType.normal,
+                onMapCreated: (GoogleMapController controller) {
+                  controller = controller;
+                  _controller.complete(controller);
+                },
+              ),
+            ],
           ),
           _markerId != null
               ? Align(
@@ -1015,7 +1216,26 @@ class MapSampleState extends State<MapSample> {
                           ),
                         )
                       : const SizedBox())
-              : const SizedBox()
+              : const SizedBox(),
+          Align(
+            alignment: AlignmentDirectional.bottomCenter,
+            child: Padding(
+              padding:  EdgeInsets.only(bottom: MediaQuery.of(context).size.height*0.02),
+              child: Container(
+                height: MediaQuery.of(context).size.height*0.06,
+                width: MediaQuery.of(context).size.width*0.5,
+                color: AppColors.primary,
+                child: MainButton(title: "Get Routes",onPressed: () {
+                  if(mounted){
+                    setState(() {
+                      _shortestpath();
+                      getShortestRoute = true;
+                    });
+                  }
+                },),
+              ),
+            ),
+          )
         ],
       ),
     );
