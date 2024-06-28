@@ -1,33 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/User/about_us_page.dart';
+
 import 'package:recyclear/User/dash_board_page.dart';
-import 'package:recyclear/User/scan_qr_code_page.dart';
 import 'package:recyclear/User/store_page.dart';
+
 import 'package:recyclear/User/term_of_use_page.dart';
 import 'package:recyclear/utils/app_colors.dart';
+import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/views/pages/login_page.dart';
 
-class CustomBottomNavbarUser extends StatefulWidget {
-  const CustomBottomNavbarUser({super.key});
+class DriverBottomNavbarUser extends StatefulWidget {
+  const DriverBottomNavbarUser({super.key});
 
   @override
-  State<CustomBottomNavbarUser> createState() => _CustomBottomNavbarUserState();
+  State<DriverBottomNavbarUser> createState() => _DriverBottomNavbarUserState();
 }
 
-class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
+class _DriverBottomNavbarUserState extends State<DriverBottomNavbarUser> {
   int currentPageIndex = 0;
   User? user = FirebaseAuth.instance.currentUser;
 
   List<Widget> pageList = [
+
+
     const MapSample(),
+    const UserDashBoard(),
     const UserStore(),
-    QRCodeScannerView(),
+
     const RequestsPage(),
   ];
 
@@ -71,7 +77,9 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+               Navigator.pushReplacementNamed(context, AppRoutes.notification);
+            },
             icon: const Icon(Icons.notifications),
           ),
         ],
@@ -193,11 +201,6 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
           icon: Icon(Icons.store_outlined),
           selectedIcon: Icon(Icons.store),
           label: 'Store',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.scanner_outlined),
-          selectedIcon: Icon(Icons.scanner),
-          label: 'Scanner',
         ),
         NavigationDestination(
           icon: Icon(Icons.announcement_outlined),

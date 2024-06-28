@@ -348,7 +348,7 @@ class _LoginFormState extends State<LoginForm> {
     String routeName;
     switch (userType) {
       case 'driver':
-        routeName = AppRoutes.driverHome; // Update these constants as needed
+        routeName = AppRoutes.bottomNavBardriver; // Update these constants as needed
         break;
       case 'admin':
         routeName = AppRoutes

@@ -21,7 +21,7 @@ dependencies:
   rxdart: ^0.27.7
   timezone: ^0.9.2
   image_picker: ^0.8.1
-  firebase_storage: ^11.7.4
+  firebase_storage: ^11.7.5
   flutter_map: ^6.1.0
   latlong2: ^0.9.1
   firebase_database: ^10.5.5
@@ -32,7 +32,7 @@ dependencies:
   google_maps_flutter: ^2.6.0
   fl_chart: ^0.68.0
   firebase_analytics: ^10.10.7
-
+  collection: ^1.16.0
   shared_preferences: ^2.2.3
   get: ^4.6.6
   carousel_slider: ^4.2.1
@@ -40,8 +40,6 @@ dependencies:
   http: ^1.2.1
   qr_code_scanner: ^1.0.1
 
- 
-  
 dev_dependencies:
   flutter_test:
     sdk: flutter
