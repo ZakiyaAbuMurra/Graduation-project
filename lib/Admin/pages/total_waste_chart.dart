@@ -1,21 +1,58 @@
-
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class TotalWasteChart extends StatelessWidget {
+class TotalWasteChart extends StatefulWidget {
   TotalWasteChart({Key? key}) : super(key: key);
 
-  final List<BarChartGroupData> barChartData = List.generate(12, (index) {
-    return BarChartGroupData(
-      x: index,
-      barRods: [
-        BarChartRodData(toY: index.toDouble() + 5, color: Colors.yellow),
-        BarChartRodData(toY: index.toDouble() + 10, color: Colors.blue),
-        BarChartRodData(toY: index.toDouble() + 15, color: Colors.red),
-        BarChartRodData(toY: index.toDouble() + 20, color: Colors.orange),
-      ],
-    );
-  });
+  @override
+  _TotalWasteChartState createState() => _TotalWasteChartState();
+}
+
+class _TotalWasteChartState extends State<TotalWasteChart> {
+  List<_WasteData> wasteDataList = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchWasteData();
+  }
+
+  Future<void> _fetchWasteData() async {
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('bins').get();
+
+      Map<String, int> wasteData = {
+        'paper': 0,
+        'plastic': 0,
+        'metal': 0,
+        'glass': 0
+      };
+
+      for (var doc in snapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        var material = data['Material'].toString().toLowerCase();
+
+        if (wasteData.containsKey(material)) {
+          wasteData[material] = wasteData[material]! + 1;
+        }
+      }
+
+      setState(() {
+        wasteDataList = [
+          _WasteData('Paper', wasteData['paper']!.toDouble(), Colors.yellow),
+          _WasteData('Plastic', wasteData['plastic']!.toDouble(), Colors.blue),
+          _WasteData('Metal', wasteData['metal']!.toDouble(), Colors.red),
+          _WasteData('Glass', wasteData['glass']!.toDouble(), Colors.green),
+        ];
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching waste data: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,80 +70,41 @@ class TotalWasteChart extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Container(
-              height: 200,
-              child: BarChart(
-                BarChartData(
-                  barGroups: barChartData,
-                  borderData: FlBorderData(show: false),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (double value, TitleMeta meta) {
-                          const style = TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          );
-                          Widget text;
-                          switch (value.toInt()) {
-                            case 0:
-                              text = const Text('JAN', style: style);
-                              break;
-                            case 1:
-                              text = const Text('FEB', style: style);
-                              break;
-                            case 2:
-                              text = const Text('MAR', style: style);
-                              break;
-                            case 3:
-                              text = const Text('APR', style: style);
-                              break;
-                            case 4:
-                              text = const Text('MAY', style: style);
-                              break;
-                            case 5:
-                              text = const Text('JUN', style: style);
-                              break;
-                            case 6:
-                              text = const Text('JUL', style: style);
-                              break;
-                            case 7:
-                              text = const Text('AUG', style: style);
-                              break;
-                            case 8:
-                              text = const Text('SEP', style: style);
-                              break;
-                            case 9:
-                              text = const Text('OCT', style: style);
-                              break;
-                            case 10:
-                              text = const Text('NOV', style: style);
-                              break;
-                            case 11:
-                              text = const Text('DEC', style: style);
-                              break;
-                            default:
-                              text = const Text('', style: style);
-                              break;
-                          }
-                          return SideTitleWidget(
-                            axisSide: meta.axisSide,
-                            child: text,
-                          );
-                        },
+              height: 300,
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : SfCartesianChart(
+                      primaryXAxis: CategoryAxis(),
+                      primaryYAxis: NumericAxis(
+                        title: AxisTitle(text: 'Number of Bins'),
+                        interval: 1,
                       ),
+                      legend: Legend(isVisible: true),
+                      tooltipBehavior: TooltipBehavior(enable: true),
+                      series: <CartesianSeries>[
+                        ColumnSeries<_WasteData, String>(
+                          dataSource: wasteDataList,
+                          xValueMapper: (_WasteData data, _) => data.type,
+                          yValueMapper: (_WasteData data, _) => data.amount,
+                          pointColorMapper: (_WasteData data, _) => data.color,
+                          name: 'Waste',
+                          dataLabelSettings: DataLabelSettings(isVisible: true),
+                          borderRadius: BorderRadius.all(Radius.circular(15)),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-              ),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+class _WasteData {
+  _WasteData(this.type, this.amount, this.color);
+
+  final String type;
+  final double amount;
+  final Color color;
 }

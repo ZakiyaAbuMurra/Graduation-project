@@ -71,21 +71,22 @@ class _DonutChartState extends State<DonutChart> {
             const SizedBox(height: 20),
             isLoading
                 ? CircularProgressIndicator()
-                : Column(
+                : Row(
                     children: [
-                      Container(
-                        height: 250,
-                        child: PieChart(
-                          PieChartData(
-                            sections: _getSections(),
-                            centerSpaceRadius: 50,
-                            sectionsSpace: 4,
-                            startDegreeOffset: -90,
+                      _buildLegend(),
+                      Expanded(
+                        child: Container(
+                          height: 250,
+                          child: PieChart(
+                            PieChartData(
+                              sections: _getSections(),
+                              centerSpaceRadius: 50,
+                              sectionsSpace: 4,
+                              startDegreeOffset: -90,
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      _buildLegend(),
                     ],
                   ),
           ],
@@ -121,19 +122,22 @@ class _DonutChartState extends State<DonutChart> {
       children: binData.entries.map((entry) {
         double total = binData.values.fold(0, (sum, value) => sum + value);
         double percentage = (entry.value / total) * 100;
-        return Row(
-          children: [
-            Container(
-              width: 16,
-              height: 16,
-              color: _getColor(entry.key),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '${entry.key} (${percentage.toStringAsFixed(1)}%)',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-          ],
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2.0),
+          child: Row(
+            children: [
+              Container(
+                width: 16,
+                height: 16,
+                color: _getColor(entry.key),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${entry.key} (${percentage.toStringAsFixed(1)}%)',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         );
       }).toList(),
     );
