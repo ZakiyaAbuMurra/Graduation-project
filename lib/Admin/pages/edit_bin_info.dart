@@ -123,63 +123,149 @@ class _BinDetailsPageState extends State<BinDetailsPage> {
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Form(
                 key: _formKey,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: ListView(
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    if (constraints.maxWidth > 600) {
+                      // Web layout
+                      return Column(
                         children: [
-                          _buildCard('Bin ID', _binIDController, Icons.delete,
-                              TextInputType.number),
-                          _buildCard(
-                              'Latitude',
-                              _latitudeController,
-                              Icons.location_on,
-                              TextInputType.numberWithOptions(decimal: true)),
-                          _buildCard(
-                              'Longitude',
-                              _longitudeController,
-                              Icons.location_on,
-                              TextInputType.numberWithOptions(decimal: true)),
-                          _buildCard(
-                              'Color', _colorController, Icons.color_lens),
-                          _buildCard('Height', _heightController, Icons.height,
-                              TextInputType.numberWithOptions(decimal: true)),
-                          _buildCard(
-                              'Width',
-                              _widthController,
-                              Icons.straighten,
-                              TextInputType.numberWithOptions(decimal: true)),
-                          _buildCard(
-                              'Material', _materialController, Icons.category),
-                          _buildCard(
-                              'Notify Humidity',
-                              _notifyHumidityController,
-                              Icons.water_drop,
-                              TextInputType.numberWithOptions(decimal: true),
-                              false),
-                          _buildCard(
-                              'Notify Temperature',
-                              _notifyTemperatureController,
-                              Icons.thermostat,
-                              TextInputType.numberWithOptions(decimal: true),
-                              false),
-                          _buildCard(
-                              'Notify Level',
-                              _notifyLevelController,
-                              Icons.bar_chart,
-                              TextInputType.numberWithOptions(decimal: true),
-                              false),
-                          _buildCard(
-                              'Assign To', _assignToController, Icons.person),
+                          Expanded(
+                            child: GridView.count(
+                              crossAxisCount: 3,
+                              childAspectRatio: 3,
+                              crossAxisSpacing: 5,
+                              mainAxisSpacing: 4,
+                              children: [
+                                _buildCard('Bin ID', _binIDController,
+                                    Icons.delete, TextInputType.number),
+                                _buildCard(
+                                    'Latitude',
+                                    _latitudeController,
+                                    Icons.location_on,
+                                   const TextInputType.numberWithOptions(
+                                        decimal: true)),
+                                _buildCard(
+                                    'Longitude',
+                                    _longitudeController,
+                                    Icons.location_on,
+                                   const TextInputType.numberWithOptions(
+                                        decimal: true)),
+                                _buildCard('Color', _colorController,
+                                    Icons.color_lens),
+                                _buildCard(
+                                    'Height',
+                                    _heightController,
+                                    Icons.height,
+                                   const TextInputType.numberWithOptions(
+                                        decimal: true)),
+                                _buildCard(
+                                    'Width',
+                                    _widthController,
+                                    Icons.straighten,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true)),
+                                _buildCard('Material', _materialController,
+                                    Icons.category),
+                                _buildCard(
+                                    'Notify Humidity',
+                                    _notifyHumidityController,
+                                    Icons.water_drop,
+                                   const  TextInputType.numberWithOptions(
+                                        decimal: true),
+                                    false),
+                                _buildCard(
+                                    'Notify Temperature',
+                                    _notifyTemperatureController,
+                                    Icons.thermostat,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                    false),
+                                _buildCard(
+                                    'Notify Level',
+                                    _notifyLevelController,
+                                    Icons.bar_chart,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                    false),
+                                _buildCard('Assign To', _assignToController,
+                                    Icons.person),
+                              ],
+                            ),
+                          ),
                         ],
-                      ),
-                    ),
-                  ],
+                      );
+                    } else {
+                      // Mobile layout
+                      return Column(
+                        children: [
+                          Expanded(
+                            child: ListView(
+                              children: [
+                                _buildCard('Bin ID', _binIDController,
+                                    Icons.delete, TextInputType.number),
+                                _buildCard(
+                                    'Latitude',
+                                    _latitudeController,
+                                    Icons.location_on,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true)),
+                                _buildCard(
+                                    'Longitude',
+                                    _longitudeController,
+                                    Icons.location_on,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true)),
+                                _buildCard('Color', _colorController,
+                                    Icons.color_lens),
+                                _buildCard(
+                                    'Height',
+                                    _heightController,
+                                    Icons.height,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true)),
+                                _buildCard(
+                                    'Width',
+                                    _widthController,
+                                    Icons.straighten,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true)),
+                                _buildCard('Material', _materialController,
+                                    Icons.category),
+                                _buildCard(
+                                    'Notify Humidity',
+                                    _notifyHumidityController,
+                                    Icons.water_drop,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                    false),
+                                _buildCard(
+                                    'Notify Temperature',
+                                    _notifyTemperatureController,
+                                    Icons.thermostat,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                    false),
+                                _buildCard(
+                                    'Notify Level',
+                                    _notifyLevelController,
+                                    Icons.bar_chart,
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                    false),
+                                _buildCard('Assign To', _assignToController,
+                                    Icons.person),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                  },
                 ),
               ),
             ),
@@ -194,28 +280,31 @@ class _BinDetailsPageState extends State<BinDetailsPage> {
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
       child: ListTile(
         leading: Icon(icon, color: Colors.black),
-        title: TextFormField(
-          controller: controller,
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: TextStyle(color: Colors.black), // Label color
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
+        title: Center(
+          child: TextFormField(
+            controller: controller,
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              labelText: label,
+              labelStyle: const TextStyle(color: Colors.black), // Label color
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              filled: true,
+              fillColor:
+                  _isEditing && isEditable ? Colors.white : Colors.grey[200],
             ),
-            filled: true,
-            fillColor:
-                _isEditing && isEditable ? Colors.white : Colors.grey[200],
+            style:const TextStyle(
+                color: Colors.black), // Text color inside the TextFormField
+            keyboardType: keyboardType,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter $label';
+              }
+              return null;
+            },
+            enabled: _isEditing && isEditable,
           ),
-          style: TextStyle(
-              color: Colors.black), // Text color inside the TextFormField
-          keyboardType: keyboardType,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter $label';
-            }
-            return null;
-          },
-          enabled: _isEditing && isEditable,
         ),
       ),
     );

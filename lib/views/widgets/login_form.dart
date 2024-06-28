@@ -6,7 +6,7 @@ import 'package:recyclear/cubits/auth_cubit/auth_cubit.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -78,7 +78,7 @@ class _LoginFormState extends State<LoginForm> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 1,
                     blurRadius: 3,
-                    offset: const Offset(0, 2), // changes position of shadow
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -87,8 +87,7 @@ class _LoginFormState extends State<LoginForm> {
                 decoration: InputDecoration(
                   hintText: 'E-mail',
                   prefixIcon: const Icon(Icons.email_outlined),
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 15.0), // Reduces height
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15.0),
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(8.0),
@@ -110,7 +109,7 @@ class _LoginFormState extends State<LoginForm> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 1,
                     blurRadius: 3,
-                    offset: const Offset(0, 2), // Changes position of shadow
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -131,15 +130,13 @@ class _LoginFormState extends State<LoginForm> {
                           : Icons.visibility,
                     ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 1.0), // Adjust the height as needed
+                  contentPadding: const EdgeInsets.symmetric(vertical: 1.0),
                   border: OutlineInputBorder(
-                    borderSide: BorderSide.none, // Hides the default border
-                    borderRadius: BorderRadius.circular(8.0), // Rounded corners
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
                   filled: true,
-                  fillColor: Colors
-                      .white, // The background color to show the shadow effectively
+                  fillColor: Colors.white,
                 ),
                 obscureText: _isVisible,
                 validator: (value) {
@@ -154,24 +151,14 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
           if (isLogin)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: MediaQuery.of(context).size.width * 0.05),
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.05,
-                    width: MediaQuery.of(context).size.width * 0.4,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    _showResetPasswordDialog(); // This will open the password reset dialog
-                  },
-                  child: const Text('Forgot Password?'),
-                ),
-              ],
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  _showResetPasswordDialog();
+                },
+                child: const Text('Forgot Password?'),
+              ),
             ),
           const SizedBox(height: 10),
           BlocConsumer<AuthCubit, AuthState>(
@@ -221,124 +208,71 @@ class _LoginFormState extends State<LoginForm> {
             },
           ),
           const SizedBox(height: 7),
-          Align(
-            alignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: MainButton(
-                child: Text(isLogin ? 'Sign Up' : 'Sign In'),
-                bgColor: AppColors.primary.withOpacity(0.4),
-                onPressed: () {
-                  if (isLogin) {
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.register,
-                    );
-                  } else {
-                    setState(() {
-                      isLogin = !isLogin;
-                    });
-                  }
-                },
+          if (!kIsWeb)
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: MainButton(
+                  child: Text(isLogin ? 'Sign Up' : 'Sign In'),
+                  bgColor: AppColors.primary.withOpacity(0.4),
+                  onPressed: () {
+                    if (isLogin) {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.register,
+                      );
+                    } else {
+                      setState(() {
+                        isLogin = !isLogin;
+                      });
+                    }
+                  },
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Row(
-            children: <Widget>[
-              Expanded(
-                child: Divider(
-                  thickness: 1,
-                  endIndent: 10,
-                ),
-              ),
-              Text(
-                'or connect with',
-                style: TextStyle(
-                  color: AppColors.black,
-                ),
-              ),
-              Expanded(
-                child: Divider(
-                  thickness: 1,
-                  indent: 10,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12), // Spacing between the buttons
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Row(
-              children: [
+          if (!kIsWeb) const SizedBox(height: 16),
+          if (!kIsWeb)
+            const Row(
+              children: <Widget>[
                 Expanded(
-                  child: SizedBox(
-                    width: 100,
-                    child: ElevatedButton.icon(
-                      icon: Image.asset('assets/images/google.png',
-                          height:
-                              24.0), // Use an appropriate height for your logo
-                      // Icon for Google
-                      label: const Text('Google'),
-                      onPressed: () {
-                        // Google sign-in logic
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.white, // Button background color
-                        foregroundColor: Colors.black, // Text and icon color
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          // Make the button rectangular with rounded corners
-                          borderRadius: BorderRadius.circular(
-                              0), // Set the border radius to 0 for rectangular
-                        ), // Removes shadow
-                      ),
-                    ),
+                  child: Divider(
+                    thickness: 1,
+                    endIndent: 10,
                   ),
                 ),
-                const SizedBox(width: 12), // Spacing between the buttons
+                Text(
+                  'or  continue as ',
+                  style: TextStyle(
+                    color: AppColors.black,
+                  ),
+                ),
                 Expanded(
-                  child: SizedBox(
-                    width: 10,
-                    child: ElevatedButton.icon(
-                      icon: const FaIcon(
-                          FontAwesomeIcons.apple), // Icon for Apple
-                      label: const Text('Apple'),
-                      onPressed: () {
-                        // Apple sign-in logic
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.white, // Button background color
-                        foregroundColor: Colors.black, // Text and icon color
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          // Make the button rectangular with rounded corners
-                          borderRadius: BorderRadius.circular(
-                              0), // Set the border radius to 0 for rectangular
-                        ), // Removes shadow
-                      ),
-                    ),
+                  child: Divider(
+                    thickness: 1,
+                    indent: 10,
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: MainButton(
-                child: Text('Continue as Guest'),
-                bgColor: Colors.grey.withOpacity(0.4),
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, AppRoutes.guestHome);
-                },
+          if (!kIsWeb)
+            const SizedBox(height: 12), // Spacing between the buttons
+
+          if (!kIsWeb)
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: MainButton(
+                  child: Text('Guest'),
+                  bgColor: Colors.grey.withOpacity(0.4),
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(
+                        context, AppRoutes.guestHome);
+                  },
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -348,19 +282,16 @@ class _LoginFormState extends State<LoginForm> {
     String routeName;
     switch (userType) {
       case 'driver':
-        routeName = AppRoutes.bottomNavBardriver; // Update these constants as needed
+        routeName = AppRoutes.bottomNavBardriver;
         break;
       case 'admin':
-        routeName = AppRoutes
-            .bottomNavbar; // Make sure this route is defined in AppRouter
+        routeName = AppRoutes.bottomNavbar;
         break;
       case 'user':
-        routeName = AppRoutes
-            .bottomNavBarUser; // Make sure this route is defined in AppRouter
+        routeName = AppRoutes.bottomNavBarUser;
         break;
       default:
-        routeName =
-            AppRoutes.adminHome; // Make sure this route is defined in AppRouter
+        routeName = AppRoutes.adminHome;
         break;
     }
     Navigator.pushReplacementNamed(context, routeName);
@@ -421,8 +352,7 @@ class _LoginFormState extends State<LoginForm> {
                   child: const Text('Cancel',
                       style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors
-                        .primary, // Use the primary color from your AppColors
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
@@ -441,15 +371,14 @@ class _LoginFormState extends State<LoginForm> {
                         return;
                       }
                       await _auth.sendPasswordResetEmail(email: email);
-                      Navigator.of(context)
-                          .pop(); // Close the dialog on success
+                      Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text("Password reset email sent!"),
                             backgroundColor: Colors.green),
                       );
                     } catch (e) {
-                      Navigator.of(context).pop(); // Close the dialog on error
+                      Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                             content: Text("Error: $e"),
@@ -460,8 +389,7 @@ class _LoginFormState extends State<LoginForm> {
                   child: Text('Send Reset Link',
                       style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors
-                        .primary, // Use the primary color from your AppColors
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
