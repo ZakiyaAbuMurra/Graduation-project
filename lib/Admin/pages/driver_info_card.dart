@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:recyclear/Admin/pages/edit_driver_card.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class UserInfoCards extends StatelessWidget {
@@ -17,155 +18,165 @@ class UserInfoCards extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final userInfo = snapshot.data!.docs.map((doc) {
-          return {
-            'name': doc['name'],
-            'phone': doc['phone'],
-            'email': doc['email'],
-            'photoUrl': doc['photoUrl'],
-            'area': doc['area'],
-            'trucknumber': doc[
-                'trucknumber'], // make sure this matches the field name in Firestore
-          };
-        }).toList();
+        final userInfo = snapshot.data!.docs;
 
-        print('++++++++++++++ ${userInfo}');
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: userInfo.map((info) {
-              return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                elevation: 4,
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                child: Container(
-                  width: 250,
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white,
-                        Color.fromARGB(255, 231, 248, 232)
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+            children: userInfo.map((doc) {
+              final info = {
+                'id': doc.id,
+                'name': doc['name'],
+                'phone': doc['phone'],
+                'email': doc['email'],
+                'photoUrl': doc['photoUrl'],
+                'area': doc['area'],
+                'trucknumber': doc['trucknumber'],
+              };
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => EditDriverPage(driver: doc),
                     ),
+                  );
+                },
+                child: Card(
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: CircleAvatar(
-                          backgroundColor: Color.fromARGB(255, 68, 255, 121),
-                          radius: 30,
-                          backgroundImage: info['photoUrl'] != null &&
-                                  info['photoUrl'].isNotEmpty
-                              ? NetworkImage(info['photoUrl'])
-                              : const AssetImage('assets/images/avater.png')
-                                  as ImageProvider,
+                  elevation: 4,
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                  child: Container(
+                    width: 250,
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Colors.white,
+                          Color.fromARGB(255, 231, 248, 232)
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Divider(),
-                      Row(
-                        children: [
-                          const Text(
-                            'Name: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
-                            ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: CircleAvatar(
+                            backgroundColor:
+                                const Color.fromARGB(255, 68, 255, 121),
+                            radius: 30,
+                            backgroundImage: info['photoUrl'] != null &&
+                                    info['photoUrl'].isNotEmpty
+                                ? NetworkImage(info['photoUrl'])
+                                : const AssetImage('assets/images/avater.png')
+                                    as ImageProvider,
                           ),
-                          Expanded(
-                            child: Text(
-                              '${info['name']}',
+                        ),
+                        const SizedBox(height: 10),
+                        const Divider(),
+                        Row(
+                          children: [
+                            const Text(
+                              'Name: ',
                               style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.blueGrey.shade900,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          const Text(
-                            'Phone: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              '${info['phone']}',
-                              style: const TextStyle(
-                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                                 color: AppColors.black,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          const Text(
-                            'Truck: ', // Change 'truck' to 'trucknumber'
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
+                            Expanded(
+                              child: Text(
+                                '${info['name']}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.blueGrey.shade900,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              '${info['trucknumber']}', // make sure this matches the field name in Firestore
-                              style: const TextStyle(
-                                fontSize: 16,
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const Text(
+                              'Phone: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
                                 color: AppColors.black,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          const Text(
-                            'Area: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              '${info['area']}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.blueGrey.shade900,
+                            Expanded(
+                              child: Text(
+                                '${info['phone']}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.black,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const Text(
+                              'Truck: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.black,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                '${info['trucknumber']}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.black,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const Text(
+                              'Area: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.black,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                '${info['area']}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.blueGrey.shade900,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
