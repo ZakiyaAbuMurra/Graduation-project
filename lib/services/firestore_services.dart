@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:recyclear/models/bin_model.dart';
@@ -89,37 +90,88 @@ class FirestoreService {
     return result;
   }
 
-  void monitorBinHeightAndNotify() {
-    collectionStream<BinModel>(
-      path: 'bin info',
-      builder: (data, documentId) {
-        debugPrint('Received data from Firestore: $data');
-        return BinModel.fromMap(data, documentId);
-      },
-    ).listen(
-      (binList) {
-        for (var bin in binList) {
-          debugPrint("-------- the height is : ${bin.height}  ");
-          if (bin.height > 60) {
-            debugPrint(
-                "Showing notification for bin at location: ${bin.location}");
+Future<void> monitorBinHeightAndNotify() async {
 
-            NotificationService().showNotification(
+  collectionStream<BinModel>(
+    path: 'bins',
+    builder: (data, documentId) {
+      debugPrint('Received data from Firestore: $data');
+      return BinModel.fromMap(data, documentId);
+    },
+  ).listen(
+    (binList) {
+      DateTime now = DateTime.now();
+
+    
+      //print("------------------------------------------------------- ${now}");
+
+      for (var bin in binList) {
+
+        Duration difference = now.difference(bin.changes.toDate());
+
+        if(difference.inMinutes < 1){
+        //
+        print( "-------------------------------------------------------- ${binList.length}");
+             if (bin.fillLevel == null || bin.humidity == null || bin.temp == null) {
+          debugPrint("Bin with ID ${bin.id} has a null value.");
+        } else {
+      
+
+          if (bin.fillLevel < bin.notifiyLevel && bin.fillLevel !=0 && bin.fillLevel!=357) {
+            debugPrint("Showing notification for bin at location: ${bin.location}");
+
+                     NotificationService().showNotification(
               title: 'Bin Height Alert',
-              body: 'The bin at ${bin.location} is now ${bin.height}cm high.',
+              body: 'The bin ${bin.binID} now ${bin.fillLevel}cm high.',
               payload: 'Bin ID: ${bin.id}',
             );
 
-            NotificationService().saveNotification(
-              'Bin Height Alert',
-              'The bin at ${bin.location} is now ${bin.height}cm high.',
-            );
           }
+          else if(bin.temp >= bin.notifiTemp){
+                debugPrint("Showing notification for bin at location: ${bin.location}");
+
+            NotificationService().showNotification(
+               title: 'Bin Temperature Alert',
+              body: 'The bin ${bin.binID} is now ${bin.temp} c.',
+              payload: 'Bin ID: ${bin.id}',
+            );
+
+        
+          }
+          else if(bin.humidity >= bin.notifiyHumidity){
+                debugPrint("Showing notification for bin at location: ${bin.location}");
+
+            NotificationService().showNotification(
+              title: 'Bin Humidity Alert',
+              body: 'The bin ${bin.binID} now reached ${bin.humidity} humidity.',
+              payload: 'Bin ID: ${bin.id}',
+            );
+          }else if(bin.fillLevel == 0 || bin.fillLevel == 357){
+            NotificationService().showNotification(
+                title: 'Ultrasonic Faliure Alert',
+              body: 'The bin ${bin.binID} has a Faliure in ultrasonic sensor',
+              payload: 'Bin ID: ${bin.id}',
+            );
+          } else if(bin.humidity == -2000 || bin.temp == -2000){
+             NotificationService().showNotification(
+                title: 'DHT Faliure Alert',
+              body: 'The bin ${bin.binID} has a Faliure in DHT sensor',
+              payload: 'Bin ID: ${bin.id}',
+            );
+          } 
         }
-      },
-      onError: (error) {
-        debugPrint('Error in monitoring bins: $error');
-      },
-    );
-  }
+
+        }
+   
+      }
+    },
+    onError: (error) {
+      debugPrint('Error in monitoring bins: $error');
+    },
+  );
+}
+
+
+
+
 }
