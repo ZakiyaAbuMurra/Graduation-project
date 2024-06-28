@@ -30,7 +30,7 @@ class _DonutChartState extends State<DonutChart> {
           await FirebaseFirestore.instance.collection('bins').get();
 
       Map<String, double> data = {
-        'Half': 0,
+        'not full': 0,
         'Not Working': 0,
         'empty': 0,
         'full': 0,

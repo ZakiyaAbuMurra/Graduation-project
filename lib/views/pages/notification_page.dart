@@ -11,16 +11,16 @@ class NotificationsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Received Notifications'),
+        title: const Text('Received Notifications'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: notificationStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No notifications received yet.'));
+            return const Center(child: Text('No notifications received yet.'));
           }
           var notifications = snapshot.data!.docs;
           return ListView.builder(
@@ -40,12 +40,12 @@ class NotificationsScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.notifications, color: Colors.black, size: 30),
-                          SizedBox(width: 10),
+                          const Icon(Icons.notifications, color: Colors.black, size: 30),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               notification['title'] ?? 'No Title',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
                                 color: Colors.black,
@@ -55,17 +55,17 @@ class NotificationsScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      SizedBox(height: 10),
+                     const  SizedBox(height: 10),
                       Text(
                         notification['body'] ?? 'No Body',
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Text(
                         DateFormat('yyyy-MM-dd – kk:mm').format(
                           (notification['timestamp'] as Timestamp).toDate(),
                         ),
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                        style: const TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                     ],
                   ),

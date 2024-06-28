@@ -5,8 +5,6 @@
   notification services.
 */
 import 'package:flutter/material.dart';
-import 'package:recyclear/services/firestore_services.dart';
-import 'package:recyclear/services/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
