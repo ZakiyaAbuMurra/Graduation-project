@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/views/pages/login_page.dart';
-import 'package:recyclear/views/widgets/contact_type_box.dart';
 
 class RequestsPageForGuest extends StatelessWidget {
   const RequestsPageForGuest({super.key});

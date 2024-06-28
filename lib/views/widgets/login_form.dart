@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recyclear/cubits/auth_cubit/auth_cubit.dart';
@@ -22,7 +21,6 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _isVisible = true;
   bool isLogin = true;
-  bool _rememberMe = false;
 
   Future<void> login() async {
     if (_formKey.currentState!.validate()) {
