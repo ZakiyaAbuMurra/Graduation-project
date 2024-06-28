@@ -1,24 +1,13 @@
-import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/services/location_controller.dart';
 import 'package:recyclear/services/location_service.dart';
-import 'package:recyclear/sharedPreferences.dart';
 import 'package:recyclear/utils/app_colors.dart';
-import 'package:recyclear/utils/route/app_routes.dart';
-import 'package:recyclear/views/pages/home_page.dart';
 import 'package:recyclear/views/pages/login_page.dart';
-import 'package:recyclear/views/widgets/main_button.dart';
 
 class EnableLocation extends StatefulWidget {
   const EnableLocation({super.key});

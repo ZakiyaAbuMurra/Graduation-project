@@ -1,11 +1,9 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +12,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 
-import 'package:recyclear/models/bin_model.dart';
 import 'package:recyclear/services/auth_service.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Add this line
@@ -185,11 +181,6 @@ class MapSampleState extends State<MapSample> {
       _fetchLatestBinHistory();
     }
   }
-
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(31.9014, 35.1999),
-    zoom: 8,
-  );
 
   static const CameraPosition _kLake = CameraPosition(
       bearing: 192.8334901395799,

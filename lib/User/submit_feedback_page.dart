@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:reviews_slider/reviews_slider.dart';
 
@@ -13,12 +14,12 @@ class SubmitFeedbackPage extends StatefulWidget {
 class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
   final _formKey = GlobalKey<FormState>();
   final _feedbackDescriptionController = TextEditingController();
-
+  bool isAnonymous = false;
   String selectedEmoji = '';
+  User? get currentUser => FirebaseAuth.instance.currentUser;
 
-  void _submitRequest() {
+  void _submitRequest() async {
     if (_formKey.currentState!.validate()) {
-      // Check if any of the text controllers are empty
       if (_feedbackDescriptionController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -26,13 +27,37 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
             backgroundColor: AppColors.red,
           ),
         );
-        return; // Stop execution
+        return;
       }
-      FirebaseFirestore.instance.collection('users_feedback').add({
-        'feedback description': _feedbackDescriptionController.text,
+
+      final feedbackData = {
+        'feedback_description': _feedbackDescriptionController.text,
         'timestamp': DateTime.now(),
         'selected_emoji': selectedEmoji,
-      });
+      };
+
+      if (!isAnonymous && currentUser != null) {
+        String userName = 'Anonymous';
+        String userEmail = currentUser!.email ?? 'anonymous@example.com';
+
+        // Fetch the custom name field from Firestore
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser!.uid)
+            .get();
+
+        if (userDoc.exists) {
+          userName = userDoc.get('name') ?? 'Anonymous';
+        }
+
+        print("User Name: $userName");
+        print("User Email: $userEmail");
+
+        feedbackData['name'] = userName;
+        feedbackData['email'] = userEmail;
+      }
+
+      FirebaseFirestore.instance.collection('users_feedback').add(feedbackData);
 
       showDialog(
         context: context,
@@ -140,6 +165,7 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
                   border: const OutlineInputBorder(),
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
+                  iconData: Icons.feedback,
                 ),
                 const SizedBox(height: 16.0),
                 Container(
@@ -188,15 +214,33 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: _submitRequest,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: AppColors.white,
-                    backgroundColor: AppColors.primary,
-                    elevation: 8,
-                    shadowColor: AppColors.grey,
-                  ),
-                  child: const Text('Send Feedback'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _submitRequest,
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: AppColors.white,
+                        backgroundColor: AppColors.primary,
+                        elevation: 8,
+                        shadowColor: AppColors.grey,
+                      ),
+                      child: const Text('Send Feedback'),
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: isAnonymous,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isAnonymous = value ?? false;
+                            });
+                          },
+                        ),
+                        const Text('Send Anonymously'),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -214,6 +258,7 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
     TextInputType? keyboardType,
     int? maxLines,
     String? Function(String?)? validator,
+    required IconData iconData,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,14 +301,14 @@ class _SubmitFeedbackPageState extends State<SubmitFeedbackPage> {
             controller: controller,
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle:
-                  const TextStyle(color: AppColors.grey), // Hint text style
+              hintStyle: const TextStyle(color: AppColors.grey),
               border: border,
               focusedBorder: const OutlineInputBorder(
                 borderSide: BorderSide(color: AppColors.primary),
               ),
               filled: true,
               fillColor: AppColors.white,
+              prefixIcon: Icon(iconData),
             ),
             keyboardType: keyboardType,
             maxLines: maxLines,
