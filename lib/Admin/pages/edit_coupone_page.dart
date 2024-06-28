@@ -17,13 +17,25 @@ class _EditCouponPageState extends State<EditCouponPage> {
   late TextEditingController _discountController;
   late TextEditingController _imageUrlController;
 
+  late String initialCode;
+  late String initialName;
+  late String initialDiscount;
+  late String initialImageUrl;
+
   @override
   void initState() {
     super.initState();
     _codeController = TextEditingController(text: widget.coupon['code']);
     _nameController = TextEditingController(text: widget.coupon['name']);
-    _discountController = TextEditingController(text: widget.coupon['discount'].toString());
-    _imageUrlController = TextEditingController(text: widget.coupon['imageUrl']);
+    _discountController =
+        TextEditingController(text: widget.coupon['discount'].toString());
+    _imageUrlController =
+        TextEditingController(text: widget.coupon['imageUrl']);
+
+    initialCode = widget.coupon['code'];
+    initialName = widget.coupon['name'];
+    initialDiscount = widget.coupon['discount'].toString();
+    initialImageUrl = widget.coupon['imageUrl'];
   }
 
   @override
@@ -35,22 +47,38 @@ class _EditCouponPageState extends State<EditCouponPage> {
     super.dispose();
   }
 
+  bool _hasChanges() {
+    return _codeController.text != initialCode ||
+        _nameController.text != initialName ||
+        _discountController.text != initialDiscount ||
+        _imageUrlController.text != initialImageUrl;
+  }
+
   Future<void> _editCoupon() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        await FirebaseFirestore.instance.collection('coupones').doc(widget.coupon.id).update({
-          'code': _codeController.text,
-          'name': _nameController.text,
-          'discount': int.parse(_discountController.text),
-          'imageUrl': _imageUrlController.text,
-        });
+      if (_hasChanges()) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('coupones')
+              .doc(widget.coupon.id)
+              .update({
+            'code': _codeController.text,
+            'name': _nameController.text,
+            'discount': int.parse(_discountController.text),
+            'imageUrl': _imageUrlController.text,
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Coupon updated successfully')),
+          );
+          Navigator.of(context).pop(); // Navigate back to the previous screen
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update coupon: $e')),
+          );
+        }
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Coupon updated successfully')),
-        );
-        Navigator.of(context).pop(); // Navigate back to the previous screen
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update coupon: $e')),
+          const SnackBar(content: Text('No changes made')),
         );
       }
     }
@@ -138,7 +166,8 @@ class _EditCouponPageState extends State<EditCouponPage> {
               ElevatedButton(
                 onPressed: _editCoupon,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),

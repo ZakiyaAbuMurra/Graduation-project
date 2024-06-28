@@ -5,9 +5,7 @@ import 'package:recyclear/Admin/pages/create_driver_account.dart';
 import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
-import 'package:recyclear/Admin/pages/store_page.dart';
 import 'package:recyclear/Admin/pages/view_store_page.dart';
-import 'package:recyclear/User/store_page.dart';
 import 'package:recyclear/services/auth_service.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -34,10 +32,10 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
       AuthServicesImpl(); // Instantiate AuthServicesImpl
 
   List<Widget> pageList = [
-    MapSample(), //TODO :  After fixed the map , replace the correct one
+    const MapSample(), //TODO :  After fixed the map , replace the correct one
     DashboardPage(),
-    ViewStore(),
-    RequestsPage(),
+    const ViewStore(),
+    const RequestsPage(),
   ];
 
   String? userName;
@@ -53,14 +51,14 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
     }
   }
 
-  // void initApp() async {
-  //   // Initialize notification service
-  //   await NotificationService().initializeNotification();
-  //   debugPrint('Before the start Monitoring Bin');
-  //   // Start monitoring bin heights
-  //   FirestoreService.instance.monitorBinHeightAndNotify();
-  //   debugPrint('After the start Monitoring Bin');
-  // }
+  void initApp() async {
+    // Initialize notification service
+    await NotificationService().initializeNotification();
+    debugPrint('Before the start Monitoring Bin');
+    // Start monitoring bin heights
+    FirestoreService.instance.monitorBinHeightAndNotify();
+    debugPrint('After the start Monitoring Bin');
+  }
 
   Future<void> _loadUserData() async {
     // Use the FirestoreService to get the user's data
