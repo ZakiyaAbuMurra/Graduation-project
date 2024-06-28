@@ -6,6 +6,8 @@ import 'package:recyclear/Admin/pages/dash_board_page.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/Admin/pages/store_page.dart';
+import 'package:recyclear/Admin/pages/view_store_page.dart';
+import 'package:recyclear/User/store_page.dart';
 import 'package:recyclear/services/auth_service.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -34,7 +36,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   List<Widget> pageList = [
     MapSample(), //TODO :  After fixed the map , replace the correct one
     DashboardPage(),
-    Store(),
+    ViewStore(),
     RequestsPage(),
   ];
 
