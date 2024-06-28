@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recyclear/utils/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QRCodeScannerView extends StatefulWidget {
   const QRCodeScannerView({super.key});
@@ -11,6 +13,7 @@ class QRCodeScannerView extends StatefulWidget {
 }
 
 class _QRCodeScannerViewState extends State<QRCodeScannerView> {
+  bool _showDialog = false;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   Barcode? result;
   QRViewController? controller;
@@ -18,7 +21,21 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
   DateTime? lastScanTime; // To keep track of the last successful scan time
 
   @override
+  void initState() {
+    super.initState();
+    _checkFirstTimeUser('QRCodeScannerView');
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_showDialog && WidgetsBinding.instance != null) {
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        _showIntroDialog(context);
+        setState(() {
+          _showDialog = false;
+        });
+      });
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('QR Code Scanner')),
       body: Column(
@@ -89,6 +106,96 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
         );
         setState(() {
           isProcessing = false; // Reset the flag on error
+        });
+      }
+    }
+  }
+
+  void _showIntroDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    'QR Scan Guidelines',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  Image.asset(
+                    'assets/images/qr-scan.gif',
+                    height: 30,
+                    width: 30,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+              const Text(
+                'Welcome to Recyclear App! To earn points, follow these steps:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              const Text(
+                '1. After discarding your recyclables, scan the QR code on the bin within 2 minutes.',
+              ),
+              const SizedBox(height: 8.0),
+              const Text(
+                '2. Ensure the QR code is clearly visible and within the scan area.',
+              ),
+              const SizedBox(height: 8.0),
+              const Text(
+                '3. You will earn points for every successful scan.',
+              ),
+              const SizedBox(height: 16.0),
+              Center(
+                child: Image.asset(
+                  'assets/images/qr.png',
+                  height: 150,
+                  width: 150,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                foregroundColor: AppColors.white,
+                backgroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.grey),
+              ),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _checkFirstTimeUser(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String email = user.email!;
+      String uniqueKey = '$email-$key';
+      bool isFirstTime = prefs.getBool(uniqueKey) ?? true;
+
+      if (isFirstTime) {
+        await prefs.setBool(uniqueKey, false);
+        setState(() {
+          _showDialog = true;
         });
       }
     }

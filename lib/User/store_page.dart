@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -16,6 +17,7 @@ class _UserStoreState extends State<UserStore> {
   int _currentStep = 0;
   int _currentImageIndex = 0;
   bool _showDialog = false;
+  List<Map<String, dynamic>> _coupons = [];
 
   final List<String> _imagePaths = [
     'assets/images/shein.png',
@@ -24,86 +26,48 @@ class _UserStoreState extends State<UserStore> {
     'assets/images/carmelGym.jpg'
   ];
 
-  final List<Map<String, dynamic>> _coupons = [
-    {
-      'name': 'Carmel GYM',
-      'discount': 10,
-      'status': 'Available',
-      'imageUrl': 'assets/images/sGYM1.jpg',
-      'code': 'Carmel123Recyclear',
-      'timestamp': DateTime.now().toIso8601String()
-    },
-    {
-      'name': 'SheGLAM',
-      'discount': 20,
-      'status': 'Available',
-      'imageUrl': 'assets/images/sheglam.jpg',
-      'code': 'SheGlam123Recyclear',
-      'timestamp': DateTime.now().toIso8601String()
-    },
-    {
-      'name': 'Abdeen Elite Home',
-      'discount': 20,
-      'status': 'Available',
-      'imageUrl': 'assets/images/abdeen3.jpg',
-      'code': 'Abdeen123Recyclear1',
-      'timestamp': DateTime.now().toIso8601String()
-    },
-    {
-      'name': 'SHEIN',
-      'discount': 10,
-      'status': 'Available',
-      'imageUrl': 'assets/images/shein1.jpg',
-      'code': 'SHEIN123Recyclear1',
-      'timestamp': DateTime.now().toIso8601String()
-    },
-    {
-      'name': 'Carmel GYM',
-      'discount': 10,
-      'status': 'Available',
-      'imageUrl': 'assets/images/sGYM2.jpg',
-      'code': 'Carmel123Recyclear2',
-      'timestamp': DateTime.now().toIso8601String()
-    },
-    {
-      'name': 'Abdeen Elite Home',
-      'discount': 20,
-      'status': 'Used',
-      'imageUrl': 'assets/images/abdeen2.jpeg',
-      'code': 'Abdeen123Recyclear2',
-      'timestamp': DateTime.now().toIso8601String()
-    },
-    {
-      'name': 'Grand Stores',
-      'discount': 15,
-      'status': 'Expired',
-      'imageUrl': 'assets/images/Grandestore1.jpg',
-      'code': 'Grand123Recyclear',
-      'timestamp': DateTime.now().toIso8601String()
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
-    _checkFirstTimeUser();
-    _loadCouponStatuses();
+    _checkFirstTimeUser('UserStore');
+    _fetchCouponsFromFirestore();
   }
 
-  Future<void> _checkFirstTimeUser() async {
+  Future<void> _checkFirstTimeUser(String key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
       String email = user.email!;
-      bool isFirstTime = prefs.getBool(email) ?? true;
+      String uniqueKey = '$email-$key';
+      bool isFirstTime = prefs.getBool(uniqueKey) ?? true;
 
       if (isFirstTime) {
-        setState(() async {
+        await prefs.setBool(uniqueKey, false);
+        setState(() {
           _showDialog = true;
-          await prefs.setBool(email, false);
         });
       }
+    }
+  }
+
+  Future<void> _fetchCouponsFromFirestore() async {
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('coupones').get();
+      List<Map<String, dynamic>> fetchedCoupons = snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+
+      print('Fetched Coupons: $fetchedCoupons'); // Add this line for debugging
+
+      setState(() {
+        _coupons = fetchedCoupons;
+      });
+
+      _loadCouponStatuses();
+    } catch (e) {
+      print("Error fetching coupons: $e");
     }
   }
 
@@ -285,7 +249,7 @@ class _UserStoreState extends State<UserStore> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset(
+                      Image.network(
                         couponData['imageUrl'],
                         width: 80,
                         height: 80,
@@ -432,7 +396,7 @@ class _UserStoreState extends State<UserStore> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   image: DecorationImage(
-                    image: AssetImage(couponData['imageUrl']),
+                    image: NetworkImage(couponData['imageUrl']),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -450,7 +414,7 @@ class _UserStoreState extends State<UserStore> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text('Discount: ${couponData['discount']}%'),
+                    Text('Discount: ${couponData['discount']}'),
                     Text('Status: ${couponData['status']}'),
                   ],
                 ),
@@ -469,7 +433,12 @@ class _UserStoreState extends State<UserStore> {
     final double imageWidth = mediaQuery.size.width;
 
     if (_showDialog) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _showIntroDialog());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showIntroDialog();
+        setState(() {
+          _showDialog = false;
+        });
+      });
     }
 
     return Scaffold(
