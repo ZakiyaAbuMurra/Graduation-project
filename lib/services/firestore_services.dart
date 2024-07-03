@@ -90,7 +90,8 @@ class FirestoreService {
     return result;
   }
 
-Future<void> monitorBinHeightAndNotify() async {
+Future<void> monitorBinHeightAndNotify(String area) async {
+    print('================= monitorBinHeightAndNotify ${area}');
 
   collectionStream<BinModel>(
     path: 'bins',
@@ -109,7 +110,7 @@ Future<void> monitorBinHeightAndNotify() async {
 
         Duration difference = now.difference(bin.changes.toDate());
 
-        if(difference.inMinutes < 1){
+        if(difference.inMinutes < 1 && bin.area == area){
         //
         print( "-------------------------------------------------------- ${binList.length}");
              if (bin.fillLevel == null || bin.humidity == null || bin.temp == null) {

@@ -18,6 +18,7 @@ import 'dart:async';
 
 import 'package:recyclear/services/auth_service.dart';
 import 'package:recyclear/services/firestore_services.dart';
+import 'package:recyclear/services/general_services.dart';
 import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
@@ -69,8 +70,9 @@ class MapSampleState extends State<MapSample> {
   double routeDistance = 0.0;
   int routeTime = 0;
   String? type;
-  String? driverArea;
+  String driverArea = '';
   bool getShortestRoute = false;
+  String binArea = '';
 
   double notifiyHumidity = 0.0;
   double notifiyTemperature = 0.0;
@@ -84,13 +86,16 @@ class MapSampleState extends State<MapSample> {
 
 
 
-    void initApp() async {
+    void initApp(String area) async {
     // Initialize notification service
+    print('========================================== initApp ${area}');
     await NotificationService().initializeNotification();
     debugPrint('Before the start Monitoring Bin');
     // Start monitoring bin heights
-    await FirestoreService.instance.monitorBinHeightAndNotify();
+    await FirestoreService.instance.monitorBinHeightAndNotify(area);
     debugPrint('After the start Monitoring Bin');
+
+    
   }
   Future<void> _getUserType() async {
     try {
@@ -147,7 +152,8 @@ class MapSampleState extends State<MapSample> {
             'status': bin.data()?['status'],
             'temp': bin.data()?['temp'],
             'date': bin.data()?['pickDate'],
-            'ID': bin.data()?['binID']
+            'ID': bin.data()?['binID'],
+            'area':bin.data()?['area'],
           });
 
           if(bin.data()?['status'].toString().toLowerCase() == 'full' || bin.data()?['status'].toString().toLowerCase() == "failure"){
@@ -642,19 +648,38 @@ Map<String, dynamic>? binData;
               addDataToHistory();
           }
           await _getUserType();
-        
+
+          for (var bin in binInfo){
+            if(bin.data()?['binID'] == data['binId'] && bin.data()?['area'] == driverArea){
+              if(mounted){
+                setState(() {
+                  binArea = bin.data()?['area'];
+                });
+              }
+              
+
+               print("---------------------------------------------- ${type}, ${driverArea}");
+
+            }
+          }
+            print("====================================================== ${binArea}");
+
+            if(binArea == driverArea){
+
 
 
           
               if (data['fill-level'] != 0 && data['fill-level'] != 357 && data['fill-level'] <= notifiyLevel  ) {
                 if(type.toString().toLowerCase() == 'driver'){
-                  print("---------------------------------------------- ${type}, ${driverArea}");
+                  
+                  print("------------------");
+                  
 
-                   initApp();
+                   initApp(driverArea);
                      NotificationService().saveNotification(
               'Fill Level Alert',
               'The bin ${data['binId']} is now ${data['fill-level']}cm Fill Level',
-              driverArea!,
+              driverArea,
               "fill-level"
             );
                 }
@@ -681,11 +706,11 @@ Map<String, dynamic>? binData;
                   print("Failed to retrieve bin: $error");
                 });
               } else if(data['fill-level'] == 0 || data['fill-level'] == 357){
-                   initApp();
+                   initApp(driverArea);
                      NotificationService().saveNotification(
               'Ultrasonic Faliure Alert',
               'The bin ${data['binId']} has a ultrasonic Faliure',
-              driverArea!,
+              driverArea,
               "ultrasonic"
             );
                    FirebaseFirestore.instance
@@ -712,7 +737,7 @@ Map<String, dynamic>? binData;
                      NotificationService().saveNotification(
               'DHT Faliure Alert',
               'The bin ${data['binId']} has a DHT Faliure',
-              driverArea!,
+              driverArea,
               "DHT"
             );
 
@@ -739,7 +764,7 @@ Map<String, dynamic>? binData;
                    NotificationService().saveNotification(
               'Humidity Alert',
               'The bin ${data['binId']} reached ${data['humidity']} humidity',
-              driverArea!,
+              driverArea,
               "humidity"
             );
 
@@ -747,13 +772,13 @@ Map<String, dynamic>? binData;
                   NotificationService().saveNotification(
               'Temperature Alert',
               'The bin ${data['binId']} reached ${data['temperature']} Temperature',
-              driverArea!,
+              driverArea,
               "temp"
             );
 
               }
               
-              else {
+              }else {
                 FirebaseFirestore.instance
                     .collection('bins')
                     .where('binID', isEqualTo: data['binId'])
