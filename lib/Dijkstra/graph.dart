@@ -1,4 +1,4 @@
-import 'dart:math' show asin, atan2, cos, sin, sqrt;
+import 'dart:math';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -16,52 +16,41 @@ class Graph {
     adjacencyList[to]![from] = distance; // Assuming bidirectional edges
   }
 
-  List<LatLng> findShortestPath(List<LatLng> locations) {
-    // Create a copy of the locations list to modify
-    List<LatLng> path = [...locations];
+  Map<LatLng, double> dijkstra(LatLng start) {
+    Map<LatLng, double> distances = {};
+    Map<LatLng, LatLng?> previous = {};
+    List<LatLng> nodes = [];
 
-    // Starting location (assuming the first location in the list is the start)
-    LatLng current = path[0];
-    path.removeAt(0); // Remove the start location from the path list
-
-    while (path.isNotEmpty) {
-      // Find the nearest location to the current location
-      LatLng nearest = _findNearestLocation(current, path);
-
-      // Draw the shortest path between the current and nearest location
-      _drawShortestPath(current, nearest);
-
-      // Move to the nearest location and remove it from the path list
-      current = nearest;
-      path.remove(nearest);
+    for (LatLng vertex in adjacencyList.keys) {
+      if (vertex == start) {
+        distances[vertex] = 0;
+      } else {
+        distances[vertex] = double.infinity;
+      }
+      nodes.add(vertex);
+      previous[vertex] = null;
     }
 
-    // Draw the last segment back to the starting location to complete the loop
-    _drawShortestPath(current, locations[0]);
+    while (nodes.isNotEmpty) {
+      nodes.sort((a, b) => distances[a]!.compareTo(distances[b]!));
+      LatLng smallest = nodes.removeAt(0);
 
-    return locations;
-  }
+      if (distances[smallest] == double.infinity) {
+        break;
+      }
 
-  LatLng _findNearestLocation(LatLng from, List<LatLng> locations) {
-    LatLng nearest = locations[0];
-    double minDistance = double.infinity;
-
-    for (LatLng location in locations) {
-      double distance = adjacencyList[from]![location]!;
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearest = location;
+      if (adjacencyList[smallest] != null) {
+        for (LatLng neighbor in adjacencyList[smallest]!.keys) {
+          double? alt = distances[smallest]! + adjacencyList[smallest]![neighbor]!;
+          if (alt < distances[neighbor]!) {
+            distances[neighbor] = alt;
+            previous[neighbor] = smallest;
+          }
+        }
       }
     }
 
-    return nearest;
-  }
-
-  void _drawShortestPath(LatLng from, LatLng to) {
-    // Draw polyline between two points
-    // This should be implemented based on your Google Maps integration
-    // Example: polylines.add(Polyline(...));
-    // Ensure you have polylines set in the GoogleMap widget
+    return distances;
   }
 }
 
@@ -80,11 +69,9 @@ double calculateDistance(LatLng from, LatLng to) {
   return earthRadius * c;
 }
 
-void createGraph(Graph graph, List<LatLng> locations) {
-  for (int i = 0; i < locations.length; i++) {
-    for (int j = i + 1; j < locations.length; j++) {
-      double distance = calculateDistance(locations[i], locations[j]);
-      graph.addEdge(locations[i], locations[j], distance);
-    }
+void createGraph(Graph graph, LatLng currentLocation, List<LatLng> locations) {
+  for (LatLng location in locations) {
+    double distance = calculateDistance(currentLocation, location);
+    graph.addEdge(currentLocation, location, distance);
   }
 }
