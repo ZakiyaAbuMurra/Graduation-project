@@ -39,7 +39,7 @@ dependencies:
   flutter_polyline_points: ^2.0.0
   http: ^1.2.1
   qr_code_scanner: ^1.0.1
-  syncfusion_flutter_charts: ^26.1.39
+  syncfusion_flutter_charts: ^25.2.5
 
 dev_dependencies:
   flutter_test:

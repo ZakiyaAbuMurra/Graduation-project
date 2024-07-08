@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
     if (rememberMe) {
       return AppRoutes.bottomNavbar; // Replace with the appropriate home route
     } else {
-      return AppRoutes.notification;
+      return AppRoutes.homeLogin;
     }
   }
 

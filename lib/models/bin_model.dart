@@ -20,6 +20,7 @@ class BinModel {
   final double temp;
   final GeoPoint location;
   final int binID;
+  final String area;
       // dateTime: DateTime.fromMillisecondsSinceEpoch(map['dateTime']),
 //      dateTime: DateTime.fromMillisecondsSinceEpoch(map['dateTime']),
 
@@ -42,6 +43,7 @@ class BinModel {
     required this.notifiyHumidity,
     required this.notifiyLevel,
     required this.location,
+    required this.area,
   });
 
   factory BinModel.fromMap(Map<String, dynamic> map, String documentId) {
@@ -63,7 +65,8 @@ class BinModel {
       notifiyHumidity: (map['notifiyHumidity'] as num).toDouble(),
       notifiyLevel: (map['notifyLevel'] as num).toDouble(),
       location: map['location'] as GeoPoint? ?? const GeoPoint(0, 0),
-      changes: map['changes'] as Timestamp
+      changes: map['changes'] as Timestamp,
+      area: map['area'] as String? ?? 'default area'
 
     );
   }
@@ -89,7 +92,8 @@ class BinModel {
       'notifyLevel': notifiyLevel,
       'location':location,
       'changes': changes,
-      'binID': binID
+      'binID': binID,
+      'area':area
     };
   }
 }
