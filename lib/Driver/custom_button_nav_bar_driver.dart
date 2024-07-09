@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
+import 'package:recyclear/Driver/driverRequest.dart';
 import 'package:recyclear/User/about_us_page.dart';
 
 import 'package:recyclear/User/dash_board_page.dart';
@@ -9,6 +11,7 @@ import 'package:recyclear/User/store_page.dart';
 import 'package:recyclear/User/term_of_use_page.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
+import 'package:recyclear/views/pages/notification_page.dart';
 import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,9 +33,8 @@ class _DriverBottomNavbarUserState extends State<DriverBottomNavbarUser> {
 
     const MapSample(),
     const UserDashBoard(),
-    const UserStore(),
 
-    const RequestsPage(),
+    const DriverRequests(),
   ];
 
   String? userName;
@@ -76,7 +78,17 @@ class _DriverBottomNavbarUserState extends State<DriverBottomNavbarUser> {
         actions: [
           IconButton(
             onPressed: () {
-               Navigator.pushReplacementNamed(context, AppRoutes.notification);
+             Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotificationsScreen(
+                    FirebaseFirestore.instance
+                        .collection('notifications')
+                        .orderBy('timestamp', descending: true)
+                        .snapshots(),
+                  ),
+                ),
+              );
             },
             icon: const Icon(Icons.notifications),
           ),
