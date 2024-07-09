@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/custom_button_nav_bar.dart';
 import 'package:recyclear/Driver/custom_button_nav_bar_driver.dart';
 import 'package:recyclear/Driver/driver_home.dart';
-import 'package:recyclear/Driver/notificationPage.dart';
+import 'package:recyclear/Driver/driverRequest.dart';
 import 'package:recyclear/Guest/guest_home.dart';
 import 'package:recyclear/User/custom_button_bav_bar_user.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
@@ -55,9 +55,9 @@ class AppRouter {
           settings: settings,
         );
 
-        case AppRoutes.notification:
+        case AppRoutes.driverRequests:
         return MaterialPageRoute(
-          builder: (_) => const NotificationPage(),
+          builder: (_) => const DriverRequests(),
           settings: settings,
         );
 

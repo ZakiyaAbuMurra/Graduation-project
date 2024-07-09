@@ -10,7 +10,7 @@ class AppRoutes {
   static const String chat = '/chat';
   static const String bottomNavBarUser = '/bottomnavbaruser'; 
   static const String bottomNavBardriver = '/bottomnavbardriver'; 
-  static const String notification ='/notifications';
+  static const String driverRequests = '/driverRequests';
 
    static const guestHome = '/guest-home';
 }
