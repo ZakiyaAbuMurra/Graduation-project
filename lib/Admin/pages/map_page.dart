@@ -203,7 +203,7 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
            setState(() {
           binInfo = querySnapshot.docs;
 
-          _markers.clear();
+          _markers.removeWhere((marker) => marker.markerId.value != 'CurrnetLocation');
           _markerData.clear();
 
           for (var bin in binInfo) {
@@ -566,6 +566,18 @@ Map<String, dynamic>? binData;
  
     // Fetch initial data or perform any setup logic
     fetchBinLocations();
+    
+      
+      _markers.add(
+       const  Marker(
+          markerId: MarkerId('CurrnetLocation'),
+          position: LatLng(31.9574, 35.1886),
+        ),
+      );
+    
+   
+    print("============================================= markers ${_markers.length}");
+
 
     // Setup database subscription
  _databaseSubscription = _databaseReference.onValue.listen((event) async {
@@ -863,6 +875,7 @@ Map<String, dynamic>? binData;
         print('Error handling data from Firebase Realtime Database: $e');
       }
     });
+
   }
 
   @override
@@ -883,6 +896,7 @@ Map<String, dynamic>? binData;
                 initialCameraPosition:
                     CameraPosition(target: _currentPosition, zoom: 8),
                 markers: Set<Marker>.of(_markers),
+                
                 polylines: getShortestRoute == true? _shortestPolylines:_polylines,
                 myLocationEnabled: true,
                 mapType: MapType.normal,
