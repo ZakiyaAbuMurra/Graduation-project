@@ -101,6 +101,8 @@ class _AddBinFormState extends State<AddBinForm> {
     }
   }
 
+  
+
 
   @override
   Widget build(BuildContext context) {

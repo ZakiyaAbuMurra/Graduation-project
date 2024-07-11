@@ -32,9 +32,7 @@ class _DriverBottomNavbarUserState extends State<DriverBottomNavbarUser> {
 
 
     const MapSample(),
-    const UserDashBoard(),
-
-    const DriverRequests(),
+    
   ];
 
   String? userName;
@@ -99,7 +97,7 @@ class _DriverBottomNavbarUserState extends State<DriverBottomNavbarUser> {
         ),
       ),
       drawer: buildDrawer(),
-      bottomNavigationBar: buildBottomNavigationBar(),
+      //bottomNavigationBar: buildBottomNavigationBar(),
       body: pageList[currentPageIndex],
     );
   }
@@ -149,6 +147,17 @@ class _DriverBottomNavbarUserState extends State<DriverBottomNavbarUser> {
                 ),
               ),
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.calendar_month),
+            title: const Text('Appointments'),
+            onTap: () {
+              Navigator.pop(context); // Close the drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DriverRequests()),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.account_circle),

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:recyclear/Admin/pages/create_driver_account.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class BookAppointmentPage extends StatefulWidget {
@@ -20,6 +21,9 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   final _binNumberController = TextEditingController();
   final _binLocationController = TextEditingController();
   final _countryController = TextEditingController();
+  final _areaController = TextEditingController();
+
+  int appointmentID = 0;
 
   User? get currentUser => FirebaseAuth.instance.currentUser;
 
@@ -43,11 +47,48 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     'Beit Lahia',
     'Jabalia'
   ];
+ Future<void> _getBinId() async {
+    int highestBinId = await fetchId();
+    if(mounted){
+      appointmentID = (highestBinId + 1);
+    }
+    
+  }
+  Future<String?> getUserPhoneNumber(String email) async {
+  try {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users') // Adjust the collection name as needed
+        .where('email', isEqualTo: email)
+        .limit(1) // We expect only one user document per email
+        .get();
 
+    if (snapshot.docs.isNotEmpty) {
+      var userDocument = snapshot.docs.first.data() as Map<String, dynamic>;
+      return userDocument['phone'] as String?;
+    } else {
+      return null; // No user found with the given email
+    }
+  } catch (e) {
+    print('Error getting user phone number: $e');
+    return null;
+  }
+}
+   Future <int> fetchId()async{
+   final querySnapshot = await FirebaseFirestore.instance
+      .collection('bin_empty_requests')
+      .orderBy('appointmentId', descending: true)
+      .limit(1)
+      .get();
+   if (querySnapshot.docs.isNotEmpty) {
+    return querySnapshot.docs.first['appointmentId'];
+  } else {
+    return -1;
+  }
+ }
   void _submitRequest() async {
     if (_formKey.currentState!.validate()) {
       // Check if any of the text controllers are empty
-      if (_countryController.text.isEmpty ||
+      if (_areaController.text.isEmpty ||
           _descriptionController.text.isEmpty ||
           _dateController.text.isEmpty ||
           _timeController.text.isEmpty ||
@@ -64,7 +105,9 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
 
       String userName = 'Anonymous';
       String userEmail = currentUser?.email ?? 'anonymous';
-      String phone = currentUser?.phoneNumber ?? 'No Phone';
+        String? phone = await getUserPhoneNumber(userEmail);
+        print("----------------------------------------------- ${phone}");
+
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
@@ -75,18 +118,19 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         userName = userDoc.get('name') ?? 'Anonymous';
       }
 
-      FirebaseFirestore.instance.collection('bin_empty_requests').add({
+      await FirebaseFirestore.instance.collection('bin_empty_requests').add({
         'description': _descriptionController.text,
         'date': _dateController.text,
         'time': _timeController.text,
         'bin number': _binNumberController.text,
         'bin location': _binLocationController.text,
-        'country': _countryController.text,
+        'area': _areaController.text,
         'user_id': FirebaseAuth.instance.currentUser!.uid,
         'User name': userName,
         'User email': userEmail,
         'phone': phone,
         'timestamp': DateTime.now(),
+        'appointmentId': appointmentID
       });
 
       showDialog(
@@ -152,6 +196,12 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     }
   }
 
+    @override
+  void initState() {
+    super.initState();
+    _getBinId();
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -205,15 +255,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   ),
                 ),
                 const SizedBox(height: 8.0),
-                const Text(
-                  'Notify us to empty your bin',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(height: 16.0),
+                
                 _buildTextField(
                   controller: _descriptionController,
                   hintText: 'Please describe the issue...',
@@ -221,7 +263,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   border: const OutlineInputBorder(),
                   iconData: Icons.description,
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 8.0),
                 GestureDetector(
                   onTap: () => _selectDate(context),
                   child: AbsorbPointer(
@@ -234,7 +276,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 8.0),
                 GestureDetector(
                   onTap: () => _selectTime(context),
                   child: AbsorbPointer(
@@ -247,7 +289,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 8.0),
                 _buildTextField(
                   controller: _binNumberController,
                   hintText: 'Please type the bin number',
@@ -256,11 +298,10 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   iconData: Icons.numbers,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  maxLength: 3,
+                  
                 ),
-                const SizedBox(height: 16.0),
-                _buildCountryDropdown(),
-                const SizedBox(height: 16.0),
+           
+                const SizedBox(height: 8.0),
                 _buildTextField(
                   controller: _binLocationController,
                   hintText: 'Please type the bin location',
@@ -268,14 +309,36 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   border: const OutlineInputBorder(),
                   iconData: Icons.location_on,
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 8.0),
+                const Row(
+          children: [
+            Text(
+              "Area",
+              style:  TextStyle(
+                color: AppColors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const Text(
+              ' *',
+              style: TextStyle(
+                color: AppColors.red,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+                CustomDropdown(controller: _areaController),
+                const SizedBox(height: 8.0),
                 ElevatedButton(
                   onPressed: _submitRequest,
                   style: ElevatedButton.styleFrom(
                     foregroundColor: AppColors.white,
                     backgroundColor: AppColors.primary,
                     elevation: 8,
-                    shadowColor: AppColors.grey,
+               shadowColor: AppColors.grey,
                   ),
                   child: const Text(
                     'Send Request',
@@ -331,29 +394,25 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(8.0),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.grey.withOpacity(0.9),
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: const Offset(0, 2),
-              ),
-            ],
+           
           ),
           child: TextFormField(
             controller: controller,
             decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle:
-                  const TextStyle(color: AppColors.grey), // Hint text style
-              border: border,
-              focusedBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: AppColors.primary),
+              prefixIcon:  Icon(
+                iconData, // Example icon
+                color: Colors.grey, // Icon color
               ),
+              hintText: hintText,
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10.0,
+                  horizontal: 12.0), // Padding inside the text field
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                    8.0), // Rounded corners for the input field
+              ),
+              fillColor: Colors.grey[200], // A subtle fill color
               filled: true,
-              fillColor: AppColors.white,
-              counterText: '',
-              prefixIcon: Icon(iconData),
             ),
             keyboardType: keyboardType,
             maxLength: maxLength,
