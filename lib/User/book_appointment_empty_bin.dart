@@ -81,6 +81,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         'time': _timeController.text,
         'bin number': _binNumberController.text,
         'bin location': _binLocationController.text,
+        'country': _countryController.text,
         'user_id': FirebaseAuth.instance.currentUser!.uid,
         'User name': userName,
         'User email': userEmail,

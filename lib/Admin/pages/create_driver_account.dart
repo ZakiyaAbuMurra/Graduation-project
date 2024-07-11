@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -89,22 +90,84 @@ class _RegisterFormState extends State<RegisterForm> {
   bool _isVisible_con = false;
 
   bool isLogin = true;
-
   Future<void> register() async {
     if (_formKey.currentState!.validate()) {
-      debugPrint('Email: ${_emailController.text}');
-      debugPrint('Password: ${_passwordController.text}');
-      await BlocProvider.of<AuthCubit>(context).signUpWithEmailAndPassword(
-        _emailController.text,
-        _passwordController.text,
-        _nameController.text,
-        _phoneController.text,
-        _phototUrlController.text,
-        'driver',
-        _areaController.text,
-        _truckNumberController.text,
+      try {
+        // Query to check if the email already exists for driver type
+        var querySnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .where('email', isEqualTo: _emailController.text)
+            .where('type', isEqualTo: 'driver')
+            .get();
 
-      );
+        if (querySnapshot.docs.isNotEmpty) {
+          // Email already exists for a driver
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Error'),
+                content: const Text(
+                    'This email is already registered for a driver.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+          return;
+        }
+
+        // Generate a new UID for the driver
+        String newDriverUID =
+            FirebaseFirestore.instance.collection('users').doc().id;
+
+        // Write the driver data to Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(newDriverUID)
+            .set({
+          'area': _areaController.text,
+          'email': _emailController.text,
+          'name': _nameController.text,
+          'phone': _phoneController.text,
+          'photoUrl': _phototUrlController.text,
+          'trucknumber': _truckNumberController.text,
+          'type': 'driver',
+          'uid': newDriverUID,
+          'uniqueID': DateTime.now().millisecondsSinceEpoch.toString(),
+        });
+
+        // Optionally, show a success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Driver account created successfully')),
+        );
+
+        Navigator.pushNamed(context, AppRoutes.bottomNavbar);
+      } catch (e) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: Text(e.toString()),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 
@@ -350,7 +413,6 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               hintText: 'Enter the truck number ',
               contentPadding: const EdgeInsets.symmetric(
-
                   vertical: 10.0,
                   horizontal: 12.0), // Padding inside the text field
               border: OutlineInputBorder(
