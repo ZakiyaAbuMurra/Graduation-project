@@ -10,41 +10,38 @@ class DriverRequests extends StatefulWidget {
 }
 
 class _DriverRequestsState extends State<DriverRequests> {
-  final CollectionReference appointments = FirebaseFirestore.instance.collection('bin_empty_requests');
+  final CollectionReference appointments =
+      FirebaseFirestore.instance.collection('bin_empty_requests');
 
-  Future<List<Map<String, dynamic>>> _getAppointments() async {
-    QuerySnapshot snapshot = await appointments.get();
-    return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-  }
   Future<void> _removeAppointment(String userId) async {
-    QuerySnapshot snapshot = await appointments.where('user_id', isEqualTo: userId).get();
+    QuerySnapshot snapshot =
+        await appointments.where('user_id', isEqualTo: userId).get();
     for (var doc in snapshot.docs) {
       await doc.reference.delete();
     }
-    setState(() {});  // Rebuild the widget to reflect the changes
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
       backgroundColor: AppColors.bgColor,
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _getAppointments(),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: appointments.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text('No appointments found.'));
           }
 
-          List<Map<String, dynamic>> appointments = snapshot.data!;
+          List<DocumentSnapshot> docs = snapshot.data!.docs;
           return SingleChildScrollView(
             child: Center(
               child: Column(
-                children: List.generate(appointments.length, (index) {
-                  var appointment = appointments[index];
+                children: List.generate(docs.length, (index) {
+                  var appointment = docs[index].data() as Map<String, dynamic>;
                   return appointmentsWidget(
                     index,
                     appointment['bin location'] ?? 'Unknown location',
@@ -63,7 +60,8 @@ class _DriverRequestsState extends State<DriverRequests> {
     );
   }
 
-  Widget appointmentsWidget(int index, String location, String date, String time, String email, String phone,String id) {
+  Widget appointmentsWidget(int index, String location, String date,
+      String time, String email, String phone, String id) {
     return Padding(
       padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.02),
       child: Container(
@@ -192,7 +190,8 @@ class _DriverRequestsState extends State<DriverRequests> {
                               children: [
                                 Icon(
                                   Icons.phone,
-                                  size: MediaQuery.of(context).size.height * 0.03,
+                                  size:
+                                      MediaQuery.of(context).size.height * 0.03,
                                   color: AppColors.lineColors,
                                 ),
                                 Padding(
@@ -209,19 +208,21 @@ class _DriverRequestsState extends State<DriverRequests> {
                             ),
                           ),
                           ElevatedButton(
-                            onPressed: ()async {
-                               await _removeAppointment(id);
+                            onPressed: () async {
+                              await _removeAppointment(id);
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,
                               backgroundColor: AppColors.primary,
-                              side: const BorderSide(color: AppColors.green, width: 2),
+                              side: const BorderSide(
+                                  color: AppColors.green, width: 2),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
                             child: SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.035,
+                              height:
+                                  MediaQuery.of(context).size.height * 0.035,
                               child: const Text('Collect'),
                             ),
                           ),
