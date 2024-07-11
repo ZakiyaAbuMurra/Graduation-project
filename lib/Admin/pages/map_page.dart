@@ -95,6 +95,7 @@ class MapSampleState extends State<MapSample> {
   Future<void> _getUserType() async {
     try {
       // Get current user
+      
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         print('No user signed in');

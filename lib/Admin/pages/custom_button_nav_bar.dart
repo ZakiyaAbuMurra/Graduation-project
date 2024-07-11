@@ -45,19 +45,9 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   @override
   void initState() {
     super.initState();
-    //initApp();
     if (user != null) {
       _loadUserData();
     }
-  }
-
-  void initApp() async {
-    // Initialize notification service
-    await NotificationService().initializeNotification();
-    debugPrint('Before the start Monitoring Bin');
-    // Start monitoring bin heights
-    FirestoreService.instance.monitorBinHeightAndNotify();
-    debugPrint('After the start Monitoring Bin');
   }
 
   Future<void> _loadUserData() async {
@@ -72,6 +62,11 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
       userEmail = userData['email'] as String?;
       userPhotoUrl = userData['photoUrl'] as String?;
     });
+
+    // Logging to check values
+    debugPrint('User Name: $userName');
+    debugPrint('User Email: $userEmail');
+    debugPrint('User Photo URL: $userPhotoUrl');
   }
 
   @override
@@ -102,7 +97,6 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
         ],
         title: Image.asset(
           'assets/images/greenRecyclear.png',
-          // fit: BoxFit.cover,
           height:
               AppBar().preferredSize.height, // Match the height of the AppBar
         ),
@@ -120,29 +114,41 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          Center(
-            child: UserAccountsDrawerHeader(
-              accountName: Text(user?.displayName ??
-                  'Your Name'), // Replace with data fetched from Firestore
-              accountEmail: Text(user?.email ??
-                  'email@example.com'), // Replace with data fetched from Firestore
-              currentAccountPicture: (userPhotoUrl != null)
-                  ? CircleAvatar(
-                      backgroundImage: NetworkImage(userPhotoUrl!),
-                    )
-                  : CircleAvatar(
-                      child: Text(
-                        userName != null ? userName![0] : 'U',
-                        style: TextStyle(fontSize: 40.0),
-                      ),
-                    ),
+          UserAccountsDrawerHeader(
+            accountName: Text(userName ??
+                'Your Name'), // Replace with data fetched from Firestore
+            accountEmail: Text(userEmail ??
+                'email@example.com'), // Replace with data fetched from Firestore
+            currentAccountPicture: CircleAvatar(
+              child: ClipOval(
+                child: kIsWeb
+                    ? Image.asset(
+                        'assets/images/imageAdmin.png',
+                        fit: BoxFit.cover,
+                        width: 90,
+                        height: 90,
+                      )
+                    : (userPhotoUrl != null && userPhotoUrl!.isNotEmpty)
+                        ? Image.network(
+                            userPhotoUrl!,
+                            fit: BoxFit.cover,
+                            width: 90,
+                            height: 90,
+                          )
+                        : Image.asset(
+                            'assets/images/imageAdmin.png',
+                            fit: BoxFit.cover,
+                            width: 90,
+                            height: 90,
+                          ),
+              ),
             ),
           ),
           if (!isMobile) ...buildDrawerItems(), // Add drawer items for web
           if (isMobile) ...[
             ListTile(
               leading: const Icon(Icons.add),
-              title: const Text('Create Truck Driver account '),
+              title: const Text('Create Truck Driver account'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -166,7 +172,6 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
               title: const Text('Profile'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
-                // Navigate to profile page
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EditProfile()),
@@ -178,7 +183,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
               title: const Text('Logout'),
               onTap: () async {
                 Navigator.pop(context); // Close the drawer
-                // await authServices.signOut(); // Sign out the user
+                await FirebaseAuth.instance.signOut(); // Sign out the user
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -189,21 +194,29 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
             ),
           ],
           if (!isMobile) ...[
-            // Add Profile and Logout for web at the bottom
             Divider(),
             ListTile(
               leading: const Icon(Icons.account_circle),
               title: const Text('Profile'),
               onTap: () {
-                // Navigate to profile page
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditProfile()),
+                );
               },
             ),
-
             ListTile(
               leading: const Icon(Icons.exit_to_app),
               title: const Text('Logout'),
-              onTap: () {
-                // Handle user logout
+              onTap: () async {
+                await FirebaseAuth.instance.signOut(); // Sign out the user
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          LoginPage()), // Navigate to login page
+                );
               },
             ),
           ],
@@ -234,7 +247,6 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
         title: const Text('Requests'),
         onTap: () => selectPage(3),
       ),
-      // Add any other ListTile widgets for other drawer items
     ];
   }
 
