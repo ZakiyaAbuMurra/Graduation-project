@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:recyclear/Admin/pages/edit_profile.dart';
 import 'package:recyclear/Admin/pages/map_page.dart';
 import 'package:recyclear/User/about_us_page.dart';
+import 'package:recyclear/User/dash_board_page.dart';
 import 'package:recyclear/User/scan_qr_code_page.dart';
 import 'package:recyclear/User/store_page.dart';
 import 'package:recyclear/User/term_of_use_page.dart';
@@ -67,12 +68,6 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications),
-          ),
-        ],
         title: Image.asset(
           'assets/images/greenRecyclear.png',
           height: AppBar().preferredSize.height,
@@ -132,6 +127,17 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
           ),
           ListTile(
             leading: const Icon(Icons.account_circle),
+            title: const Text('Blog'),
+            onTap: () {
+              Navigator.pop(context); // Close the drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserDashBoard()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.account_circle),
             title: const Text('Profile'),
             onTap: () {
               Navigator.pop(context); // Close the drawer
@@ -183,9 +189,9 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
       },
       destinations: const <NavigationDestination>[
         NavigationDestination(
-          icon: Icon(Icons.dashboard_outlined),
-          selectedIcon: Icon(Icons.dashboard),
-          label: 'Dashboard',
+          icon: Icon(Icons.map_outlined),
+          selectedIcon: Icon(Icons.map),
+          label: 'Map',
         ),
         NavigationDestination(
           icon: Icon(Icons.store_outlined),
@@ -200,7 +206,7 @@ class _CustomBottomNavbarUserState extends State<CustomBottomNavbarUser> {
         NavigationDestination(
           icon: Icon(Icons.announcement_outlined),
           selectedIcon: Icon(Icons.announcement),
-          label: 'Requests',
+          label: 'Send Requests',
         ),
       ],
     );
