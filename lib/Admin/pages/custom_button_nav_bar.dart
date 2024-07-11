@@ -50,6 +50,17 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
     }
   }
 
+
+  void initApp(String area) async {
+    // Initialize notification service
+    await NotificationService().initializeNotification();
+    debugPrint('Before the start Monitoring Bin');
+    // Start monitoring bin heights
+    FirestoreService.instance.monitorBinHeightAndNotify(area);
+    debugPrint('After the start Monitoring Bin');
+  }
+
+
   Future<void> _loadUserData() async {
     // Use the FirestoreService to get the user's data
     final userData = await FirestoreService.instance.getDocument(

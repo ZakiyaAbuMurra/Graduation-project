@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:recyclear/services/map_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 class NotificationService {
@@ -41,7 +42,9 @@ class NotificationService {
   }
 
   Future<void> showNotification(
-      {int id = 0, String? title, String? body, String? payload}) async {
+      {int? id , String? title, String? body, String? payload,GeoPoint? location, String? area, String? type}) async {
+    MapServices.saveRoutesLocation(id!,location!,area!,type!);
+
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'your_channel_id',
@@ -50,6 +53,7 @@ class NotificationService {
       importance: Importance.max,
       priority: Priority.high,
       showWhen: false,
+
     );
 
     const DarwinNotificationDetails iosPlatformChannelSpecifics =

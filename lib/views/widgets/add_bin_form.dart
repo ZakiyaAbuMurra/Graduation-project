@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:recyclear/Admin/pages/create_driver_account.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
 
@@ -23,6 +24,7 @@ class _AddBinFormState extends State<AddBinForm> {
   final _tempController = TextEditingController();
   final _levelController = TextEditingController();
   final _assignController = TextEditingController();
+    final _areaController = TextEditingController();
 
 
   @override
@@ -72,6 +74,7 @@ class _AddBinFormState extends State<AddBinForm> {
           'notifiyTemperature': double.parse(_tempController.text),
           'notifyLevel': double.parse(_levelController.text),
           'assignTo': _assignController.text,
+          'area': _areaController.text,
           'status':'empty',
         });
         ScaffoldMessenger.of(context).showSnackBar(
@@ -88,6 +91,7 @@ class _AddBinFormState extends State<AddBinForm> {
         _tempController.clear();
         _levelController.clear();
         _assignController.clear();
+        _areaController.clear();
         _getBinId(); // Update the bin ID for the next entry
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -393,6 +397,16 @@ class _AddBinFormState extends State<AddBinForm> {
           ),
 
            const SizedBox(height: 8),
+             Text(
+            'Bin Area',
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+          CustomDropdown(controller: _areaController),
+          const SizedBox(height: 8),
+
           Text(
             'Assignd To',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(

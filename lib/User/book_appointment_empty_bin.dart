@@ -63,7 +63,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       }
 
       String userName = 'Anonymous';
-      String userEmail = currentUser?.email ?? 'anonymous@example.com';
+      String userEmail = currentUser?.email ?? 'anonymous';
+      String phone = currentUser?.phoneNumber ?? 'No Phone';
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
@@ -83,6 +84,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         'user_id': FirebaseAuth.instance.currentUser!.uid,
         'User name': userName,
         'User email': userEmail,
+        'phone': phone,
         'timestamp': DateTime.now(),
       });
 

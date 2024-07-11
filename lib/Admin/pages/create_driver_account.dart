@@ -537,7 +537,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
             Icons.home_work_outlined,
             color: Colors.grey,
           ),
-          hintText: 'Select the driving area',
+          hintText: 'Select the area',
           contentPadding:
               const EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
           border: OutlineInputBorder(
