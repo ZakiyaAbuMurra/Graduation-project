@@ -80,6 +80,7 @@ class MapSampleState extends State<MapSample> {
   double notifiyHumidity = 0.0;
   double notifiyTemperature = 0.0;
   double notifiyLevel = 0.0; 
+   late Map<dynamic, dynamic> realData;
 
   StreamSubscription<DatabaseEvent>? _databaseSubscription;
   final List<Map<String, dynamic>> _markerData = [];
@@ -194,50 +195,72 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
   }
   Future<void> fetchBinLocations() async {
     try {
-      // Fetch the bin data from Firestore
-      QuerySnapshot<Map<String, dynamic>> querySnapshot =
-          await FirebaseFirestore.instance.collection('bins').get();
+      // Create a stream to listen for updates
+      FirebaseFirestore.instance.collection('bins').snapshots().listen((querySnapshot) {
+        setState(() {
+          binInfo = querySnapshot.docs;
 
-      // Save the documents to the list and create markers
-      if(mounted){
-      setState(() {
-        binInfo = querySnapshot.docs;
+          _markers.clear();
+          _markerData.clear();
 
-        for (var bin in binInfo) {
-          _markerData.add({
-            'docId': bin.id,
-            'height': bin.data()?['Height'],
-            'humidity': bin.data()?['Humidity'],
-            'material': bin.data()?['Material'],
-            'width': bin.data()?['Width'],
-            'color': bin.data()?['color'],
-            'fill-level': bin.data()?['fill-level'],
-            'location': bin.data()?['location'],
-            'status': bin.data()?['status'],
-            'temp': bin.data()?['temp'],
-            'date': bin.data()?['pickDate'],
-            'ID': bin.data()?['binID'],
-            'area':bin.data()?['area'],
-          });
+          for (var bin in binInfo) {
+            // Check if _markerData already contains the docId
+            var existingIndex = _markerData.indexWhere((element) => element['docId'] == bin.id);
 
-        
+            if (existingIndex != -1) {
+              setState(() {
+                _markerData[existingIndex] = {
+                  'docId': bin.id,
+                  'height': bin.data()?['Height'],
+                  'humidity': bin.data()?['Humidity'],
+                  'material': bin.data()?['Material'],
+                  'width': bin.data()?['Width'],
+                  'color': bin.data()?['color'],
+                  'fill-level': bin.data()?['fill-level'],
+                  'location': bin.data()?['location'],
+                  'status': bin.data()?['status'],
+                  'temp': bin.data()?['temp'],
+                  'date': bin.data()?['pickDate'],
+                  'ID': bin.data()?['binID'],
+                  'area': bin.data()?['area'],
+                };
+              });
+            } else {
+              setState(() {
+                _markerData.add({
+                  'docId': bin.id,
+                  'height': bin.data()?['Height'],
+                  'humidity': bin.data()?['Humidity'],
+                  'material': bin.data()?['Material'],
+                  'width': bin.data()?['Width'],
+                  'color': bin.data()?['color'],
+                  'fill-level': bin.data()?['fill-level'],
+                  'location': bin.data()?['location'],
+                  'status': bin.data()?['status'],
+                  'temp': bin.data()?['temp'],
+                  'date': bin.data()?['pickDate'],
+                  'ID': bin.data()?['binID'],
+                  'area': bin.data()?['area'],
+                });
+              });
+            }
 
-          GeoPoint geoPoint = bin.data()?['location'];
-          _markers.add(
-            Marker(
-              markerId: MarkerId(bin.id),
-              position: LatLng(geoPoint.latitude, geoPoint.longitude),
-              onTap: () async => await _tappedMarker(bin.id),
-            ),
-          );
-        }
-      }
-      );
-      }
+            GeoPoint geoPoint = bin.data()?['location'];
+            _markers.add(
+              Marker(
+                markerId: MarkerId(bin.id),
+                position: LatLng(geoPoint.latitude, geoPoint.longitude),
+                onTap: () async => await _tappedMarker(bin.id),
+              ),
+            );
+          }
+        });
+      });
     } catch (e) {
       print('Error fetching bin locations: $e');
     }
   }
+
 
   void getAddress() async {
     String address = await getAddressFromLatLng(location!, 'address');
@@ -272,6 +295,8 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
   }
 
   Future<void> _tappedMarker(String docId) async {
+   // fetchBinLocations();
+
     if (mounted) {
       setState(() {
 
@@ -286,7 +311,7 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
         routeTime = calculateEstimatedTime(_currentPosition, locroute);
        // print("//////////////////// ${distance}");
         showCard = true;
-        fetchBinLocations();
+       // fetchBinLocations();
 
       });
       _getRoute();
@@ -539,6 +564,11 @@ Map<String, dynamic>? binData;
  _databaseSubscription = _databaseReference.onValue.listen((event) async {
       try {
         final data = event.snapshot.value as Map<dynamic, dynamic>;
+        if(mounted){
+          setState(() {
+            realData = data;
+          });
+        }
         if (data != null) {
           print("Data received:");
           print("Bin ID: ${data['binId']}");
@@ -765,6 +795,41 @@ Map<String, dynamic>? binData;
               }
               
               else {
+               print("--------------------------------------- ${data['fill-level']}");
+
+                if(data['fill-level'] as int >=80 && data['fill-level'] as int <=100){
+                  print("--------------------------------------- fill level entered");
+                  FirebaseFirestore.instance
+                    .collection('bins')
+                    .where('binID', isEqualTo: data['binId'] as int)
+                    .get()
+                    .then((querySnapshot) {
+                  for (var doc in querySnapshot.docs) {
+                    doc.reference.update({'pickDate': Timestamp.fromDate(DateTime(data['year'],data['month'],
+
+                    data['day'],data['hour'],data['minute']))}).then((_) {
+                       if( _markerData[_markerIndex]['ID'] == data['binId']){
+                        
+                          
+                                     _markerData[_markerIndex]['date'] = Timestamp.fromDate(DateTime(data['year'],data['month'],
+
+                    data['day'],data['hour'],data['minute']));
+                            
+                          
+                          
+                        
+               
+                      }
+                      print(
+                          "Bin pickupdate updated to ${_markerData[_markerIndex]['date']} for bin ID: ${data['binId']}");
+                    }).catchError((error) {
+                      print("Failed to update bin status: $error");
+                    });
+                  }
+                });
+                  
+                  
+                }
                 print("----------------------------------------- status is Empty");
                 await MapServices.deleteDocumentByBinId(data['binId']);
                 FirebaseFirestore.instance
@@ -1333,7 +1398,7 @@ Map<String, dynamic>? binData;
             alignment: AlignmentDirectional.bottomCenter,
             child: Padding(
               padding:  EdgeInsets.only(bottom: MediaQuery.of(context).size.height*0.02),
-              child: Container(
+              child: showCard == false? Container(
                 height: MediaQuery.of(context).size.height*0.06,
                 width: MediaQuery.of(context).size.width*0.5,
                 color: AppColors.primary,
@@ -1365,7 +1430,7 @@ Map<String, dynamic>? binData;
                     });
                   }
                 },),
-              ),
+              ):SizedBox(),
             ),
           ):SizedBox(),
         ],
@@ -1492,25 +1557,36 @@ Map<String, dynamic>? binData;
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold),
                             ),
-                            Text(
-                              _markerData[_markerIndex]['ID'].toString(),
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 110, 108, 108),
-                                fontSize: 16,
-                              ),
+                            Row(
+                              children: [
+                                const Text(
+                                 'Bin ID: ',
+                                  style:  TextStyle(
+                                    color: Color.fromARGB(255, 110, 108, 108),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Text(
+                                  _markerData[_markerIndex]['ID'].toString(),
+                                  style: const TextStyle(
+                                    color: Color.fromARGB(255, 110, 108, 108),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       )
                     ],
                   ),
-                  rowWidget(_latestData['fill-level'].toString(), 'Fill-Level',
-                      _latestData['humidity'].toString(), "Humidity"),
+                  rowWidget(_markerData[_markerIndex]['fill-level'].toString(), 'Fill-Level',
+                      _markerData[_markerIndex]['humidity'].toString(), "Humidity"),
                   Padding(
                     padding: EdgeInsets.only(
                         top: MediaQuery.of(context).size.height * 0.015),
                     child: rowWidget(
-                        _latestData['temperature'].toString(),
+                        _markerData[_markerIndex]['temp'].toString(),
                         'Temperature',
                         _markerData[_markerIndex]['material'],
                         "Material"),
