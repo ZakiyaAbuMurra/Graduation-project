@@ -90,6 +90,7 @@ class MapSampleState extends State<MapSample> {
 
 
 
+
   // Future<void> _getUserType() async {
   //   try {
   //     // Get current user
