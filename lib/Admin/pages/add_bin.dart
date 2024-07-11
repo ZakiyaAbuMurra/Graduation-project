@@ -19,18 +19,18 @@ class AddBin extends StatefulWidget {
 }
 
 class _AddBinState extends State<AddBin> {
+ StreamSubscription<DatabaseEvent>? _databaseSubscription;
   final DatabaseReference _databaseReference =
-      FirebaseDatabase.instance.reference().child('sensors/data');  
-StreamSubscription<DatabaseEvent>? _databaseSubscription;
+      FirebaseDatabase.instance.reference().child('sensors/data');
+        final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+          List<DocumentSnapshot<Map<String, dynamic>>> binInfo = [];
+
+
+      Map<String, dynamic>? binData;
   double notifiyHumidity = 0.0;
   double notifiyTemperature = 0.0;
   double notifiyLevel = 0.0; 
- final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  List<DocumentSnapshot<Map<String, dynamic>>> binInfo = [];
-
-
-  
-  String _date = '';
+    String _date = '';
   int year = 0;
   int month = 0;
   int day = 0;
@@ -46,10 +46,7 @@ StreamSubscription<DatabaseEvent>? _databaseSubscription;
   String driverArea = '';
   String binArea = '';
 
-
-Map<String, dynamic>? binData;
-
-  Future <void> getNotifiedData2(int binID) async{
+Future <void> getNotifiedData2(int binID) async{
 
     binData = await MapServices.getNotifiedData(binID);
     if (binData!=null){
@@ -77,7 +74,7 @@ Map<String, dynamic>? binData;
 
   }
 
-    Future<void> addDataToHistory() async {
+   Future<void> addDataToHistory() async {
     try {
       await _firestore.collection('binsHistory').add({
         'binId': _binId,
@@ -91,32 +88,16 @@ Map<String, dynamic>? binData;
       print('Error adding data to history: $e');
     }
   }
-    Future<void> fetchBinLocations() async {
-    try {
-      // Fetch the bin data from Firestore
-      QuerySnapshot<Map<String, dynamic>> querySnapshot =
-          await FirebaseFirestore.instance.collection('bins').get();
 
-      // Save the documents to the list and create markers
-      if(mounted){
-      setState(() {
-        binInfo = querySnapshot.docs;
 
-      }
-      );
-      }
-    } catch (e) {
-      print('Error fetching bin locations: $e');
-    }
-  }
-  
   @override
   void initState() {
     super.initState();
-    fetchBinLocations();
-    _databaseSubscription = _databaseReference.onValue.listen((event) async {
+
+     _databaseSubscription = _databaseReference.onValue.listen((event) async {
       try {
         final data = event.snapshot.value as Map<dynamic, dynamic>;
+      
         if (data != null) {
           print("Data received:");
           print("Bin ID: ${data['binId']}");
@@ -241,7 +222,7 @@ Map<String, dynamic>? binData;
                 }
               
 
-         
+              
               } else if(data['fill-level'] == 0 || data['fill-level'] == 357){
                                 print("----------------------------------------- status is lidar");
 
@@ -252,7 +233,7 @@ Map<String, dynamic>? binData;
               driverArea,
               "ultrasonic"
             );
-                 
+                  
 
               }else if(data['humidity'] == -2000 || data['temperature'] == -2000){
                                 print("----------------------------------------- status is DHT");
@@ -264,6 +245,7 @@ Map<String, dynamic>? binData;
               "DHT"
             );
 
+                   
               }else if(data['humidity']>= notifiyHumidity){
                 print("----------------------------------------- status is humidity");
 
@@ -285,7 +267,6 @@ Map<String, dynamic>? binData;
             );
 
               }
-      
         }
         } else {
           print('Received null data from Firebase Realtime Database.');
@@ -296,7 +277,13 @@ Map<String, dynamic>? binData;
     });
   }
 
-
+  
+  @override
+  void dispose() {
+    // Cancel subscription to avoid memory leaks
+    _databaseSubscription?.cancel();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

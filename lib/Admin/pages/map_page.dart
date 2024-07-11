@@ -80,7 +80,6 @@ class MapSampleState extends State<MapSample> {
   double notifiyHumidity = 0.0;
   double notifiyTemperature = 0.0;
   double notifiyLevel = 0.0; 
-   late Map<dynamic, dynamic> realData;
 
   StreamSubscription<DatabaseEvent>? _databaseSubscription;
   final List<Map<String, dynamic>> _markerData = [];
@@ -188,16 +187,20 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
 
      
     }
-     setState(() {
+    if(mounted){
+       setState(() {
         
         _shortestPolylines.addAll(newPolylines);
       });
+    }
+    
   }
   Future<void> fetchBinLocations() async {
     try {
       // Create a stream to listen for updates
       FirebaseFirestore.instance.collection('bins').snapshots().listen((querySnapshot) {
-        setState(() {
+        if(mounted){
+           setState(() {
           binInfo = querySnapshot.docs;
 
           _markers.clear();
@@ -255,6 +258,10 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
             );
           }
         });
+
+        }
+       
+
       });
     } catch (e) {
       print('Error fetching bin locations: $e');
@@ -564,11 +571,7 @@ Map<String, dynamic>? binData;
  _databaseSubscription = _databaseReference.onValue.listen((event) async {
       try {
         final data = event.snapshot.value as Map<dynamic, dynamic>;
-        if(mounted){
-          setState(() {
-            realData = data;
-          });
-        }
+     
         if (data != null) {
           print("Data received:");
           print("Bin ID: ${data['binId']}");
