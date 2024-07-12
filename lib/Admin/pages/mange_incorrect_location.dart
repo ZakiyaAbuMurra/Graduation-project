@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
-class ManageIncoorectLocation extends StatelessWidget {
+class ManageIncorrectLocation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,18 +22,20 @@ class ManageIncoorectLocation extends StatelessWidget {
             return const Center(child: Text('No Feedback Found'));
           }
           var feedbackDocs = snapshot.data!.docs;
-          List<FaultBins> IncorrectLocationList = feedbackDocs.map((doc) {
+          List<FaultBins> incorrectLocationList = feedbackDocs.map((doc) {
             var data = doc.data() as Map<String, dynamic>;
             return FaultBins(
               description: data['user'] ?? 'Anonymous',
               feedback: data['Problem description'] ?? 'No feedback',
+              binLocation: data['Bin Location'] ?? 'No location',
+              binNumber: data['Bin Number'] ?? 'No Bin ID',
             );
           }).toList();
 
           return ListView.builder(
-            itemCount: IncorrectLocationList.length,
+            itemCount: incorrectLocationList.length,
             itemBuilder: (context, index) {
-              final incorrectLocation = IncorrectLocationList[index];
+              final incorrectLocation = incorrectLocationList[index];
               return Card(
                 margin: const EdgeInsets.symmetric(
                     vertical: 10.0, horizontal: 15.0),
@@ -51,21 +53,6 @@ class ManageIncoorectLocation extends StatelessWidget {
                         borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(10.0)),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.person,
-                              color: Colors.black, size: 30),
-                          const SizedBox(width: 10),
-                          Text(
-                            incorrectLocation.description,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                     const Divider(height: 1, thickness: 1),
                     Container(
@@ -73,6 +60,52 @@ class ManageIncoorectLocation extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on,
+                                  color: Colors.black, size: 24),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'Bin Location:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  incorrectLocation.binLocation,
+                                  style: const TextStyle(fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              const Icon(Icons.confirmation_number,
+                                  color: Colors.black, size: 24),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'Bin Number:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  incorrectLocation.binNumber,
+                                  style: const TextStyle(fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               const Icon(Icons.description,
@@ -112,9 +145,13 @@ class ManageIncoorectLocation extends StatelessWidget {
 class FaultBins {
   final String description;
   final String feedback;
+  final String binLocation;
+  final String binNumber;
 
   FaultBins({
     required this.description,
     required this.feedback,
+    required this.binLocation,
+    required this.binNumber,
   });
 }

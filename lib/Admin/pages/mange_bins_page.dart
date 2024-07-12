@@ -12,7 +12,7 @@ class ManageBinsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Bins'),
+        title: const Text('View Requested Bins'),
         backgroundColor: AppColors.primary,
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -122,20 +122,6 @@ class _BinRequestCardState extends State<BinRequestCard> {
                     isExpanded ? 'Show Less' : 'Show More',
                     style: const TextStyle(fontSize: 14), // Reduced font size
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BlocProvider(
-                          create: (context) => ChatCubit()..getMessages(),
-                          child: const ChatPage(),
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('Chat'),
                 ),
               ],
             ),
