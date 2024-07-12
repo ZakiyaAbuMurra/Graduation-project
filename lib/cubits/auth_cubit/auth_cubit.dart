@@ -47,6 +47,7 @@ class AuthCubit extends Cubit<AuthState> {
       String trucknumber) async {
     emit(AuthLoading());
     try {
+      
       final result = await authServices.signUpWithEmailAndPassword(
         email,
         password,

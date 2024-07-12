@@ -315,7 +315,6 @@ Future <void> getNotifiedData2(int binID) async{
     super.dispose();
   }
 
-
   void initApp(String area) async {
     // Initialize notification service
     await NotificationService().initializeNotification();
@@ -324,7 +323,6 @@ Future <void> getNotifiedData2(int binID) async{
     FirestoreService.instance.monitorBinHeightAndNotify(area);
     debugPrint('After the start Monitoring Bin');
   }
-
 
   Future<void> _loadUserData() async {
     // Use the FirestoreService to get the user's data

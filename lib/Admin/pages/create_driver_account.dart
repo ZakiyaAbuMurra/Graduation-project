@@ -88,24 +88,25 @@ class _RegisterFormState extends State<RegisterForm> {
  bool _isVisible = false;
  bool _isVisible_con = false;
 
- bool isLogin = true;
+  bool isLogin = true;
 
- Future<void> register() async {
-   if (_formKey.currentState!.validate()) {
-     debugPrint('Email: ${_emailController.text}');
-     debugPrint('Password: ${_passwordController.text}');
-     await BlocProvider.of<AuthCubit>(context).signUpWithEmailAndPassword(
-       _emailController.text,
-       _passwordController.text,
-       _nameController.text,
-       _phoneController.text,
-       _phototUrlController.text,
-       'driver',
-       _areaController.text,
-       _truckNumberController.text,
-     );
-   }
- }
+  Future<void> register() async {
+    if (_formKey.currentState!.validate()) {
+      debugPrint('Email: ${_emailController.text}');
+      debugPrint('Password: ${_passwordController.text}');
+      await BlocProvider.of<AuthCubit>(context).signUpWithEmailAndPassword(
+        _emailController.text,
+        _passwordController.text,
+        _nameController.text,
+        _phoneController.text,
+        _phototUrlController.text,
+        'driver',
+        _areaController.text,
+        _truckNumberController.text,
+      );
+    }
+  }
+
 
  String? validatePassword(String value) {
    String pattern =
@@ -408,6 +409,7 @@ class _RegisterFormState extends State<RegisterForm> {
      ),
    );
  }
+
 
  Widget buildTextFormField(
      TextEditingController controller, String label, String hintText,

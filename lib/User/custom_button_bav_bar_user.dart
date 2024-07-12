@@ -17,6 +17,7 @@ import 'package:recyclear/views/pages/requests_page_for_user_and_admain.dart';
 import 'package:recyclear/services/firestore_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recyclear/views/pages/login_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomBottomNavbarUser extends StatefulWidget {
   const CustomBottomNavbarUser({super.key});
@@ -341,6 +342,36 @@ Future <void> getNotifiedData2(int binID) async{
           'assets/images/greenRecyclear.png',
           height: AppBar().preferredSize.height,
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: user != null
+                  ? StreamBuilder<DocumentSnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user!.uid)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return const Text('Error');
+                        } else if (!snapshot.hasData || snapshot.data == null) {
+                          return const Text('No Data');
+                        } else {
+                          final userData =
+                              snapshot.data!.data() as Map<String, dynamic>;
+                          final userPoints = userData['points'] as int? ?? 0;
+                          return _PointsDisplay(points: userPoints);
+                        }
+                      },
+                    )
+                  : const Text('Loading...'),
+            ),
+          ),
+        ],
       ),
       drawer: buildDrawer(),
       bottomNavigationBar: buildBottomNavigationBar(),
@@ -478,6 +509,40 @@ Future <void> getNotifiedData2(int binID) async{
           label: 'Send Requests',
         ),
       ],
+    );
+  }
+}
+
+class _PointsDisplay extends StatelessWidget {
+  final int points;
+
+  const _PointsDisplay({required this.points});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.monetization_on,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$points',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

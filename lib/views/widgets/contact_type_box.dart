@@ -25,11 +25,26 @@ class ContactTypeBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = userType == 'admin' ? adminText : userText;
-    final buttonLabel =
-        userType == 'admin' ? adminButtonLabel : userButtonLabel;
-    final page = userType == 'admin' ? adminPage : userPage;
-    final boxWidth = MediaQuery.of(context).size.width * 0.4;
+    final String text;
+    final String buttonLabel;
+    final Widget page;
+
+    if (userType == 'admin') {
+      text = adminText;
+      buttonLabel = adminButtonLabel;
+      page = adminPage;
+    } else if (userType == 'user') {
+      text = userText;
+      buttonLabel = userButtonLabel;
+      page = userPage;
+    } else {
+      // Handle the case where userType is neither 'admin' nor 'user'
+      text = adminText;
+      buttonLabel = adminButtonLabel;
+      page = adminPage; // An empty container or an error page
+    }
+
+    final double boxWidth = MediaQuery.of(context).size.width * 0.4;
 
     return GestureDetector(
       onTap: () {
@@ -104,8 +119,7 @@ class ContactTypeBox extends StatelessWidget {
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18.0),
                       side: BorderSide(
-                        color: const Color.fromARGB(255, 47, 88, 69)
-                            .withOpacity(0.5),
+                        color: AppColors.primary.withOpacity(0.5),
                         width: 2.0,
                       ),
                     ),

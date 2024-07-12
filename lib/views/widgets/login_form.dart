@@ -7,6 +7,7 @@ import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/utils/route/app_routes.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -21,6 +22,16 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _isVisible = true;
   bool isLogin = true;
+  String? adminId;
+  String? userName;
+  String? userEmail;
+  String? userPhotoUrl;
+
+  String extractNameFromEmail(String email) {
+    if (email.isEmpty) return 'Admin';
+    String namePart = email.split('@')[0];
+    return namePart[0].toUpperCase() + namePart.substring(1);
+  }
 
   Future<void> login() async {
     if (_formKey.currentState!.validate()) {
@@ -30,6 +41,62 @@ class _LoginFormState extends State<LoginForm> {
         _emailController.text,
         _passwordController.text,
       );
+
+      // Store the admin's ID if the user is an admin
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Fetch the user's data to determine their type
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          final userType = userDoc.data()?['type'] as String?;
+          if (userType == 'admin') {
+            adminId = user.uid;
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      // Ensure adminId is initialized
+      if (adminId == null) {
+        debugPrint('Admin ID is not initialized');
+        return;
+      }
+
+      debugPrint('Attempting to fetch data for Admin ID: $adminId');
+
+      // Fetch admin data from Firestore
+      final userDoc = await FirebaseFirestore.instance
+          .collection('admin_info')
+          .doc(adminId)
+          .get();
+
+      debugPrint('UserDoc exists: ${userDoc.exists}');
+
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+        setState(() {
+          userName = userData['displayName'] as String?;
+          userEmail = userData['email'] as String?;
+          userPhotoUrl = userData['photoURL'] as String?;
+          // adminId is already set, no need to fetch again
+        });
+
+        // Logging to check values
+        debugPrint('User Name: $userName');
+        debugPrint('User Email: $userEmail');
+        debugPrint('User Photo URL: $userPhotoUrl');
+      } else {
+        debugPrint('No user data found for Admin ID: $adminId');
+      }
+    } catch (e) {
+      debugPrint('Error loading user data: $e');
     }
   }
 
@@ -165,8 +232,30 @@ class _LoginFormState extends State<LoginForm> {
             bloc: cubit,
             listenWhen: (previous, current) =>
                 current is AuthSuccess || current is AuthFailure,
-            listener: (context, state) {
+            listener: (context, state) async {
               if (state is AuthSuccess) {
+                if (state.userType == 'admin') {
+                  // Get the current user
+                  User? user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    // Extract name from email
+                    String userName = extractNameFromEmail(user.email ?? '');
+
+                    // Store admin information in 'admin_info' collection
+                    await FirebaseFirestore.instance
+                        .collection('admin_info')
+                        .doc(adminId)
+                        .set({
+                      'adminId': adminId, // Use the stored adminId
+                      'email': user.email,
+                      'displayName': userName,
+                      'photoURL': user.photoURL,
+                      'lastSignIn': FieldValue.serverTimestamp(),
+                      // Uncomment the following line if you must store the password (not recommended)
+                      // 'password': _passwordController.text,
+                    }, SetOptions(merge: true));
+                  }
+                }
                 navigateBasedOnUserType(state.userType!, context);
               } else if (state is AuthFailure) {
                 showDialog(
