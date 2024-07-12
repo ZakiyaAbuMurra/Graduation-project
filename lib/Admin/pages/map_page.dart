@@ -196,8 +196,9 @@ class MapSampleState extends State<MapSample> {
           setState(() {
             binInfo = querySnapshot.docs;
 
-            _markers.clear();
-            _markerData.clear();
+
+          _markers.removeWhere((marker) => marker.markerId.value != 'CurrnetLocation');
+          _markerData.clear();
 
             for (var bin in binInfo) {
               // Check if _markerData already contains the docId
@@ -308,7 +309,6 @@ class MapSampleState extends State<MapSample> {
         showCard = true;
         // fetchBinLocations();
       });
-      _getRoute();
 
       getAddress();
       _fetchLatestBinHistory();
@@ -330,9 +330,9 @@ class MapSampleState extends State<MapSample> {
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         if (area == "address") {
-          address = "${place.locality},${place.name}";
+          address = "${place.street}";
         } else if (area == "name") {
-          address = "${place.name}";
+          address = "${place.street}";
         } else {
           address = '';
         }
@@ -538,6 +538,18 @@ class MapSampleState extends State<MapSample> {
 
     // Fetch initial data or perform any setup logic
     fetchBinLocations();
+    
+      
+      _markers.add(
+       const  Marker(
+          markerId: MarkerId('CurrnetLocation'),
+          position: LatLng(31.9574, 35.1886),
+        ),
+      );
+    
+   
+    print("============================================= markers ${_markers.length}");
+
 
     // Setup database subscription
     _databaseSubscription = _databaseReference.onValue.listen((event) async {
@@ -628,28 +640,21 @@ class MapSampleState extends State<MapSample> {
                   "---------------------------------------------- ${type}, ${driverArea}");
             }
           }
-          print(
-              "====================================================== ${binArea}");
 
-          if (binArea == driverArea) {
+            print("====================================================== ${binArea}");
+
+            if(binArea == driverArea){
             print("----------------------------------------- status is area");
 
-            if (data['fill-level'] != 0 &&
-                data['fill-level'] != 357 &&
-                data['fill-level'] <= notifiyLevel) {
-              if (type.toString().toLowerCase() == 'driver') {
-                print("------------------");
+              if (data['fill-level'] != 0 && data['fill-level'] != 357 && data['fill-level'] <= notifiyLevel  ) {
+                if(type.toString().toLowerCase() == 'driver'){
+                  
+                  print("------------------");
 
-                print(
-                    "----------------------------------------- status is fill");
+                print("----------------------------------------- status is fill");
 
-                await MapServices.initApp(driverArea);
-                NotificationService().saveNotification(
-                    'Fill Level Alert',
-                    'The bin ${data['binId']} is now ${data['fill-level']}cm Fill Level',
-                    driverArea,
-                    "fill-level");
-              }
+                  
+
 
               FirebaseFirestore.instance
                   .collection('bins')
@@ -814,6 +819,7 @@ class MapSampleState extends State<MapSample> {
         print('Error handling data from Firebase Realtime Database: $e');
       }
     });
+
   }
 
   @override
@@ -834,8 +840,8 @@ class MapSampleState extends State<MapSample> {
                 initialCameraPosition:
                     CameraPosition(target: _currentPosition, zoom: 8),
                 markers: Set<Marker>.of(_markers),
-                polylines:
-                    getShortestRoute == true ? _shortestPolylines : _polylines,
+  
+                polylines: getShortestRoute == true? _shortestPolylines:_polylines,
                 myLocationEnabled: true,
                 mapType: MapType.normal,
                 onMapCreated: (GoogleMapController controller) {
@@ -1297,6 +1303,8 @@ class MapSampleState extends State<MapSample> {
                                           ),
                                           child: ElevatedButton(
                                             onPressed: () {
+                                             _getRoute();
+
                                               //ToDo
                                               if (type == 'user' &&
                                                   _markerData[_markerIndex]
@@ -1304,7 +1312,6 @@ class MapSampleState extends State<MapSample> {
                                                           .toString()
                                                           .toLowerCase() ==
                                                       'full') {
-                                                // showDialog(context: context, builder: builder)
                                               } else {
                                                 print("Navigate successfuly");
                                               }
