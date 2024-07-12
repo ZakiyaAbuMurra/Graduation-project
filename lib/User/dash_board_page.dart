@@ -11,6 +11,9 @@ class _UserDashBoardState extends State<UserDashBoard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       appBar: AppBar(
+        title: const Text('Blogs'),
+      ),
       body: Column(
         children: [
           Stack(

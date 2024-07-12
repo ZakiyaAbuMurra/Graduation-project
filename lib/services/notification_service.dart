@@ -43,7 +43,7 @@ class NotificationService {
 
   Future<void> showNotification(
       {int? id , String? title, String? body, String? payload,GeoPoint? location, String? area, String? type}) async {
-    MapServices.saveRoutesLocation(id!,location!,area!,type!);
+   
 
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
@@ -69,7 +69,7 @@ class NotificationService {
     );
 
     await flutterLocalNotificationsPlugin.show(
-      id,
+      id!,
       title ?? 'Notification',
       body ?? 'Here is the notification body',
       platformChannelSpecifics,

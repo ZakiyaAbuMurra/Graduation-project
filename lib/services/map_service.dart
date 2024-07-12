@@ -90,7 +90,6 @@ class MapServices {
         'binID': binID,
         'location': location,
         'area':area,
-        'type': type,
       });
     } catch (e) {
       print('Error saving notification: $e');

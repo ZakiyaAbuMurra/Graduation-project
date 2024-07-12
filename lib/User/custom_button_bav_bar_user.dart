@@ -239,7 +239,7 @@ Future <void> getNotifiedData2(int binID) async{
                   await MapServices.initApp(driverArea);
                      NotificationService().saveNotification(
               'Fill Level Alert',
-              'The bin ${data['binId']} is now ${data['fill-level']}cm Fill Level',
+              'The bin ${data['binId']} is now ${100 - data['fill-level']}cm Fill Level',
               driverArea,
               "fill-level"
             );
@@ -426,7 +426,7 @@ Future <void> getNotifiedData2(int binID) async{
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.account_circle),
+            leading: const Icon(Icons.newspaper),
             title: const Text('Blog'),
             onTap: () {
               Navigator.pop(context); // Close the drawer
