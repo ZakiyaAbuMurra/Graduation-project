@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:get/get_rx/get_rx.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart' as latlong;
 
@@ -50,7 +48,6 @@ class MapSampleState extends State<MapSample> {
   Set<Polyline> _shortestPolylines = {};
   final prefrance = SharedPreferences.getInstance();
   final AuthServices authServices = AuthServicesImpl();
-  
 
   String _date = '';
   int year = 0;
@@ -81,11 +78,11 @@ class MapSampleState extends State<MapSample> {
 
   double notifiyHumidity = 0.0;
   double notifiyTemperature = 0.0;
-  double notifiyLevel = 0.0; 
+  double notifiyLevel = 0.0;
 
   StreamSubscription<DatabaseEvent>? _databaseSubscription;
   final List<Map<String, dynamic>> _markerData = [];
-  final List<Map<String,dynamic>> _routs = [];
+  final List<Map<String, dynamic>> _routs = [];
   late Map<String, dynamic> _latestData;
   User? user = FirebaseAuth.instance.currentUser;
   late  BitmapDescriptor customIcon2;
@@ -103,12 +100,14 @@ Future<BitmapDescriptor> _loadCustomMarker(String status) async {
   );
 }
 
+
   Future<BitmapDescriptor> _loadCurrentMarker() async {
      return await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: ui.Size(48, 48)),
       'assets/images/currentLocation.png',
     );
   }
+
 
 
 
@@ -129,12 +128,12 @@ Future<BitmapDescriptor> _loadCustomMarker(String status) async {
 
   //     if (userDoc.exists) {
   //       setState(() {
-          
-  //         type = userDoc['type']; 
+
+  //         type = userDoc['type'];
   //         if(userDoc['type'].toString().toLowerCase() == 'driver'){
   //          driverArea = userDoc['area'];
   //         }
-          
+
   //       });
   //     } else {
   //       print('User document does not exist');
@@ -167,77 +166,74 @@ Future<BitmapDescriptor> _loadCustomMarker(String status) async {
 }
 
   List<LatLng> decodePolyline(String encoded) {
-  List<LatLng> polyline = [];
-  int index = 0, len = encoded.length;
-  int lat = 0, lng = 0;
+    List<LatLng> polyline = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
 
-  while (index < len) {
-    int b, shift = 0, result = 0;
-    do {
-      b = encoded.codeUnitAt(index++) - 63;
-      result |= (b & 0x1F) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    int dlat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-    lat += dlat;
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1F) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lat += dlat;
 
-    shift = 0;
-    result = 0;
-    do {
-      b = encoded.codeUnitAt(index++) - 63;
-      result |= (b & 0x1F) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    int dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-    lng += dlng;
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1F) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lng += dlng;
 
-    LatLng p = LatLng(lat / 1E5, lng / 1E5);
-    polyline.add(p);
+      LatLng p = LatLng(lat / 1E5, lng / 1E5);
+      polyline.add(p);
+    }
+
+    return polyline;
   }
-
-  return polyline;
-}
 
 // Function to get route from OSRM
-Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
-  final url = 'http://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full';
+  Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
+    final url =
+        'http://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full';
 
-  final response = await http.get(Uri.parse(url)).timeout(Duration(seconds: 30));
+    final response =
+        await http.get(Uri.parse(url)).timeout(Duration(seconds: 30));
 
-  if (response.statusCode == 200) {
-    Map<String, dynamic> data = json.decode(response.body);
-    String encodedPolyline = data['routes'][0]['geometry'];
-    return decodePolyline(encodedPolyline);
-  } else {
-    throw Exception('Failed to load route');
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = json.decode(response.body);
+      String encodedPolyline = data['routes'][0]['geometry'];
+      return decodePolyline(encodedPolyline);
+    } else {
+      throw Exception('Failed to load route');
+    }
   }
-}
-
 
   Future<void> _initializeMap() async {
-     List<Polyline> newPolylines = [];
-
+    List<Polyline> newPolylines = [];
 
     for (latlong.LatLng location in routeList) {
-      List<LatLng> routePoints = await getRouteDriver(_currentPosition, location);
+      List<LatLng> routePoints =
+          await getRouteDriver(_currentPosition, location);
       newPolylines.add(Polyline(
           polylineId: PolylineId(location.toString()),
           visible: true,
           points: routePoints,
           color: Colors.blue,
-          width: 4
-        ));
-
-     
+          width: 4));
     }
-    if(mounted){
-       setState(() {
-        
+    if (mounted) {
+      setState(() {
         _shortestPolylines.addAll(newPolylines);
       });
     }
-    
   }
+
 Future<void> fetchBinLocations() async {
   try {
     // Create a stream to listen for updates
@@ -325,6 +321,7 @@ Future<void> fetchBinLocations() async {
     });
   } catch (e) {
     print('Error fetching bin locations: $e');
+
   }
 }
 
@@ -345,6 +342,7 @@ void _checkAndInitializeMap() async {
     String address = await getAddressFromLatLng(location!, 'address',binArea);
     String locat = await getAddressFromLatLng(location!, "name",binArea);
    // print("Address: $address");
+
     if (mounted) {
       setState(() {
         addressloc = address;
@@ -352,7 +350,6 @@ void _checkAndInitializeMap() async {
       });
     }
   }
-
 
   Future<void> addDataToHistory() async {
     try {
@@ -374,11 +371,10 @@ void _checkAndInitializeMap() async {
   }
 
   Future<void> _tappedMarker(String docId) async {
-   // fetchBinLocations();
+    // fetchBinLocations();
 
     if (mounted) {
       setState(() {
-
         _markerId = docId;
         _markerIndex =
             _markerData.indexWhere((marker) => marker['docId'] == _markerId);
@@ -388,10 +384,9 @@ void _checkAndInitializeMap() async {
         double distance = calculateDistance(_currentPosition, locroute);
         routeDistance = distance;
         routeTime = calculateEstimatedTime(_currentPosition, locroute);
-       // print("//////////////////// ${distance}");
+        // print("//////////////////// ${distance}");
         showCard = true;
-       // fetchBinLocations();
-
+        // fetchBinLocations();
       });
 
       getAddress(_markerData[_markerIndex]['area']);
@@ -444,7 +439,6 @@ Future<void> deleteRouteLocationsByArea(int area) async {
     }
   }
 
-
   Future<List<LatLng>> getRouteCoordinates(LatLng start, LatLng end) async {
     final response = await http.get(Uri.parse(
         'http://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson'));
@@ -456,8 +450,6 @@ Future<void> deleteRouteLocationsByArea(int area) async {
       throw Exception('Failed to load route');
     }
   }
-
-
 
   double calculateDistance(LatLng start, LatLng end) {
     const earthRadius = 6371; // Radius of the earth in km
@@ -500,19 +492,17 @@ Future<void> deleteRouteLocationsByArea(int area) async {
   Future<void> _getRoute() async {
     List<LatLng> route =
         await getRouteCoordinates(_currentPosition, locroute as LatLng);
-      if(mounted){
-    setState(() {
-      _polylines.add(Polyline(
-        polylineId: PolylineId('route'),
-        points: route,
-        color: Colors.blue,
-        width: 5,
-      ));
-    });
-      }
+    if (mounted) {
+      setState(() {
+        _polylines.add(Polyline(
+          polylineId: PolylineId('route'),
+          points: route,
+          color: Colors.blue,
+          width: 5,
+        ));
+      });
+    }
   }
-
- 
 
   Future<void> _fetchLatestBinHistory() async {
     try {
@@ -577,6 +567,7 @@ Future<void> deleteRouteLocationsByArea(int area) async {
 
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
+
       if(mounted){
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
@@ -591,6 +582,7 @@ Future<void> deleteRouteLocationsByArea(int area) async {
           "///////////////////////////////// ${position.latitude}\n ${position.longitude}");
     });
       }
+
     GeoPoint locationCurrent = GeoPoint(position.latitude, position.longitude);
     // String current = await getAddressFromLatLng(locationCurrent, "name");
     // print("//////////////////////////////////// Current = ${current}\n");
@@ -610,35 +602,28 @@ Future<void> deleteRouteLocationsByArea(int area) async {
         .animateCamera(CameraUpdate.newCameraPosition(_newCameraPosition));
   }
 
+  Map<String, dynamic>? binData;
 
-Map<String, dynamic>? binData;
-
-  Future <void> getNotifiedData2(int binID) async{
-
+  Future<void> getNotifiedData2(int binID) async {
     binData = await MapServices.getNotifiedData(binID);
-    if (binData!=null){
-      if(mounted){
+    if (binData != null) {
+      if (mounted) {
         setState(() {
-          
-      notifiyHumidity =  binData?['notifiyHumidity'] is int
-                  ? (binData?['notifiyHumidity'] as int).toDouble()
-                  : binData?['notifiyHumidity']; 
-                 
-      notifiyLevel =  binData?['notifyLevel'] is int
-                  ? (binData?['notifyLevel'] as int).toDouble()
-                  : binData?['notifyLevel'];
-      notifiyTemperature =   binData?['notifiyTemperature'] is int
-                  ? (binData?['notifiyTemperature'] as int).toDouble()
-                  : binData?['notifiyTemperature'];
-  
-        });
-    
-      }
+          notifiyHumidity = binData?['notifiyHumidity'] is int
+              ? (binData?['notifiyHumidity'] as int).toDouble()
+              : binData?['notifiyHumidity'];
 
-    }else{
+          notifiyLevel = binData?['notifyLevel'] is int
+              ? (binData?['notifyLevel'] as int).toDouble()
+              : binData?['notifyLevel'];
+          notifiyTemperature = binData?['notifiyTemperature'] is int
+              ? (binData?['notifiyTemperature'] as int).toDouble()
+              : binData?['notifiyTemperature'];
+        });
+      }
+    } else {
       print('bin data is null');
     }
-
   }
 Future<void> deleteAllRouteLocations() async {
   try {
@@ -651,6 +636,7 @@ Future<void> deleteAllRouteLocations() async {
     querySnapshot.docs.forEach((doc) {
       batch.delete(doc.reference);
     });
+
 
     await batch.commit();
     
@@ -669,6 +655,7 @@ Future<void> deleteAllRouteLocations() async {
     
  //deleteRouteLocationsByArea(5);
  deleteAllRouteLocations();
+
     // Fetch initial data or perform any setup logic
     fetchBinLocations();
     
@@ -680,65 +667,52 @@ Future<void> deleteAllRouteLocations() async {
 
 
     // Setup database subscription
- _databaseSubscription = _databaseReference.onValue.listen((event) async {
+    _databaseSubscription = _databaseReference.onValue.listen((event) async {
       try {
         final data = event.snapshot.value as Map<dynamic, dynamic>;
-     
+
         if (data != null) {
           print("Data received:");
           print("Bin ID: ${data['binId']}");
-          print("DateTime: ${DateTime(data['year'],data['month'],
-          data['day'],data['hour'],data['minute'])}");
+          print(
+              "DateTime: ${DateTime(data['year'], data['month'], data['day'], data['hour'], data['minute'])}");
           print("Fill Level: ${data['fill-level']}");
           print("Humidity: ${data['humidity']}");
           print("Temperature: ${data['temperature']}");
 
+          // print("Time: ${data['time']}");
 
+          FirebaseFirestore.instance
+              .collection('bins')
+              .where('binID', isEqualTo: data['binId'] as int)
+              .get()
+              .then((querySnapshot) {
+            for (var doc in querySnapshot.docs) {
+              print(
+                  "---------------------------------------------- ${Timestamp.fromDate(DateTime(data['year'], data['month']))}");
 
-
-
-
-         // print("Time: ${data['time']}");
-
-             FirebaseFirestore.instance
-                    .collection('bins')
-                    .where('binID', isEqualTo: data['binId'] as int)
-                    .get()
-                    .then((querySnapshot) {
-                  for (var doc in querySnapshot.docs) {
-                     print("---------------------------------------------- ${Timestamp.fromDate(DateTime(data['year'],data['month']))}");
-
-                    doc.reference.update({'fill-level': data['fill-level'], 
-                    'Humidity':data['humidity'],
-                    'temp':data['temperature'],
-                    'changes':Timestamp.fromDate(DateTime(data['year'],data['month'],
-
-                    data['day'],data['hour'],data['minute']))},
-                    ).then((_) {
-                      print(
-                          "Bin: ${data['binId']} data updated");
-                    }).catchError((error) {
-                      print("Failed to update bin status: $error");
-                    });
-                  }
-                }).catchError((error) {
-                  print("Failed to retrieve bin: $error");
-                });
-
+              doc.reference.update(
+                {
+                  'fill-level': data['fill-level'],
+                  'Humidity': data['humidity'],
+                  'temp': data['temperature'],
+                  'changes': Timestamp.fromDate(DateTime(data['year'],
+                      data['month'], data['day'], data['hour'], data['minute']))
+                },
+              ).then((_) {
+                print("Bin: ${data['binId']} data updated");
+              }).catchError((error) {
+                print("Failed to update bin status: $error");
+              });
+            }
+          }).catchError((error) {
+            print("Failed to retrieve bin: $error");
+          });
 
           if (mounted) {
             await getNotifiedData2(data['binId']);
             setState(() {
-
-            print(notifiyLevel);
-
-            
-
-
-         
-
-
-              
+              print(notifiyLevel);
 
               _binId = data['binId'] as int;
               year = data['year'];
@@ -758,14 +732,15 @@ Future<void> deleteAllRouteLocations() async {
               //_time = data['time'];
             });
 
-              addDataToHistory();
+            addDataToHistory();
           }
-           Map<String, String?> userType = await MapServices.getUserType();
-           if(mounted){
-             setState(() {
+          Map<String, String?> userType = await MapServices.getUserType();
+          if (mounted) {
+            setState(() {
               type = userType['type'];
               driverArea = userType['driverArea']!;
             });
+
            }
                           print("---------------------------------------------- ${type}, ${driverArea}, ${binInfo.length}");
 
@@ -782,16 +757,17 @@ Future<void> deleteAllRouteLocations() async {
             if(bin.data()?['binID'] as int == data['binId'] as int && bin.data()?['area'] == driverArea){
               print("/////////////////////////////////////////////// inside");
               if(mounted){
+
                 setState(() {
                   binArea = bin.data()?['area'];
                 });
               }
-              
 
-               print("---------------------------------------------- ${type}, ${driverArea}");
-
+              print(
+                  "---------------------------------------------- ${type}, ${driverArea}");
             }
           }
+
             print("====================================================== ${binArea}");
 
             if(binArea == driverArea){
@@ -806,6 +782,7 @@ Future<void> deleteAllRouteLocations() async {
 
                   
 
+
                   await MapServices.initApp(driverArea);
                      NotificationService().saveNotification(
               'Fill Level Alert',
@@ -813,135 +790,85 @@ Future<void> deleteAllRouteLocations() async {
               driverArea,
               "fill-level"
             );
+
                 }
-              
+              }).catchError((error) {
+                print("Failed to retrieve bin: $error");
+              });
+            } else if (data['humidity'] == -2000 ||
+                data['temperature'] == -2000) {
+              print("----------------------------------------- status is DHT");
 
+              NotificationService().saveNotification(
+                  'DHT Faliure Alert',
+                  'The bin ${data['binId']} has a DHT Faliure',
+                  driverArea,
+                  "DHT");
+
+              FirebaseFirestore.instance
+                  .collection('bins')
+                  .where('binID', isEqualTo: data['binId'])
+                  .get()
+                  .then((querySnapshot) {
+                for (var doc in querySnapshot.docs) {
+                  doc.reference.update({'status': 'failure'}).then((_) {
+                    if (_markerData[_markerIndex]['ID'] as int ==
+                        data['binId'] as int) {
+                      _markerData[_markerIndex]['status'] = 'Failure';
+                    }
+                    print(
+                        "Bin status updated to 'failure: DHT' for bin ID: ${data['binId']}");
+                  }).catchError((error) {
+                    print("Failed to update bin status: $error");
+                  });
+                }
+              }).catchError((error) {
+                print("Failed to retrieve bin: $error");
+              });
+            } else if (data['humidity'] >= notifiyHumidity) {
+              print(
+                  "----------------------------------------- status is humidity");
+
+              NotificationService().saveNotification(
+                  'Humidity Alert',
+                  'The bin ${data['binId']} reached ${data['humidity']} humidity',
+                  driverArea,
+                  "humidity");
+            } else if (data['temperature'] >= notifiyTemperature) {
+              print(
+                  "----------------------------------------- status is temperature");
+
+              NotificationService().saveNotification(
+                  'Temperature Alert',
+                  'The bin ${data['binId']} reached ${data['temperature']} Temperature',
+                  driverArea,
+                  "temp");
+            } else {
+              print(
+                  "--------------------------------------- ${data['fill-level']}");
+
+              if (data['fill-level'] as int >= 80 &&
+                  data['fill-level'] as int <= 100) {
+                print(
+                    "--------------------------------------- fill level entered");
                 FirebaseFirestore.instance
-                    .collection('bins')
-                    .where('binID', isEqualTo: data['binId'])
-                    .get()
-                    .then((querySnapshot) {
-                  for (var doc in querySnapshot.docs) {
-                    doc.reference.update({'status': 'full'}).then((_) {
-                      if( _markerData[_markerIndex]['ID'] == data['binId']){
-                        _markerData[_markerIndex]['status'] = 'Full';
-                      }
-                     
-                      print(
-                          "Bin status updated to 'full' for bin ID: ${data['binId']}");
-                    }).catchError((error) {
-                      print("Failed to update bin status: $error");
-                    });
-                  }
-                }).catchError((error) {
-                  print("Failed to retrieve bin: $error");
-                });
-              } else if(data['fill-level'] == 0 || data['fill-level'] == 357){
-                                print("----------------------------------------- status is lidar");
-
-                 // MapServices.initApp(driverArea);
-                     NotificationService().saveNotification(
-              'Ultrasonic Faliure Alert',
-              'The bin ${data['binId']} has a ultrasonic Faliure',
-              driverArea,
-              "ultrasonic"
-            );
-                   FirebaseFirestore.instance
-                    .collection('bins')
-                    .where('binID', isEqualTo: data['binId'])
-                    .get()
-                    .then((querySnapshot) {
-                  for (var doc in querySnapshot.docs) {
-                    doc.reference.update({'status': 'failure'}).then((_) {
-                       if( _markerData[_markerIndex]['ID'] == data['binId']){
-                        _markerData[_markerIndex]['status'] = 'Failure';
-                      }
-                      print(
-                          "Bin status updated to 'failure: Ultrasonic' for bin ID: ${data['binId']}");
-                    }).catchError((error) {
-                      print("Failed to update bin status: $error");
-                    });
-                  }
-                }).catchError((error) {
-                  print("Failed to retrieve bin: $error");
-                });
-
-              }else if(data['humidity'] == -2000 || data['temperature'] == -2000){
-                                print("----------------------------------------- status is DHT");
-
-                     NotificationService().saveNotification(
-              'DHT Faliure Alert',
-              'The bin ${data['binId']} has a DHT Faliure',
-              driverArea,
-              "DHT"
-            );
-
-                       FirebaseFirestore.instance
-                    .collection('bins')
-                    .where('binID', isEqualTo: data['binId'])
-                    .get()
-                    .then((querySnapshot) {
-                  for (var doc in querySnapshot.docs) {
-                    doc.reference.update({'status': 'failure'}).then((_) {
-                       if( _markerData[_markerIndex]['ID'] as int == data['binId'] as int){
-                        _markerData[_markerIndex]['status'] = 'Failure';
-                      }
-                      print(
-                          "Bin status updated to 'failure: DHT' for bin ID: ${data['binId']}");
-                    }).catchError((error) {
-                      print("Failed to update bin status: $error");
-                    });
-                  }
-                }).catchError((error) {
-                  print("Failed to retrieve bin: $error");
-                });
-              }else if(data['humidity']>= notifiyHumidity){
-                print("----------------------------------------- status is humidity");
-
-                   NotificationService().saveNotification(
-              'Humidity Alert',
-              'The bin ${data['binId']} reached ${data['humidity']} humidity',
-              driverArea,
-              "humidity"
-            );
-
-              }else if(data['temperature'] >= notifiyTemperature){
-                print("----------------------------------------- status is temperature");
-
-                  NotificationService().saveNotification(
-              'Temperature Alert',
-              'The bin ${data['binId']} reached ${data['temperature']} Temperature',
-              driverArea,
-              "temp"
-            );
-
-              }
-              
-              else {
-               print("--------------------------------------- ${data['fill-level']}");
-
-                if(data['fill-level'] as int >=80 && data['fill-level'] as int <=100){
-                  print("--------------------------------------- fill level entered");
-                  FirebaseFirestore.instance
                     .collection('bins')
                     .where('binID', isEqualTo: data['binId'] as int)
                     .get()
                     .then((querySnapshot) {
                   for (var doc in querySnapshot.docs) {
-                    doc.reference.update({'pickDate': Timestamp.fromDate(DateTime(data['year'],data['month'],
-
-                    data['day'],data['hour'],data['minute']))}).then((_) {
-                       if( _markerData[_markerIndex]['ID'] == data['binId']){
-                        
-                          
-                                     _markerData[_markerIndex]['date'] = Timestamp.fromDate(DateTime(data['year'],data['month'],
-
-                    data['day'],data['hour'],data['minute']));
-                            
-                          
-                          
-                        
-               
+                    doc.reference.update({
+                      'pickDate': Timestamp.fromDate(DateTime(
+                          data['year'],
+                          data['month'],
+                          data['day'],
+                          data['hour'],
+                          data['minute']))
+                    }).then((_) {
+                      if (_markerData[_markerIndex]['ID'] == data['binId']) {
+                        _markerData[_markerIndex]['date'] = Timestamp.fromDate(
+                            DateTime(data['year'], data['month'], data['day'],
+                                data['hour'], data['minute']));
                       }
                       print(
                           "Bin pickupdate updated to ${_markerData[_markerIndex]['date']} for bin ID: ${data['binId']}");
@@ -950,32 +877,31 @@ Future<void> deleteAllRouteLocations() async {
                     });
                   }
                 });
-                  
-                  
-                }
-                print("----------------------------------------- status is Empty");
-                await MapServices.deleteDocumentByBinId(data['binId']);
-                FirebaseFirestore.instance
-                    .collection('bins')
-                    .where('binID', isEqualTo: data['binId'] as int)
-                    .get()
-                    .then((querySnapshot) {
-                  for (var doc in querySnapshot.docs) {
-                    doc.reference.update({'status': 'not full'}).then((_) {
-                       if( _markerData[_markerIndex]['ID'] == data['binId']){
-                        _markerData[_markerIndex]['status'] = 'Not Full';
-                      }
-                      print(
-                          "Bin status updated to 'not full' for bin ID: ${data['binId']}");
-                    }).catchError((error) {
-                      print("Failed to update bin status: $error");
-                    });
-                  }
-                }).catchError((error) {
-                  print("Failed to retrieve bin: $error");
-                });
               }
-        }
+              print(
+                  "----------------------------------------- status is Empty");
+              await MapServices.deleteDocumentByBinId(data['binId']);
+              FirebaseFirestore.instance
+                  .collection('bins')
+                  .where('binID', isEqualTo: data['binId'] as int)
+                  .get()
+                  .then((querySnapshot) {
+                for (var doc in querySnapshot.docs) {
+                  doc.reference.update({'status': 'not full'}).then((_) {
+                    if (_markerData[_markerIndex]['ID'] == data['binId']) {
+                      _markerData[_markerIndex]['status'] = 'Not Full';
+                    }
+                    print(
+                        "Bin status updated to 'not full' for bin ID: ${data['binId']}");
+                  }).catchError((error) {
+                    print("Failed to update bin status: $error");
+                  });
+                }
+              }).catchError((error) {
+                print("Failed to retrieve bin: $error");
+              });
+            }
+          }
         } else {
           print('Received null data from Firebase Realtime Database.');
         }
@@ -1004,7 +930,7 @@ Future<void> deleteAllRouteLocations() async {
                 initialCameraPosition:
                     CameraPosition(target: _currentPosition, zoom: 13),
                 markers: Set<Marker>.of(_markers),
-                
+  
                 polylines: getShortestRoute == true? _shortestPolylines:_polylines,
                 myLocationEnabled: true,
                 mapType: MapType.normal,
@@ -1103,11 +1029,13 @@ Future<void> deleteAllRouteLocations() async {
                                                                   'full'
                                                               ? 'Full'
                                                               : _markerData[_markerIndex]
-                                                                          [
-                                                                          'status']
-                                                                      .toString()
-                                                                      .toLowerCase() ==
-                                                                  'failure'? 'Failure':'Empty',
+                                                                              [
+                                                                              'status']
+                                                                          .toString()
+                                                                          .toLowerCase() ==
+                                                                      'failure'
+                                                                  ? 'Failure'
+                                                                  : 'Empty',
                                                           style: TextStyle(
                                                             color: _markerData[_markerIndex]
                                                                             [
@@ -1115,15 +1043,15 @@ Future<void> deleteAllRouteLocations() async {
                                                                         .toString()
                                                                         .toLowerCase() ==
                                                                     'full'
-                                                                ? AppColors.red:
-                                                                _markerData[_markerIndex]
-                                                                          [
-                                                                          'status']
-                                                                      .toString()
-                                                                      .toLowerCase() ==
-                                                                  'failure'? Colors.orangeAccent
-                                                                : AppColors
-                                                                    .green,
+                                                                ? AppColors.red
+                                                                : _markerData[_markerIndex]['status']
+                                                                            .toString()
+                                                                            .toLowerCase() ==
+                                                                        'failure'
+                                                                    ? Colors
+                                                                        .orangeAccent
+                                                                    : AppColors
+                                                                        .green,
                                                             //fontWeight: FontWeight.bold,
                                                             fontSize: 14,
                                                           ),
@@ -1138,10 +1066,10 @@ Future<void> deleteAllRouteLocations() async {
                                         ),
                                         IconButton(
                                             onPressed: () {
-                                              if(mounted){
-                                              setState(() {
-                                                showCard = false;
-                                              });
+                                              if (mounted) {
+                                                setState(() {
+                                                  showCard = false;
+                                                });
                                               }
                                             },
                                             icon: Icon(
@@ -1520,6 +1448,7 @@ Future<void> deleteAllRouteLocations() async {
                       : const SizedBox())
               : const SizedBox(),
 
+
           type?.toLowerCase() == 'driver'?Align(
             alignment: AlignmentDirectional.bottomCenter,
             child: Padding(
@@ -1559,6 +1488,7 @@ Future<void> deleteAllRouteLocations() async {
               ):SizedBox(),
             ),
           ):SizedBox(),
+
         ],
       ),
     );
@@ -1686,8 +1616,8 @@ Future<void> deleteAllRouteLocations() async {
                             Row(
                               children: [
                                 const Text(
-                                 'Bin ID: ',
-                                  style:  TextStyle(
+                                  'Bin ID: ',
+                                  style: TextStyle(
                                     color: Color.fromARGB(255, 110, 108, 108),
                                     fontSize: 14,
                                   ),
@@ -1706,8 +1636,11 @@ Future<void> deleteAllRouteLocations() async {
                       )
                     ],
                   ),
-                  rowWidget(_markerData[_markerIndex]['fill-level'].toString(), 'Fill-Level',
-                      _markerData[_markerIndex]['humidity'].toString(), "Humidity"),
+                  rowWidget(
+                      _markerData[_markerIndex]['fill-level'].toString(),
+                      'Fill-Level',
+                      _markerData[_markerIndex]['humidity'].toString(),
+                      "Humidity"),
                   Padding(
                     padding: EdgeInsets.only(
                         top: MediaQuery.of(context).size.height * 0.015),
@@ -1771,6 +1704,4 @@ Future<void> deleteAllRouteLocations() async {
           );
         });
   }
-
-  
 }

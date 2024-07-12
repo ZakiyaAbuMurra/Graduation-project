@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:recyclear/Admin/pages/add_coupone_page.dart';
@@ -27,6 +28,7 @@ class _ViewStoreState extends State<ViewStore> {
           itemCount: data.size,
           itemBuilder: (context, index) {
             var coupon = data.docs[index];
+
             return GestureDetector(
               onTap: () {
                 Navigator.of(context).push(
@@ -41,17 +43,19 @@ class _ViewStoreState extends State<ViewStore> {
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: ListTile(
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      coupon['imageUrl'],
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.error),
-                    ),
-                  ),
+                  leading: !kIsWeb
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.network(
+                            coupon['imageUrl'],
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.error),
+                          ),
+                        )
+                      : null,
                   title: Text(coupon['name']),
                   subtitle: Text('Discount: ${coupon['discount']}%'),
                 ),

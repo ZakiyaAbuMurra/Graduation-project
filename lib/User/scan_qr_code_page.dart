@@ -115,11 +115,6 @@ Future <void> getNotifiedData2(int binID) async{
           print("Humidity: ${data['humidity']}");
           print("Temperature: ${data['temperature']}");
 
-
-
-
-
-
          // print("Time: ${data['time']}");
 
              FirebaseFirestore.instance
@@ -518,7 +513,7 @@ setState(() {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-                content: Text('Time difference is more than 5 minutes.')),
+                content: Text('Time difference is more than 2 minutes.')),
           );
         }
       } else {
