@@ -203,7 +203,7 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
            setState(() {
           binInfo = querySnapshot.docs;
 
-          _markers.clear();
+          _markers.removeWhere((marker) => marker.markerId.value != 'CurrnetLocation');
           _markerData.clear();
 
           for (var bin in binInfo) {
@@ -321,7 +321,6 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
        // fetchBinLocations();
 
       });
-      _getRoute();
 
       getAddress();
       _fetchLatestBinHistory();
@@ -343,9 +342,9 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         if (area == "address") {
-          address = "${place.locality},${place.name}";
+          address = "${place.street}";
         } else if (area == "name") {
-          address = "${place.name}";
+          address = "${place.street}";
         } else {
           address = '';
         }
@@ -566,6 +565,18 @@ Map<String, dynamic>? binData;
  
     // Fetch initial data or perform any setup logic
     fetchBinLocations();
+    
+      
+      _markers.add(
+       const  Marker(
+          markerId: MarkerId('CurrnetLocation'),
+          position: LatLng(31.9574, 35.1886),
+        ),
+      );
+    
+   
+    print("============================================= markers ${_markers.length}");
+
 
     // Setup database subscription
  _databaseSubscription = _databaseReference.onValue.listen((event) async {
@@ -672,10 +683,7 @@ Map<String, dynamic>? binData;
             print("====================================================== ${binArea}");
 
             if(binArea == driverArea){
-
-
-
-                          print("----------------------------------------- status is area");
+            print("----------------------------------------- status is area");
 
               if (data['fill-level'] != 0 && data['fill-level'] != 357 && data['fill-level'] <= notifiyLevel  ) {
                 if(type.toString().toLowerCase() == 'driver'){
@@ -863,6 +871,7 @@ Map<String, dynamic>? binData;
         print('Error handling data from Firebase Realtime Database: $e');
       }
     });
+
   }
 
   @override
@@ -883,6 +892,7 @@ Map<String, dynamic>? binData;
                 initialCameraPosition:
                     CameraPosition(target: _currentPosition, zoom: 8),
                 markers: Set<Marker>.of(_markers),
+                
                 polylines: getShortestRoute == true? _shortestPolylines:_polylines,
                 myLocationEnabled: true,
                 mapType: MapType.normal,
@@ -1343,6 +1353,8 @@ Map<String, dynamic>? binData;
                                           ),
                                           child: ElevatedButton(
                                             onPressed: () {
+                                             _getRoute();
+
                                               //ToDo
                                               if (type == 'user' &&
                                                   _markerData[_markerIndex]
@@ -1350,7 +1362,6 @@ Map<String, dynamic>? binData;
                                                           .toString()
                                                           .toLowerCase() ==
                                                       'full') {
-                                                // showDialog(context: context, builder: builder)
                                               } else {
                                                 print("Navigate successfuly");
                                               }
