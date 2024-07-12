@@ -1,7 +1,12 @@
+import 'dart:async';
+
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recyclear/services/map_service.dart';
+import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,10 +25,272 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
   bool isProcessing = false; // Flag to prevent multiple increments
   DateTime? lastScanTime; // To keep track of the last successful scan time
 
+
+  StreamSubscription<DatabaseEvent>? _databaseSubscription;
+  final DatabaseReference _databaseReference =
+      FirebaseDatabase.instance.reference().child('sensors/data');
+        final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+          List<DocumentSnapshot<Map<String, dynamic>>> binInfo = [];
+
+
+      Map<String, dynamic>? binData;
+  double notifiyHumidity = 0.0;
+  double notifiyTemperature = 0.0;
+  double notifiyLevel = 0.0; 
+    String _date = '';
+  int year = 0;
+  int month = 0;
+  int day = 0;
+  int hour = 0;
+  int minute = 0;
+  int second = 0;
+  double _fillLevel = 0;
+  double _humidity = 0.0;
+  double _temperature = 0.0;
+  String _time = '';
+  int _binId = -1;
+    String? type;
+  String driverArea = '';
+  String binArea = '';
+
+Future <void> getNotifiedData2(int binID) async{
+
+    binData = await MapServices.getNotifiedData(binID);
+    if (binData!=null){
+      if(mounted){
+        setState(() {
+          
+      notifiyHumidity =  binData?['notifiyHumidity'] is int
+                  ? (binData?['notifiyHumidity'] as int).toDouble()
+                  : binData?['notifiyHumidity']; 
+                 
+      notifiyLevel =  binData?['notifyLevel'] is int
+                  ? (binData?['notifyLevel'] as int).toDouble()
+                  : binData?['notifyLevel'];
+      notifiyTemperature =   binData?['notifiyTemperature'] is int
+                  ? (binData?['notifiyTemperature'] as int).toDouble()
+                  : binData?['notifiyTemperature'];
+  
+        });
+    
+      }
+
+    }else{
+      print('bin data is null');
+    }
+
+  }
+
+   Future<void> addDataToHistory() async {
+    try {
+      await _firestore.collection('binsHistory').add({
+        'binId': _binId,
+        'fill-level': _fillLevel,
+        'humidity': _humidity,
+        'temperature': _temperature,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      print('Data added to history successfully.');
+    } catch (e) {
+      print('Error adding data to history: $e');
+    }
+  }
+
+
   @override
   void initState() {
     super.initState();
     _checkFirstTimeUser('QRCodeScannerView');
+
+     _databaseSubscription = _databaseReference.onValue.listen((event) async {
+      try {
+        final data = event.snapshot.value as Map<dynamic, dynamic>;
+      
+        if (data != null) {
+          print("Data received:");
+          print("Bin ID: ${data['binId']}");
+          print("DateTime: ${DateTime(data['year'],data['month'],
+          data['day'],data['hour'],data['minute'])}");
+          print("Fill Level: ${data['fill-level']}");
+          print("Humidity: ${data['humidity']}");
+          print("Temperature: ${data['temperature']}");
+
+
+
+
+
+
+         // print("Time: ${data['time']}");
+
+             FirebaseFirestore.instance
+                    .collection('bins')
+                    .where('binID', isEqualTo: data['binId'] as int)
+                    .get()
+                    .then((querySnapshot) {
+                  for (var doc in querySnapshot.docs) {
+                     print("---------------------------------------------- ${Timestamp.fromDate(DateTime(data['year'],data['month']))}");
+
+                    doc.reference.update({'fill-level': data['fill-level'], 
+                    'Humidity':data['humidity'],
+                    'temp':data['temperature'],
+                    'changes':Timestamp.fromDate(DateTime(data['year'],data['month'],
+
+                    data['day'],data['hour'],data['minute']))},
+                    ).then((_) {
+                      print(
+                          "Bin: ${data['binId']} data updated");
+                    }).catchError((error) {
+                      print("Failed to update bin status: $error");
+                    });
+                  }
+                }).catchError((error) {
+                  print("Failed to retrieve bin: $error");
+                });
+
+
+          if (mounted) {
+            await getNotifiedData2(data['binId']);
+            setState(() {
+
+            print(notifiyLevel);
+
+            
+
+
+         
+
+
+              
+
+              _binId = data['binId'] as int;
+              year = data['year'];
+              month = data['month'];
+              day = data['day'];
+              hour = data['hour'];
+              minute = data['minute'];
+              _fillLevel = data['fill-level'] is int
+                  ? (data['fill-level'] as int).toDouble()
+                  : data['fill-level'];
+              _humidity = data['humidity'] is int
+                  ? (data['humidity'] as int).toDouble()
+                  : data['humidity'];
+              _temperature = data['temperature'] is int
+                  ? (data['temperature'] as int).toDouble()
+                  : data['temperature'];
+              //_time = data['time'];
+            });
+
+              addDataToHistory();
+          }
+           Map<String, String?> userType = await MapServices.getUserType();
+           if(mounted){
+             setState(() {
+              type = userType['type'];
+              driverArea = userType['driverArea']!;
+            });
+           }
+
+          for (var bin in binInfo){
+            if(bin.data()?['binID'] as int == data['binId'] as int && bin.data()?['area'] == driverArea){
+              if(mounted){
+                setState(() {
+                  binArea = bin.data()?['area'];
+                });
+              }
+              
+
+               print("---------------------------------------------- ${type}, ${driverArea}");
+
+            }
+          }
+            print("====================================================== ${binArea}");
+
+            if(binArea == driverArea){
+
+
+
+                          print("----------------------------------------- status is area");
+
+              if (data['fill-level'] != 0 && data['fill-level'] != 357 && data['fill-level'] <= notifiyLevel  ) {
+                if(type.toString().toLowerCase() == 'driver'){
+                  
+                  print("------------------");
+
+                print("----------------------------------------- status is fill");
+
+                  
+
+                  await MapServices.initApp(driverArea);
+                     NotificationService().saveNotification(
+              'Fill Level Alert',
+              'The bin ${data['binId']} is now ${data['fill-level']}cm Fill Level',
+              driverArea,
+              "fill-level"
+            );
+                }
+              
+
+              
+              } else if(data['fill-level'] == 0 || data['fill-level'] == 357){
+                                print("----------------------------------------- status is lidar");
+
+                 // MapServices.initApp(driverArea);
+                     NotificationService().saveNotification(
+              'Ultrasonic Faliure Alert',
+              'The bin ${data['binId']} has a ultrasonic Faliure',
+              driverArea,
+              "ultrasonic"
+            );
+                  
+
+              }else if(data['humidity'] == -2000 || data['temperature'] == -2000){
+                                print("----------------------------------------- status is DHT");
+
+                     NotificationService().saveNotification(
+              'DHT Faliure Alert',
+              'The bin ${data['binId']} has a DHT Faliure',
+              driverArea,
+              "DHT"
+            );
+
+                   
+              }else if(data['humidity']>= notifiyHumidity){
+                print("----------------------------------------- status is humidity");
+
+                   NotificationService().saveNotification(
+              'Humidity Alert',
+              'The bin ${data['binId']} reached ${data['humidity']} humidity',
+              driverArea,
+              "humidity"
+            );
+
+              }else if(data['temperature'] >= notifiyTemperature){
+                print("----------------------------------------- status is temperature");
+
+                  NotificationService().saveNotification(
+              'Temperature Alert',
+              'The bin ${data['binId']} reached ${data['temperature']} Temperature',
+              driverArea,
+              "temp"
+            );
+
+              }
+        }
+        } else {
+          print('Received null data from Firebase Realtime Database.');
+        }
+      } catch (e) {
+        print('Error handling data from Firebase Realtime Database: $e');
+      }
+    });
+  }
+
+  
+  @override
+  void dispose() {
+    // Cancel subscription to avoid memory leaks
+    _databaseSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -31,9 +298,12 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
     if (_showDialog && WidgetsBinding.instance != null) {
       WidgetsBinding.instance!.addPostFrameCallback((_) {
         _showIntroDialog(context);
-        setState(() {
+        if(mounted){
+setState(() {
           _showDialog = false;
         });
+        }
+        
       });
     }
     return Scaffold(
@@ -71,11 +341,15 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
       if (!isProcessing) {
-        setState(() {
+        if(mounted){
+          setState(() {
           result = scanData;
           isProcessing =
               true; // Set the flag to true to prevent multiple increments
         });
+
+        }
+        
         // Process the scanned data
         _processScannedData(scanData.code);
       }
@@ -94,9 +368,12 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
 
         // Optionally resume the camera after a delay
         Future.delayed(const Duration(seconds: 2), () {
-          setState(() {
+          if(mounted){
+   setState(() {
             isProcessing = false; // Reset the flag
           });
+          }
+       
           controller?.resumeCamera();
         });
       } catch (e) {
@@ -104,9 +381,13 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error processing scanned data')),
         );
-        setState(() {
+        if(mounted){
+          setState(() {
           isProcessing = false; // Reset the flag on error
         });
+
+        }
+        
       }
     }
   }
@@ -194,9 +475,13 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
 
       if (isFirstTime) {
         await prefs.setBool(uniqueKey, false);
-        setState(() {
+        if(mounted){
+           setState(() {
           _showDialog = true;
         });
+
+        }
+       
       }
     }
   }
@@ -268,9 +553,5 @@ class _QRCodeScannerViewState extends State<QRCodeScannerView> {
     }
   }
 
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
-  }
+
 }

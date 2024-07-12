@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:recyclear/services/map_service.dart';
 import 'package:recyclear/utils/app_colors.dart';
 
 class DriverRequests extends StatefulWidget {
@@ -12,56 +13,119 @@ class DriverRequests extends StatefulWidget {
 class _DriverRequestsState extends State<DriverRequests> {
   final CollectionReference appointments =
       FirebaseFirestore.instance.collection('bin_empty_requests');
-
-  Future<void> _removeAppointment(String userId) async {
+  String searchQuery = '';
+  String? driverArea;
+  @override
+  void initState() {
+    super.initState();
+    getAppointments();
+  }
+  Future<void> _removeAppointment(int Id) async {
     QuerySnapshot snapshot =
-        await appointments.where('user_id', isEqualTo: userId).get();
+        await appointments.where('appointmentId', isEqualTo: Id).get();
     for (var doc in snapshot.docs) {
       await doc.reference.delete();
+    }
+  }
+
+  
+  Future<void> getAppointments() async {
+    Map<String, String?> userType = await MapServices.getUserType();
+    if (mounted) {
+      setState(() {
+        driverArea = userType['driverArea'];
+      });
+    }
+  }
+
+  Stream<QuerySnapshot> _getFilteredAppointments(String? area) {
+    if (searchQuery.isEmpty) {
+      return appointments.where('area', isEqualTo: area).snapshots();
+    } else {
+      return appointments
+          .where('area', isEqualTo: area!)
+          .where('User email', isGreaterThanOrEqualTo: searchQuery)
+          .where('User email', isLessThanOrEqualTo: '$searchQuery\uf8ff')
+          .snapshots();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Appointments'),
+      ),
       backgroundColor: AppColors.bgColor,
-      body: StreamBuilder<QuerySnapshot>(
-        stream: appointments.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No appointments found.'));
-          }
-
-          List<DocumentSnapshot> docs = snapshot.data!.docs;
-          return SingleChildScrollView(
-            child: Center(
-              child: Column(
-                children: List.generate(docs.length, (index) {
-                  var appointment = docs[index].data() as Map<String, dynamic>;
-                  return appointmentsWidget(
-                    index,
-                    appointment['bin location'] ?? 'Unknown location',
-                    appointment['date'] ?? 'Unknown date',
-                    appointment['time'] ?? 'Unknown time',
-                    appointment['User email'] ?? '',
-                    appointment['phone'] ?? 'Unknown phone',
-                    appointment['user_id'],
-                  );
-                }),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.065,
+              width: MediaQuery.of(context).size.width * 0.92,
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search here',
+                  hintStyle: const TextStyle(fontSize: 15),
+                  prefixIcon: const Icon(Icons.search),
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
               ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _getFilteredAppointments(driverArea),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('No appointments found 1'));
+                } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('No appointments found.'));
+                }
+
+                List<DocumentSnapshot> docs = snapshot.data!.docs;
+                return SingleChildScrollView(
+                  child: Center(
+                    child: Column(
+                      children: List.generate(docs.length, (index) {
+                        var appointment =
+                            docs[index].data() as Map<String, dynamic>;
+                        return appointmentsWidget(
+                          appointment['appointmentId'] ?? 0,
+                          appointment['area'] ?? 'Unknown area',
+                          appointment['date'] ?? 'Unknown date',
+                          appointment['time'] ?? 'Unknown time',
+                          appointment['User email'] ?? '',
+                          appointment['phone'] ?? 'Unknown phone',
+                          appointment['user_id'],
+                        );
+                      }),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget appointmentsWidget(int index, String location, String date,
-      String time, String email, String phone, String id) {
+  Widget appointmentsWidget(int index, String location, String date, String time,
+      String email, String phone, String id) {
     return Padding(
       padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.02),
       child: Container(
@@ -190,8 +254,7 @@ class _DriverRequestsState extends State<DriverRequests> {
                               children: [
                                 Icon(
                                   Icons.phone,
-                                  size:
-                                      MediaQuery.of(context).size.height * 0.03,
+                                  size: MediaQuery.of(context).size.height * 0.03,
                                   color: AppColors.lineColors,
                                 ),
                                 Padding(
@@ -209,7 +272,7 @@ class _DriverRequestsState extends State<DriverRequests> {
                           ),
                           ElevatedButton(
                             onPressed: () async {
-                              await _removeAppointment(id);
+                              await _removeAppointment(index);
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,
@@ -221,8 +284,7 @@ class _DriverRequestsState extends State<DriverRequests> {
                               ),
                             ),
                             child: SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.035,
+                              height: MediaQuery.of(context).size.height * 0.035,
                               child: const Text('Collect'),
                             ),
                           ),
