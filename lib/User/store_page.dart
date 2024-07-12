@@ -18,6 +18,7 @@ class _UserStoreState extends State<UserStore> {
   int _currentImageIndex = 0;
   bool _showDialog = false;
   List<Map<String, dynamic>> _coupons = [];
+  int _userPoints = 0;
 
   final List<String> _imagePaths = [
     'assets/images/shein.png',
@@ -30,7 +31,7 @@ class _UserStoreState extends State<UserStore> {
   void initState() {
     super.initState();
     _checkFirstTimeUser('UserStore');
-    _fetchCouponsFromFirestore();
+    _fetchUserData();
   }
 
   Future<void> _checkFirstTimeUser(String key) async {
@@ -47,6 +48,27 @@ class _UserStoreState extends State<UserStore> {
         setState(() {
           _showDialog = true;
         });
+      }
+    }
+  }
+
+  Future<void> _fetchUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        var userData = userDoc.data() as Map<String, dynamic>;
+        if (userData['type'] == 'user') {
+          setState(() {
+            _userPoints = userData['points'] ?? 0;
+          });
+          _fetchCouponsFromFirestore();
+        }
       }
     }
   }
@@ -72,31 +94,43 @@ class _UserStoreState extends State<UserStore> {
   }
 
   Future<void> _loadCouponStatuses() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      String email = user.email!;
+      String userId = user.uid;
       for (var coupon in _coupons) {
-        String statusKey = '${email}_coupon_${coupon['code']}';
-        String timestampKey = '${email}_timestamp_${coupon['code']}';
-
-        String? status = prefs.getString(statusKey);
-        String? timestamp = prefs.getString(timestampKey);
-
-        if (status != null && timestamp != null) {
-          DateTime couponTime = DateTime.parse(timestamp);
-          DateTime now = DateTime.now();
-          if (now.difference(couponTime).inDays >= 7) {
-            status = 'Expired';
-            await _saveCouponStatus(coupon['code'], 'Expired', email);
-          }
+        bool hasUsed = await _hasUserUsedCoupon(coupon['code'], userId);
+        if (hasUsed) {
           setState(() {
-            coupon['status'] = status;
+            coupon['status'] = 'Used';
+          });
+        } else {
+          setState(() {
+            coupon['status'] = _userPoints >= (coupon['discount'] ?? 0)
+                ? 'Available'
+                : 'Not enough points';
           });
         }
       }
     }
+  }
+
+  Future<void> _saveCouponUsage(String code, String userId) async {
+    await FirebaseFirestore.instance.collection('user_coupons').add({
+      'userId': userId,
+      'couponCode': code,
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<bool> _hasUserUsedCoupon(String code, String userId) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('user_coupons')
+        .where('userId', isEqualTo: userId)
+        .where('couponCode', isEqualTo: code)
+        .get();
+
+    return snapshot.docs.isNotEmpty;
   }
 
   Future<void> _saveCouponStatus(
@@ -108,6 +142,30 @@ class _UserStoreState extends State<UserStore> {
     await prefs.setString(statusKey, status);
     if (status == 'Available') {
       await prefs.setString(timestampKey, DateTime.now().toIso8601String());
+    }
+  }
+
+  Future<void> _updateUserPoints(int pointsToDeduct) async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      DocumentReference userDocRef =
+          FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot userDoc = await transaction.get(userDocRef);
+
+        if (userDoc.exists) {
+          int currentPoints = userDoc.get('points');
+          int updatedPoints = currentPoints - pointsToDeduct;
+
+          transaction.update(userDocRef, {'points': updatedPoints});
+
+          setState(() {
+            _userPoints = updatedPoints;
+          });
+        }
+      });
     }
   }
 
@@ -225,6 +283,16 @@ class _UserStoreState extends State<UserStore> {
   }
 
   void _showCouponDialog(Map<String, dynamic> couponData) {
+    if (_userPoints < couponData['discount']) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Not enough points to redeem this coupon.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -284,12 +352,14 @@ class _UserStoreState extends State<UserStore> {
                         onPressed: () async {
                           User? user = FirebaseAuth.instance.currentUser;
                           if (user != null) {
-                            String email = user.email!;
+                            String userId = user.uid;
                             setState(() {
                               couponData['status'] = 'Used';
                             });
                             await _saveCouponStatus(
-                                couponData['code'], 'Used', email);
+                                couponData['code'], 'Used', user.email!);
+                            await _updateUserPoints(couponData['discount']);
+                            await _saveCouponUsage(couponData['code'], userId);
                             Navigator.of(context).pop(); // Close the dialog
                             _showSuccessDialog(couponData['code']);
                           }
@@ -442,9 +512,6 @@ class _UserStoreState extends State<UserStore> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-      ),
       body: Column(
         children: [
           Column(
@@ -508,6 +575,40 @@ class _UserStoreState extends State<UserStore> {
               itemBuilder: (context, index) {
                 return _buildCouponCard(_coupons[index]);
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PointsDisplay extends StatelessWidget {
+  final int points;
+
+  const _PointsDisplay({required this.points});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.monetization_on,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$points',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
         ],

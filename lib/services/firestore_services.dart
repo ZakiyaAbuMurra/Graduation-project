@@ -1,7 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:recyclear/models/bin_model.dart';
 import 'package:recyclear/services/map_service.dart';
 import 'package:recyclear/services/notification_service.dart';
