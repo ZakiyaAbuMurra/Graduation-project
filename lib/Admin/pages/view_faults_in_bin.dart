@@ -29,6 +29,7 @@ class ViewFaultsBins extends StatelessWidget {
               Country_name: data['Country name'] ?? 'Unknown',
               Neighborhood_name: data['Neighborhood name'] ?? 'Unknown',
               phoneNumber: data['phoneNumber'] ?? 'N/A',
+              User_name: data['User name'] ?? 'No name',
             );
           }).toList();
 
@@ -61,7 +62,7 @@ class ViewFaultsBins extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              faultBins.description,
+                              faultBins.User_name,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
@@ -189,11 +190,13 @@ class FaultBins {
   final String Country_name;
   final String Neighborhood_name;
   final String phoneNumber;
+  final String User_name;
 
   FaultBins({
     required this.description,
     required this.Country_name,
     required this.Neighborhood_name,
     required this.phoneNumber,
+    required this.User_name,
   });
 }

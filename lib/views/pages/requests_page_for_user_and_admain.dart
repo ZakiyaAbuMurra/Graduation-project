@@ -116,7 +116,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     adminButtonLabel: 'Manage now!',
                     userPage: const ReportIncorrectBinPage(),
                     adminPage:
-                        ManageIncoorectLocation(), // Replace with actual admin page
+                        ManageIncorrectLocation(), // Replace with actual admin page
                   ),
                 ),
               ],
@@ -130,7 +130,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     icon: Icons.local_offer_outlined,
                     userType: userType,
                     userText: 'Coupons problem',
-                    adminText: 'Manage coupons',
+                    adminText: 'View coupons',
                     userButtonLabel: 'Report now!',
                     adminButtonLabel: 'Manage now!',
                     userPage: const CouponsProblemPage(),
@@ -143,7 +143,7 @@ class _RequestsPageState extends State<RequestsPage> {
                     icon: Icons.calendar_month_outlined,
                     userType: userType,
                     userText: 'Book to empty bin',
-                    adminText: 'Manage empty bin',
+                    adminText: ' View empty bin',
                     userButtonLabel: 'Book now!',
                     adminButtonLabel: 'Manage now!',
                     userPage: const BookAppointmentPage(),

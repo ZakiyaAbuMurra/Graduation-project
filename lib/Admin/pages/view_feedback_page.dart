@@ -26,7 +26,7 @@ class ViewFeedbackPage extends StatelessWidget {
           List<FeedbackItem> feedbackList = feedbackDocs.map((doc) {
             var data = doc.data() as Map<String, dynamic>;
             return FeedbackItem(
-              user: data['user'] ?? 'Anonymous',
+              user: data['name'] ?? 'Anonymous',
               feedback: data['feedback description'] ?? 'No feedback',
               emoji: data['selected_emoji'] ?? '😊',
               timestamp: (data['timestamp'] as Timestamp?)
