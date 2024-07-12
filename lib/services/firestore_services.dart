@@ -8,6 +8,7 @@ import 'package:recyclear/services/notification_service.dart';
 class FirestoreService {
   FirestoreService._();
   static final instance = FirestoreService._();
+  String? type;
 
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
 
@@ -92,7 +93,13 @@ class FirestoreService {
   }
 
 Future<void> monitorBinHeightAndNotify(String area ) async {
-    print('================= monitorBinHeightAndNotify ${area}');
+      Map<String, String?> userType = await MapServices.getUserType();
+        
+              type = userType['type'];
+                  print('================= monitorBinHeightAndNotify ${type}');
+
+            
+           
 
   collectionStream<BinModel>(
     path: 'bins',
@@ -103,18 +110,23 @@ Future<void> monitorBinHeightAndNotify(String area ) async {
   ).listen(
     (binList) {
       DateTime now = DateTime.now();
+      
 
     
       //print("------------------------------------------------------- ${now}");
 
       for (var bin in binList) {
         print("---------------------------------------------- ${bin.changes.toDate()}");
+        if(type?.toLowerCase() != 'user'){
 
         Duration difference = now.difference(bin.changes.toDate());
 
         if(difference.inMinutes < 1 && bin.area == area){
         //
         print( "-------------------------------------------------------- ${binList.length}");
+        
+
+        
              if (bin.fillLevel == null || bin.humidity == null || bin.temp == null) {
           debugPrint("Bin with ID ${bin.id} has a null value.");
         } else {
@@ -129,7 +141,7 @@ Future<void> monitorBinHeightAndNotify(String area ) async {
             NotificationService().showNotification(
               id: bin.binID,
               title: 'Bin Height Alert',
-              body: 'The bin ${bin.binID} now ${bin.fillLevel}cm high.',
+              body: 'The bin ${bin.binID} now ${ 100 - bin.fillLevel}cm high.',
               payload: 'Bin ID: ${bin.id}',
               area: bin.area,
               type: 'fill-level',
@@ -150,14 +162,14 @@ Future<void> monitorBinHeightAndNotify(String area ) async {
               type: 'temp',
               location: bin.location
             );
-            MapServices.saveRoutesLocation(bin.binID,bin.location,bin.area,'temperature');
+           // MapServices.saveRoutesLocation(bin.binID,bin.location,bin.area,'temperature');
 
 
         
           }
           else if(bin.humidity >= bin.notifiyHumidity){
                 debugPrint("Showing notification for bin at location: ${bin.location}");
-              MapServices.saveRoutesLocation(bin.binID,bin.location,bin.area,'humidity');
+             // MapServices.saveRoutesLocation(bin.binID,bin.location,bin.area,'humidity');
 
 
             NotificationService().showNotification(
@@ -170,7 +182,7 @@ Future<void> monitorBinHeightAndNotify(String area ) async {
               location: bin.location
             );
           }else if(bin.fillLevel == 0 || bin.fillLevel == 357){
-          MapServices.saveRoutesLocation(bin.binID,bin.location,bin.area,'lidar');
+         // MapServices.saveRoutesLocation(bin.binID,bin.location,bin.area,'lidar');
 
             NotificationService().showNotification(
               id: bin.binID,
@@ -182,7 +194,7 @@ Future<void> monitorBinHeightAndNotify(String area ) async {
               location: bin.location
             );
           } else if(bin.humidity == -2000 || bin.temp == -2000){
-                      MapServices.saveRoutesLocation(bin.binID,bin.location,bin.area,'DHT');
+                    //  MapServices.saveRoutesLocation(bin.binID,bin.location,bin.area,'DHT');
 
              NotificationService().showNotification(
               id: bin.binID,
@@ -196,6 +208,7 @@ Future<void> monitorBinHeightAndNotify(String area ) async {
           } 
         }
 
+        }
         }
    
       }

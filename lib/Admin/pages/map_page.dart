@@ -25,6 +25,8 @@ import 'package:recyclear/services/map_service.dart';
 import 'package:recyclear/services/notification_service.dart';
 import 'package:recyclear/utils/app_colors.dart';
 import 'package:recyclear/views/widgets/main_button.dart';
+import 'dart:ui' as ui;
+
 import 'package:shared_preferences/shared_preferences.dart'; // Add this line
 
 class MapSample extends StatefulWidget {
@@ -86,8 +88,27 @@ class MapSampleState extends State<MapSample> {
   final List<Map<String,dynamic>> _routs = [];
   late Map<String, dynamic> _latestData;
   User? user = FirebaseAuth.instance.currentUser;
+  late  BitmapDescriptor customIcon2;
+ // late BitmapDescriptor surrentIcon;
 
 
+Future<BitmapDescriptor> _loadCustomMarker(String status) async {
+  return await BitmapDescriptor.fromAssetImage(
+    ImageConfiguration(size: ui.Size(100, 100)),
+    status.toLowerCase() == 'full'
+        ? 'assets/images/redMark.png'
+        : status.toLowerCase() == 'not full'
+            ? 'assets/images/greenMark.png'
+            : 'assets/images/yellowMark.png',
+  );
+}
+
+  Future<BitmapDescriptor> _loadCurrentMarker() async {
+     return await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: ui.Size(48, 48)),
+      'assets/images/currentLocation.png',
+    );
+  }
 
 
 
@@ -122,6 +143,28 @@ class MapSampleState extends State<MapSample> {
   //     print('Error fetching user type: $e');
   //   }
   // }
+
+  void listenToBinsStatus(String area) {
+  CollectionReference bins = FirebaseFirestore.instance.collection('bins');
+
+  Stream<QuerySnapshot> stream = bins
+      .where('area', isEqualTo: area)
+      .where('status', whereIn: ['failure', 'full'])
+      .snapshots();
+
+  stream.listen((QuerySnapshot querySnapshot) {
+    querySnapshot.docChanges.forEach((change) {
+      // Handle document changes here
+      if (change.type == DocumentChangeType.added) {
+        print('New bin added: ${change.doc.id}, Status: ${change.doc.data()??['status']}');
+      } else if (change.type == DocumentChangeType.modified) {
+        print('Modified bin: ${change.doc.id}, Status: ${change.doc.data()??['status']}');
+      } else if (change.type == DocumentChangeType.removed) {
+        print('Removed bin: ${change.doc.id}');
+      }
+    });
+  });
+}
 
   List<LatLng> decodePolyline(String encoded) {
   List<LatLng> polyline = [];
@@ -195,83 +238,112 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
     }
     
   }
-  Future<void> fetchBinLocations() async {
-    try {
-      // Create a stream to listen for updates
-      FirebaseFirestore.instance.collection('bins').snapshots().listen((querySnapshot) {
-        if(mounted){
-           setState(() {
-          binInfo = querySnapshot.docs;
+Future<void> fetchBinLocations() async {
+  try {
+    // Create a stream to listen for updates
+    FirebaseFirestore.instance.collection('bins').snapshots().listen((querySnapshot) async {
+      if (mounted) {
 
-          _markers.removeWhere((marker) => marker.markerId.value != 'CurrnetLocation');
-          _markerData.clear();
+        List<DocumentSnapshot<Map<String, dynamic>>> binInfo1 = querySnapshot.docs; 
+        print("-------------------------------- ${binInfo1.length}");
+                       
+            binInfo = binInfo1;
+          
+        
+                print("-------------------------------- bin info ${binInfo.length}");
 
-          for (var bin in binInfo) {
-            // Check if _markerData already contains the docId
-            var existingIndex = _markerData.indexWhere((element) => element['docId'] == bin.id);
 
-            if (existingIndex != -1) {
-              setState(() {
-                _markerData[existingIndex] = {
-                  'docId': bin.id,
-                  'height': bin.data()?['Height'],
-                  'humidity': bin.data()?['Humidity'],
-                  'material': bin.data()?['Material'],
-                  'width': bin.data()?['Width'],
-                  'color': bin.data()?['color'],
-                  'fill-level': bin.data()?['fill-level'],
-                  'location': bin.data()?['location'],
-                  'status': bin.data()?['status'],
-                  'temp': bin.data()?['temp'],
-                  'date': bin.data()?['pickDate'],
-                  'ID': bin.data()?['binID'],
-                  'area': bin.data()?['area'],
-                };
-              });
-            } else {
-              setState(() {
-                _markerData.add({
-                  'docId': bin.id,
-                  'height': bin.data()?['Height'],
-                  'humidity': bin.data()?['Humidity'],
-                  'material': bin.data()?['Material'],
-                  'width': bin.data()?['Width'],
-                  'color': bin.data()?['color'],
-                  'fill-level': bin.data()?['fill-level'],
-                  'location': bin.data()?['location'],
-                  'status': bin.data()?['status'],
-                  'temp': bin.data()?['temp'],
-                  'date': bin.data()?['pickDate'],
-                  'ID': bin.data()?['binID'],
-                  'area': bin.data()?['area'],
-                });
-              });
-            }
+        Set<Marker> newMarkers = {};
 
-            GeoPoint geoPoint = bin.data()?['location'];
-            _markers.add(
-              Marker(
-                markerId: MarkerId(bin.id),
-                position: LatLng(geoPoint.latitude, geoPoint.longitude),
-                onTap: () async => await _tappedMarker(bin.id),
-              ),
-            );
+        for (var bin in binInfo1) {
+          var binData = bin.data() as Map<String, dynamic>;
+
+          var existingIndex = _markerData.indexWhere((element) => element['docId'] == bin.id);
+
+          if (existingIndex != -1) {
+            _markerData[existingIndex] = {
+              'docId': bin.id,
+              'height': binData['Height'],
+              'humidity': binData['Humidity'],
+              'material': binData['Material'],
+              'width': binData['Width'],
+              'color': binData['color'],
+              'fill-level': binData['fill-level'],
+              'location': binData['location'],
+              'status': binData['status'],
+              'temp': binData['temp'],
+              'date': binData['pickDate'],
+              'ID': binData['binID'],
+              'area': binData['area'],
+            };
+          } else {
+            _markerData.add({
+              'docId': bin.id,
+              'height': binData['Height'],
+              'humidity': binData['Humidity'],
+              'material': binData['Material'],
+              'width': binData['Width'],
+              'color': binData['color'],
+              'fill-level': binData['fill-level'],
+              'location': binData['location'],
+              'status': binData['status'],
+              'temp': binData['temp'],
+              'date': binData['pickDate'],
+              'ID': binData['binID'],
+              'area': binData['area'],
+            });
           }
-        });
 
+          GeoPoint geoPoint = binData['location'];
+          BitmapDescriptor customIcon = await _loadCustomMarker(binData['status']);
+          BitmapDescriptor currentIcon = await _loadCurrentMarker();
+
+          _markers.add(
+            Marker(
+              markerId: MarkerId('CurrentLocation'),
+              icon: currentIcon,
+              position: LatLng(31.9574, 35.1886),
+            ),
+          );
+
+          newMarkers.add(
+            Marker(
+              markerId: MarkerId(bin.id),
+              icon: customIcon,
+              position: LatLng(geoPoint.latitude, geoPoint.longitude),
+              onTap: () async => await _tappedMarker(bin.id),
+            ),
+          );
         }
-       
 
-      });
-    } catch (e) {
-      print('Error fetching bin locations: $e');
-    }
+        // Update markers with new data
+        setState(() {
+          _markers.removeWhere((marker) => marker.markerId.value != 'CurrentLocation');
+          _markers.addAll(newMarkers);
+        });
+      }
+    });
+  } catch (e) {
+    print('Error fetching bin locations: $e');
   }
+}
 
 
-  void getAddress() async {
-    String address = await getAddressFromLatLng(location!, 'address');
-    String locat = await getAddressFromLatLng(location!, "name");
+void _checkAndInitializeMap() async {
+  if (routeList.length != 0) {
+    await _initializeMap();
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('No Bins need to collect in your area')),
+    );
+  }
+}
+
+
+
+  void getAddress(String binArea) async {
+    String address = await getAddressFromLatLng(location!, 'address',binArea);
+    String locat = await getAddressFromLatLng(location!, "name",binArea);
    // print("Address: $address");
     if (mounted) {
       setState(() {
@@ -322,18 +394,32 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
 
       });
 
-      getAddress();
+      getAddress(_markerData[_markerIndex]['area']);
       _fetchLatestBinHistory();
     }
   }
+Future<void> deleteRouteLocationsByArea(int area) async {
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('routeLocations')
+        .where('binID', isEqualTo: area)
+        .get();
 
-  static const CameraPosition _kLake = CameraPosition(
-      bearing: 192.8334901395799,
-      target: LatLng(37.43296265331129, -122.08832357078792),
-      tilt: 59.440717697143555,
-      zoom: 19.151926040649414);
+    List<DocumentSnapshot> documents = querySnapshot.docs;
 
-  Future<String> getAddressFromLatLng(GeoPoint location, String area) async {
+    for (DocumentSnapshot document in documents) {
+      await document.reference.delete();
+      print('Document ${document.id} successfully deleted.');
+    }
+
+    print('Deletion operation completed.');
+  } catch (e) {
+    print('Error deleting route locations: $e');
+  }
+}
+
+
+  Future<String> getAddressFromLatLng(GeoPoint location, String area, String binArea) async {
     try {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(location.latitude, location.longitude);
@@ -344,7 +430,7 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
         if (area == "address") {
           address = "${place.street}";
         } else if (area == "name") {
-          address = "${place.street}";
+          address = "${binArea} - ${place.street}"; 
         } else {
           address = '';
         }
@@ -497,6 +583,7 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
       _markers.add(
         Marker(
           markerId: MarkerId('CurrnetLocation'),
+          icon: customIcon2,
           position: LatLng(position.latitude, position.longitude),
         ),
       );
@@ -505,19 +592,19 @@ Future<List<LatLng>> getRouteDriver(LatLng start, latlong.LatLng end) async {
     });
       }
     GeoPoint locationCurrent = GeoPoint(position.latitude, position.longitude);
-    String current = await getAddressFromLatLng(locationCurrent, "name");
-    print("//////////////////////////////////// Current = ${current}\n");
+    // String current = await getAddressFromLatLng(locationCurrent, "name");
+    // print("//////////////////////////////////// Current = ${current}\n");
 
     _cameraToPosition(_currentPosition);
 
     print(_markers.length);
     controller?.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: _currentPosition, zoom: 8)));
+        CameraPosition(target: _currentPosition, zoom: 13)));
   }
 
   Future<void> _cameraToPosition(LatLng pos) async {
     final GoogleMapController controller = await _controller.future;
-    CameraPosition _newCameraPosition = CameraPosition(target: pos, zoom: 8);
+    CameraPosition _newCameraPosition = CameraPosition(target: pos, zoom: 13);
 
     await controller
         .animateCamera(CameraUpdate.newCameraPosition(_newCameraPosition));
@@ -553,26 +640,40 @@ Map<String, dynamic>? binData;
     }
 
   }
+Future<void> deleteAllRouteLocations() async {
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('routeLocations')
+        .get();
 
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+
+    querySnapshot.docs.forEach((doc) {
+      batch.delete(doc.reference);
+    });
+
+    await batch.commit();
+    
+    print('All routeLocations deleted successfully.');
+  } catch (e) {
+    print('Error deleting routeLocations: $e');
+  }
+}
     @override
   void initState() {
     super.initState();
+    _loadCurrentMarker();
    
  
-
        //  initApp();
     
- 
+ //deleteRouteLocationsByArea(5);
+ deleteAllRouteLocations();
     // Fetch initial data or perform any setup logic
     fetchBinLocations();
     
       
-      _markers.add(
-       const  Marker(
-          markerId: MarkerId('CurrnetLocation'),
-          position: LatLng(31.9574, 35.1886),
-        ),
-      );
+   
     
    
     print("============================================= markers ${_markers.length}");
@@ -666,9 +767,20 @@ Map<String, dynamic>? binData;
               driverArea = userType['driverArea']!;
             });
            }
+                          print("---------------------------------------------- ${type}, ${driverArea}, ${binInfo.length}");
+
+
 
           for (var bin in binInfo){
+
+            print(bin.data()?['status']);
+
+            
+            if(bin.data()?['status'].toString().toLowerCase() == 'full' ||  bin.data()?['status'].toString().toLowerCase() == 'failure'){
+            await MapServices.saveRoutesLocation(bin['binID'], bin['location'], bin['area'],bin.data()!['status'].toString() );
+          }
             if(bin.data()?['binID'] as int == data['binId'] as int && bin.data()?['area'] == driverArea){
+              print("/////////////////////////////////////////////// inside");
               if(mounted){
                 setState(() {
                   binArea = bin.data()?['area'];
@@ -697,7 +809,7 @@ Map<String, dynamic>? binData;
                   await MapServices.initApp(driverArea);
                      NotificationService().saveNotification(
               'Fill Level Alert',
-              'The bin ${data['binId']} is now ${data['fill-level']}cm Fill Level',
+              'The bin ${data['binId']} is now ${100 - data['fill-level']}cm Fill Level',
               driverArea,
               "fill-level"
             );
@@ -890,7 +1002,7 @@ Map<String, dynamic>? binData;
             children: [
               GoogleMap(
                 initialCameraPosition:
-                    CameraPosition(target: _currentPosition, zoom: 8),
+                    CameraPosition(target: _currentPosition, zoom: 13),
                 markers: Set<Marker>.of(_markers),
                 
                 polylines: getShortestRoute == true? _shortestPolylines:_polylines,
@@ -1428,7 +1540,7 @@ Map<String, dynamic>? binData;
                     print(routeList);
                       }
                  
-                    await _initializeMap();
+             _checkAndInitializeMap();
                     
                   }
                   print(routeList.length);
