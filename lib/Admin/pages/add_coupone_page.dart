@@ -32,7 +32,6 @@ class _AddCouponPageState extends State<AddCouponPage> {
           'name': _nameController.text,
           'discount': _discountController.text,
           'imageUrl': _imageUrlController.text,
-          'status': 'Available',
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Coupon added successfully')),
@@ -129,8 +128,8 @@ class _AddCouponPageState extends State<AddCouponPage> {
               ElevatedButton(
                 onPressed: _addCoupon,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 30, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),

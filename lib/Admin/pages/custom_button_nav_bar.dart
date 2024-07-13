@@ -46,18 +46,17 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   String? userEmail;
   String? userPhotoUrl;
 
-   StreamSubscription<DatabaseEvent>? _databaseSubscription;
+  StreamSubscription<DatabaseEvent>? _databaseSubscription;
   final DatabaseReference _databaseReference =
       FirebaseDatabase.instance.reference().child('sensors/data');
-        final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-          List<DocumentSnapshot<Map<String, dynamic>>> binInfo = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<DocumentSnapshot<Map<String, dynamic>>> binInfo = [];
 
-
-      Map<String, dynamic>? binData;
+  Map<String, dynamic>? binData;
   double notifiyHumidity = 0.0;
   double notifiyTemperature = 0.0;
-  double notifiyLevel = 0.0; 
-    String _date = '';
+  double notifiyLevel = 0.0;
+  String _date = '';
   int year = 0;
   int month = 0;
   int day = 0;
@@ -69,39 +68,33 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
   double _temperature = 0.0;
   String _time = '';
   int _binId = -1;
-    String? type;
+  String? type;
   String driverArea = '';
   String binArea = '';
 
-Future <void> getNotifiedData2(int binID) async{
-
+  Future<void> getNotifiedData2(int binID) async {
     binData = await MapServices.getNotifiedData(binID);
-    if (binData!=null){
-      if(mounted){
+    if (binData != null) {
+      if (mounted) {
         setState(() {
-          
-      notifiyHumidity =  binData?['notifiyHumidity'] is int
-                  ? (binData?['notifiyHumidity'] as int).toDouble()
-                  : binData?['notifiyHumidity']; 
-                 
-      notifiyLevel =  binData?['notifyLevel'] is int
-                  ? (binData?['notifyLevel'] as int).toDouble()
-                  : binData?['notifyLevel'];
-      notifiyTemperature =   binData?['notifiyTemperature'] is int
-                  ? (binData?['notifiyTemperature'] as int).toDouble()
-                  : binData?['notifiyTemperature'];
-  
-        });
-    
-      }
+          notifiyHumidity = binData?['notifiyHumidity'] is int
+              ? (binData?['notifiyHumidity'] as int).toDouble()
+              : binData?['notifiyHumidity'];
 
-    }else{
+          notifiyLevel = binData?['notifyLevel'] is int
+              ? (binData?['notifyLevel'] as int).toDouble()
+              : binData?['notifyLevel'];
+          notifiyTemperature = binData?['notifiyTemperature'] is int
+              ? (binData?['notifiyTemperature'] as int).toDouble()
+              : binData?['notifiyTemperature'];
+        });
+      }
+    } else {
       print('bin data is null');
     }
-
   }
 
-   Future<void> addDataToHistory() async {
+  Future<void> addDataToHistory() async {
     try {
       await _firestore.collection('binsHistory').add({
         'binId': _binId,
@@ -116,73 +109,59 @@ Future <void> getNotifiedData2(int binID) async{
     }
   }
 
-
   @override
   void initState() {
     super.initState();
-     if (user != null) {
+    if (user != null) {
       _loadUserData();
     }
 
-     _databaseSubscription = _databaseReference.onValue.listen((event) async {
+    _databaseSubscription = _databaseReference.onValue.listen((event) async {
       try {
         final data = event.snapshot.value as Map<dynamic, dynamic>;
-      
+
         if (data != null) {
           print("Data received:");
           print("Bin ID: ${data['binId']}");
-          print("DateTime: ${DateTime(data['year'],data['month'],
-          data['day'],data['hour'],data['minute'])}");
+          print(
+              "DateTime: ${DateTime(data['year'], data['month'], data['day'], data['hour'], data['minute'])}");
           print("Fill Level: ${data['fill-level']}");
           print("Humidity: ${data['humidity']}");
           print("Temperature: ${data['temperature']}");
 
+          // print("Time: ${data['time']}");
 
+          FirebaseFirestore.instance
+              .collection('bins')
+              .where('binID', isEqualTo: data['binId'] as int)
+              .get()
+              .then((querySnapshot) {
+            for (var doc in querySnapshot.docs) {
+              print(
+                  "---------------------------------------------- ${Timestamp.fromDate(DateTime(data['year'], data['month']))}");
 
-
-
-
-         // print("Time: ${data['time']}");
-
-             FirebaseFirestore.instance
-                    .collection('bins')
-                    .where('binID', isEqualTo: data['binId'] as int)
-                    .get()
-                    .then((querySnapshot) {
-                  for (var doc in querySnapshot.docs) {
-                     print("---------------------------------------------- ${Timestamp.fromDate(DateTime(data['year'],data['month']))}");
-
-                    doc.reference.update({'fill-level': data['fill-level'], 
-                    'Humidity':data['humidity'],
-                    'temp':data['temperature'],
-                    'changes':Timestamp.fromDate(DateTime(data['year'],data['month'],
-
-                    data['day'],data['hour'],data['minute']))},
-                    ).then((_) {
-                      print(
-                          "Bin: ${data['binId']} data updated");
-                    }).catchError((error) {
-                      print("Failed to update bin status: $error");
-                    });
-                  }
-                }).catchError((error) {
-                  print("Failed to retrieve bin: $error");
-                });
-
+              doc.reference.update(
+                {
+                  'fill-level': data['fill-level'],
+                  'Humidity': data['humidity'],
+                  'temp': data['temperature'],
+                  'changes': Timestamp.fromDate(DateTime(data['year'],
+                      data['month'], data['day'], data['hour'], data['minute']))
+                },
+              ).then((_) {
+                print("Bin: ${data['binId']} data updated");
+              }).catchError((error) {
+                print("Failed to update bin status: $error");
+              });
+            }
+          }).catchError((error) {
+            print("Failed to retrieve bin: $error");
+          });
 
           if (mounted) {
             await getNotifiedData2(data['binId']);
             setState(() {
-
-            print(notifiyLevel);
-
-            
-
-
-         
-
-
-              
+              print(notifiyLevel);
 
               _binId = data['binId'] as int;
               year = data['year'];
@@ -202,102 +181,90 @@ Future <void> getNotifiedData2(int binID) async{
               //_time = data['time'];
             });
 
-              addDataToHistory();
+            addDataToHistory();
           }
-           Map<String, String?> userType = await MapServices.getUserType();
-           if(mounted){
-             setState(() {
+          Map<String, String?> userType = await MapServices.getUserType();
+          if (mounted) {
+            setState(() {
               type = userType['type'];
               driverArea = userType['driverArea']!;
             });
-           }
+          }
 
-          for (var bin in binInfo){
-            if(bin.data()?['binID'] as int == data['binId'] as int && bin.data()?['area'] == driverArea){
-              if(mounted){
+          for (var bin in binInfo) {
+            if (bin.data()?['binID'] as int == data['binId'] as int &&
+                bin.data()?['area'] == driverArea) {
+              if (mounted) {
                 setState(() {
                   binArea = bin.data()?['area'];
                 });
               }
-              
 
-               print("---------------------------------------------- ${type}, ${driverArea}");
-
+              print(
+                  "---------------------------------------------- ${type}, ${driverArea}");
             }
           }
-            print("====================================================== ${binArea}");
+          print(
+              "====================================================== ${binArea}");
 
-            if(binArea == driverArea){
+          if (binArea == driverArea) {
+            print("----------------------------------------- status is area");
 
+            if (data['fill-level'] != 0 &&
+                data['fill-level'] != 357 &&
+                data['fill-level'] <= notifiyLevel) {
+              if (type.toString().toLowerCase() == 'driver') {
+                print("------------------");
 
+                print(
+                    "----------------------------------------- status is fill");
 
-                          print("----------------------------------------- status is area");
-
-              if (data['fill-level'] != 0 && data['fill-level'] != 357 && data['fill-level'] <= notifiyLevel  ) {
-                if(type.toString().toLowerCase() == 'driver'){
-                  
-                  print("------------------");
-
-                print("----------------------------------------- status is fill");
-
-                  
-
-                  await MapServices.initApp(driverArea);
-                     NotificationService().saveNotification(
-              'Fill Level Alert',
-              'The bin ${data['binId']} is now ${data['fill-level']}cm Fill Level',
-              driverArea,
-              "fill-level"
-            );
-                }
-              
-
-              
-              } else if(data['fill-level'] == 0 || data['fill-level'] == 357){
-                                print("----------------------------------------- status is lidar");
-
-                 // MapServices.initApp(driverArea);
-                     NotificationService().saveNotification(
-              'Ultrasonic Faliure Alert',
-              'The bin ${data['binId']} has a ultrasonic Faliure',
-              driverArea,
-              "ultrasonic"
-            );
-                  
-
-              }else if(data['humidity'] == -2000 || data['temperature'] == -2000){
-                                print("----------------------------------------- status is DHT");
-
-                     NotificationService().saveNotification(
-              'DHT Faliure Alert',
-              'The bin ${data['binId']} has a DHT Faliure',
-              driverArea,
-              "DHT"
-            );
-
-                   
-              }else if(data['humidity']>= notifiyHumidity){
-                print("----------------------------------------- status is humidity");
-
-                   NotificationService().saveNotification(
-              'Humidity Alert',
-              'The bin ${data['binId']} reached ${data['humidity']} humidity',
-              driverArea,
-              "humidity"
-            );
-
-              }else if(data['temperature'] >= notifiyTemperature){
-                print("----------------------------------------- status is temperature");
-
-                  NotificationService().saveNotification(
-              'Temperature Alert',
-              'The bin ${data['binId']} reached ${data['temperature']} Temperature',
-              driverArea,
-              "temp"
-            );
-
+                await MapServices.initApp(driverArea);
+                NotificationService().saveNotification(
+                    'Fill Level Alert',
+                    'The bin ${data['binId']} is now ${data['fill-level']}cm Fill Level',
+                    driverArea,
+                    "fill-level");
               }
-        }
+            } else if (data['fill-level'] == 0 || data['fill-level'] == 357) {
+              print(
+                  "----------------------------------------- status is lidar");
+
+              // MapServices.initApp(driverArea);
+              NotificationService().saveNotification(
+                  'Ultrasonic Faliure Alert',
+                  'The bin ${data['binId']} has a ultrasonic Faliure',
+                  driverArea,
+                  "ultrasonic");
+            } else if (data['humidity'] == -2000 ||
+                data['temperature'] == -2000) {
+              print("----------------------------------------- status is DHT");
+
+              NotificationService().saveNotification(
+                  'DHT Faliure Alert',
+                  'The bin ${data['binId']} has a DHT Faliure',
+                  driverArea,
+                  "DHT");
+            } else if (data['humidity'] >= notifiyHumidity) {
+              print(
+                  "----------------------------------------- status is humidity");
+
+              NotificationService().saveNotification(
+                  'Humidity Alert',
+                  'The bin ${data['binId']} reached ${data['humidity']} humidity',
+                  driverArea,
+                  "humidity");
+            } else if (data['temperature'] >= notifiyTemperature) {
+              print(
+                  "----------------------------------------- status is temperature");
+
+              NotificationService().saveNotification(
+                  'Temperature Alert',
+                  'The bin ${data['binId']} reached ${data['temperature']} Temperature',
+                  driverArea,
+                  "temp");
+            }
+          }
         } else {
           print('Received null data from Firebase Realtime Database.');
         }
@@ -307,7 +274,6 @@ Future <void> getNotifiedData2(int binID) async{
     });
   }
 
-  
   @override
   void dispose() {
     // Cancel subscription to avoid memory leaks
@@ -389,34 +355,34 @@ Future <void> getNotifiedData2(int binID) async{
         padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
-            accountName: Text(userName ??
-                'Your Name'), // Replace with data fetched from Firestore
-            accountEmail: Text(userEmail ??
-                'email@example.com'), // Replace with data fetched from Firestore
-            // currentAccountPicture: CircleAvatar(
-            //   child: ClipOval(
-            //     child: kIsWeb
-            //         ? Image.asset(
-            //             'assets/images/imageAdmin.png',
-            //             fit: BoxFit.cover,
-            //             width: 90,
-            //             height: 90,
-            //           )
-            //         : (userPhotoUrl != null && userPhotoUrl!.isNotEmpty)
-            //             ? Image.network(
-            //                 userPhotoUrl!,
-            //                 fit: BoxFit.cover,
-            //                 width: 90,
-            //                 height: 90,
-            //               )
-            //             : Image.asset(
-            //                 'assets/images/imageAdmin.png',
-            //                 fit: BoxFit.cover,
-            //                 width: 90,
-            //                 height: 90,
-            //               ),
-            //   ),
-            // ),
+            accountName:
+                Text('anas'), // Replace with data fetched from Firestore
+            accountEmail: Text(
+                'anas@gmail.com'), // Replace with data fetched from Firestore
+            currentAccountPicture: CircleAvatar(
+              child: ClipOval(
+                child: kIsWeb
+                    ? Image.asset(
+                        'assets/images/imageAdmin.png',
+                        fit: BoxFit.cover,
+                        width: 90,
+                        height: 90,
+                      )
+                    : (userPhotoUrl != null && userPhotoUrl!.isNotEmpty)
+                        ? Image.asset(
+                            'assets/images/imageAdmin.png',
+                            fit: BoxFit.cover,
+                            width: 90,
+                            height: 90,
+                          )
+                        : Image.asset(
+                            'assets/images/imageAdmin.png',
+                            fit: BoxFit.cover,
+                            width: 90,
+                            height: 90,
+                          ),
+              ),
+            ),
           ),
           if (!isMobile) ...buildDrawerItems(), // Add drawer items for web
           if (isMobile) ...[
@@ -477,6 +443,27 @@ Future <void> getNotifiedData2(int binID) async{
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EditProfile()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.recycling_rounded),
+              title: const Text('Add Bin'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddBin()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.add),
+              title: const Text('Create Truck Driver account'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CreateDriverAccount()),
                 );
               },
             ),
